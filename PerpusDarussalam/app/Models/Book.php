@@ -10,7 +10,11 @@ class Book extends Model
         return $this->hasMany(Borrowing::class);    
     }
 
-    public function category(){
-        return $this->belongsTo(category::class);
+    public function categories(){
+        return $this->belongsTo(categories::class);
+    }
+
+    public function logs(){
+    return $this->hasMany(Book_logs::class);
     }
 }

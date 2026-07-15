@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void{
     Schema::create('books', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('category_id')
+        $table->foreignId('categories_id')
             ->constrained()
             ->cascadeOnDelete();
         $table->string('kode_buku')->unique();
