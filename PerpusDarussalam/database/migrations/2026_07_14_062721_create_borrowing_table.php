@@ -21,7 +21,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->date('tanggal_pinjam');
             $table->date('tanggal_jatuh_tempo');
-            $table->date('tanggal_kembali');
+            $table->date('tanggal_kembali')->nullable();
             $table->enum('status', [
                 'dipinjam',
                 'dikembalikan',
