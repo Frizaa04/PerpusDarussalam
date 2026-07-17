@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void{
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('Notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('borrowing_id')
                 ->constrained()

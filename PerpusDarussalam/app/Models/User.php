@@ -39,10 +39,10 @@ class User extends Authenticatable
     }
 
     public function visits(){
-        return $this->hasMany(visits::class);
+        return $this->hasMany(Visits::class);
     }
 
     public function bookLogs(){
-        return $this->hasMany(Book_Logs::class);
+        return $this->hasMany(BookLogs::class);
     }
 }

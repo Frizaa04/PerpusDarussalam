@@ -8,13 +8,13 @@ use Illuminate\Notifications\Notification;
 
 class Borrowing extends Model
 {
-    public function user(){
+    public function User(){
         return $this->belongsTo(User::class);
     }
     public function Book(){
         return $this->belongTo(Book::class);
     }
-    public function notifications(){
+    public function Notifications(){
         return $this->hasMany(ModelsNotification::class);
     }
 
