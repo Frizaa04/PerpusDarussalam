@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\category;
+use App\Models\categories;
 use App\Models\Book;
 
 
@@ -18,7 +18,7 @@ class SearchController extends Controller
         if (empty($query)) {
             return view('layouts.search-result', [
                 'books' => collect([]),
-                'categories' => category::all()
+                'categories' => categories::all()
             ]);
         }
 
@@ -29,7 +29,7 @@ class SearchController extends Controller
 
         return view('layouts.search-result', [
             'books' => $books,
-            'categories' => category::all()
+            'categories' => categories::all()
         ]);
     }
 }
