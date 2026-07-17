@@ -11,10 +11,10 @@ class Book extends Model
     }
 
     public function categories(){
-        return $this->belongsTo(categories::class);
+        return $this->belongsTo(Category::class);
     }
 
     public function logs(){
-    return $this->hasMany(Book_logs::class);
+    return $this->hasMany(BookLogs::class);
     }
 }
