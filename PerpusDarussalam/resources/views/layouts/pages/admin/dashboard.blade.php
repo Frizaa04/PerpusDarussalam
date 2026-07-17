@@ -1,88 +1,67 @@
-@extends('layouts.app') {{-- Sesuaikan dengan master layout Anda --}}
+@extends('layouts.app')
 
 @section('content')
-<div class="flex min-h-screen bg-gray-100">
+<div class="flex min-h-screen bg-[#f4f7f6]">
     
-    <aside class="w-64 bg-[#004d3d] text-white flex flex-col justify-between">
-        <div class="p-6">
-            <h2 class="text-xl font-bold tracking-wider">PERPUSTAKAAN</h2>
-            <p class="text-xs text-gray-300">MADRASAH DARUSSALAM</p>
-            <hr class="border-emerald-700 my-4">
-            
-            <nav class="space-y-4">
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded bg-[#003d30] font-medium text-white">
-                    <span class="material-icons">dashboard</span> Dashboard
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-300 hover:bg-[#003d30] hover:text-white transition">
-                    <span class="material-icons">people</span> Manajemen Siswa
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-300 hover:bg-[#003d30] hover:text-white transition">
-                    <span class="material-icons">menu_book</span> Katalog Buku
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-300 hover:bg-[#003d30] hover:text-white transition">
-                    <span class="material-icons">swap_horiz</span> Sirkulasi
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-300 hover:bg-[#003d30] hover:text-white transition">
-                    <span class="material-icons">qr_code_scanner</span> Absen
-                </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded text-gray-300 hover:bg-[#003d30] hover:text-white transition">
-                    <span class="material-icons">description</span> Laporan
-                </a>
-            </nav>
-        </div>
-    </aside>
+    <!-- Panggil Sidebar yang Sudah Dipisah -->
+    @include('layouts.sidebar')
 
+    <!-- KONTEN UTAMA -->
     <main class="flex-1 flex flex-col">
-        <header class="bg-[#fffde6] border-b border-gray-200 py-4 px-8 flex justify-between items-center">
-            <div></div> <div class="flex items-center gap-2">
-                <img src="{{ asset('images/logo_darussalam.png') }}" alt="Logo Darussalam" class="h-10">
+        <!-- Header Atas -->
+        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
+            <div class="flex items-center h-full">
+                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-full py-1 object-contain">
             </div>
         </header>
 
-        <div class="p-8 space-y-6">
-            <h1 class="text-2xl font-bold text-[#004d3d]">Selamat Datang, ADMIN BESAR</h1>
+        <!-- Area Konten -->
+        <div class="p-8 space-y-8">
+            <h1 class="text-2xl font-bold text-[#004d40] tracking-wide">Selamat Datang, ADMIN BESAR</h1>
 
+            <!-- Grid Tiga Card Statistik -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-[#9bb2b1] text-white p-6 rounded-lg shadow text-center">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-100">Pengunjung hari ini</h3>
-                    <p class="text-4xl font-bold mt-2">{{ $todayVisitors }}</p>
+                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Pengunjung hari ini</h3>
+                    <p class="text-4xl font-extrabold mt-3">{{ $todayVisitors }}</p>
                 </div>
                 
-                <div class="bg-[#9bb2b1] text-white p-6 rounded-lg shadow text-center">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-100">Peminjaman Buku</h3>
-                    <p class="text-4xl font-bold mt-2">{{ $todayBorrowings }}</p>
+                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Peminjaman Buku</h3>
+                    <p class="text-4xl font-extrabold mt-3">{{ $todayBorrowings }}</p>
                 </div>
 
-                <div class="bg-[#9bb2b1] text-white p-6 rounded-lg shadow text-center">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-100">Pengembalian Buku</h3>
-                    <p class="text-4xl font-bold mt-2">{{ $todayReturns }}</p>
+                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Pengembalian Buku</h3>
+                    <p class="text-4xl font-extrabold mt-3">{{ $todayReturns }}</p>
                 </div>
             </div>
 
-            <div class="bg-[#9bb2b1] p-6 rounded-lg shadow">
-                <h2 class="text-lg font-bold text-white mb-4">Aktivitas Terbaru</h2>
+            <!-- Panel Box Tabel Aktivitas -->
+            <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
+                <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Aktivitas Terbaru</h2>
                 
-                <div class="overflow-x-auto rounded-lg">
-                    <table class="min-w-full text-left border-collapse">
+                <div class="overflow-x-auto rounded">
+                    <table class="min-w-full text-left border-collapse border border-white/40">
                         <thead>
-                            <tr class="bg-[#004d3d] text-white">
-                                <th class="p-3 text-sm font-semibold">Waktu</th>
-                                <th class="p-3 text-sm font-semibold">Tindakan</th>
-                                <th class="p-3 text-sm font-semibold">Detail Buku</th>
-                                <th class="p-3 text-sm font-semibold">User</th>
+                            <tr class="bg-[#004d40] text-white divide-x divide-white/40">
+                                <th class="p-3 text-sm font-bold tracking-wider">Waktu</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Tindakan</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Detail Buku</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">User</th>
                             </tr>
                         </thead>
-                        <tbody class="text-white divide-y divide-gray-300/40">
+                        <tbody class="text-white divide-y divide-white/40">
                             @forelse($recentActivities as $activity)
-                                <tr class="hover:bg-[#8da7a6]/50">
-                                    <td class="p-3 text-sm font-medium">{{ $activity['waktu'] }}</td>
-                                    <td class="p-3 text-sm">{{ $activity['tindakan'] }}</td>
-                                    <td class="p-3 text-sm italic">{{ $activity['detail_buku'] }}</td>
-                                    <td class="p-3 text-sm font-medium">{{ $activity['user'] }}</td>
+                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                    <td class="p-3 text-sm font-bold text-white/90">{{ $activity['waktu'] }}</td>
+                                    <td class="p-3 text-sm text-white/90">{{ $activity['tindakan'] }}</td>
+                                    <td class="p-3 text-sm text-white/90">{{ $activity['detail_buku'] }}</td>
+                                    <td class="p-3 text-sm font-bold text-white/90">{{ $activity['user'] }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="p-4 text-center text-sm">Tidak ada aktivitas hari ini.</td>
+                                    <td colspan="4" class="p-5 text-center text-sm font-semibold text-white/80">Tidak ada aktivitas hari ini.</td>
                                 </tr>
                             @endforelse
                         </tbody>
