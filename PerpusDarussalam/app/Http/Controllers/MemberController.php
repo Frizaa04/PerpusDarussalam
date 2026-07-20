@@ -34,4 +34,23 @@ class MemberController extends Controller
 
         return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search'));
     }
+
+    public function update(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nis' => 'required',
+            'name' => 'required|string|max:255',
+            'role' => 'required|string'
+        ]);
+
+        // Catatan: Jika nanti sudah tersambung dengan Database Eloquent, gunakan logika ini:
+        // $user = User::where('nis', $request->nis)->first();
+        // $user->update([
+        //     'name' => $request->name,
+        //     'role' => $request->role,
+        // ]);
+
+        return redirect()->route('member.index')->with('success', 'Data user berhasil diperbarui!');
+    }
 }

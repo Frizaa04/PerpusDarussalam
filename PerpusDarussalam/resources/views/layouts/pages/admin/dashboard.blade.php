@@ -3,10 +3,10 @@
 @section('content')
 <div class="flex min-h-screen bg-[#f4f7f6]">
     
-    <!-- Panggil Sidebar yang Sudah Dipisah -->
+    <!-- Pemanggilan Sidebar -->
     @include('layouts.sidebar')
 
-    <!-- KONTEN UTAMA -->
+    
     <main class="flex-1 flex flex-col">
         <!-- Header Atas -->
         <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
@@ -19,7 +19,7 @@
         <div class="p-8 space-y-8">
             <h1 class="text-2xl font-bold text-[#004d40] tracking-wide">Selamat Datang, ADMIN BESAR</h1>
 
-            <!-- Grid Tiga Card Statistik -->
+            <!-- Statistik -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Pengunjung hari ini</h3>
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <!-- Panel Box Tabel Aktivitas -->
+            <!-- Box Tabel Aktivitas -->
             <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
                 <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Aktivitas Terbaru</h2>
                 
