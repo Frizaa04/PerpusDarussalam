@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\categories;
 use App\Models\Book;
-
+use App\Models\Category;
 
 class SearchController extends Controller
 {
@@ -18,7 +18,7 @@ class SearchController extends Controller
         if (empty($query)) {
             return view('layouts.search-result', [
                 'books' => collect([]),
-                'categories' => categories::all()
+                'categories' => Category::all()
             ]);
         }
 
@@ -29,7 +29,7 @@ class SearchController extends Controller
 
         return view('layouts.search-result', [
             'books' => $books,
-            'categories' => categories::all()
+            'categories' => category::all()
         ]);
     }
 }
