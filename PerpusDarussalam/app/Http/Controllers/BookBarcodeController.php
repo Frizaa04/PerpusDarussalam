@@ -9,6 +9,7 @@ use App\Models\Book;
 class BookBarcodeController extends Controller
 {
     public function storeBuku(Request $request)
+    // Membaca barcode dari buku 
     {
         $request->validate([
             'categories_id' => 'required|exists:categories,id', 
