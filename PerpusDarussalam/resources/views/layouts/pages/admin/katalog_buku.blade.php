@@ -37,6 +37,7 @@
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="text-white divide-y divide-white/40">
@@ -50,6 +51,7 @@
                                     <td class="p-3 text-sm font-bold text-white/90">{{ $book->judul }}</td>
                                     <td class="p-3 text-sm text-white/90">{{ $book->kategori }}</td>
                                     <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
+                                    <td class="p-3 text-sm font bold text-white/90">#</td>  
                                 </tr>
                             @empty
                                 <tr>
