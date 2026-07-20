@@ -6,10 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Perpustakaan Madrasah Darussalam</title>
 
-    <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     <style>
@@ -20,7 +18,7 @@
 </head>
 <body class="bg-gray-100 antialiased">
 
-    <!-- Isi konten dari dashboard.blade.php disuntikkan di bawah ini -->
+    <!-- isi dari Dashboard -->
     @yield('content')
 
 </body>

@@ -3,24 +3,23 @@
 @section('content')
 <div class="flex min-h-screen bg-[#f4f7f6]">
     
-    <!-- Panggil Sidebar yang Sudah Dipisah -->
+    <!-- Pemanggilan Sidebar -->
     @include('layouts.sidebar')
 
-    <!-- KONTEN UTAMA -->
     <main class="flex-1 flex flex-col">
-        <!-- Header Atas -->
+
         <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
             <div class="flex items-center h-full">
                 <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-full py-1 object-contain">
             </div>
         </header>
 
-        <!-- Area Konten Sirkulasi -->
+        <!-- Konten Sirkulasi -->
         <div class="p-8 space-y-6">
             
-            <!-- Filter Bar & Tambah Data -->
+            <!-- Filter & Tambah Data -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <!-- Form Pencarian -->
+                <!-- Pencarian -->
                 <div class="w-full max-w-md">
                     <form action="{{ route('circulation.index') }}" method="GET" class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
                         <input type="text" name="search" value="{{ $search }}" placeholder="Cari Data Peminjaman" class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">

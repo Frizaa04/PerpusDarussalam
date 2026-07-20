@@ -1,7 +1,7 @@
-<!-- SIDEBAR COMPONENT -->
+
 <aside class="w-72 bg-[#00695c] text-white flex flex-col justify-between shadow-lg min-h-screen">
     <div class="p-6">
-        <!-- Header Brand Sidebar -->
+
         <div class="mb-6">
             <h2 class="text-2xl font-bold tracking-wider uppercase">Perpustakaan</h2>
             <p class="text-xs text-emerald-200 tracking-widest font-semibold uppercase mt-1">Madrasah Darussalam</p>
@@ -38,7 +38,7 @@
                 <span class="tracking-wider text-sm uppercase">Sirkulasi</span>
             </a>
 
-            <!-- Menu Absen (Gunakan route baru jika sudah ada controller-nya) -->
+            <!-- Menu Absen -->
             <a href="#" 
                class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition hover:bg-[#004d40]">
                 <span class="material-icons text-xl">clean_hands</span> 

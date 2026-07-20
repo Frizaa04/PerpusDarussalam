@@ -3,12 +3,11 @@
 @section('content')
 <div class="flex min-h-screen bg-[#f4f7f6]">
     
-    <!-- Panggil Sidebar yang Sudah Dipisah -->
+    <!-- Pemanggilan Sidebar -->
     @include('layouts.sidebar')
 
-    <!-- KONTEN UTAMA -->
     <main class="flex-1 flex flex-col">
-        <!-- Header Atas -->
+
         <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
             <div class="flex items-center h-full">
                 <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-full py-1 object-contain">
@@ -26,7 +25,7 @@
                 </form>
             </div>
 
-            <!-- Panel Box Tabel -->
+            <!-- Box Tabel -->
             <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
                 <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Tabel Daftar Buku</h2>
                 

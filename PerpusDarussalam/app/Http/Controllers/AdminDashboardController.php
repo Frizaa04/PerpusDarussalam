@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\visits; // Pastikan huruf besar/kecil sesuai file model Anda
+use App\Models\visits; 
 use App\Models\Borrowing;    
 
 class AdminDashboardController extends Controller
