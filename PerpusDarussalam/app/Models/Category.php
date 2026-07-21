@@ -8,7 +8,8 @@ class Category extends Model
 {
     protected $fillable = [
         'nama',
-        'deskripsi'
+        'deskripsi',
+        'id',
     ];
 
     public function books(){
