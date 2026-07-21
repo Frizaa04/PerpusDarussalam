@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User; // Pastikan Model User di-import
+use App\Models\User;
 
 class MemberController extends Controller
 {
@@ -10,10 +11,8 @@ class MemberController extends Controller
     {
         $search = $request->query('search');
 
-        // Mulai query dari Model User database
         $query = User::query();
 
-        // Logika filter pencarian berdasarkan nama atau NIS
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
@@ -21,24 +20,25 @@ class MemberController extends Controller
             });
         }
 
-        // Ambil data dari database
         $students = $query->get();
 
         return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search'));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         // 1. Validasi input
         $request->validate([
+            'id'   => 'required|exists:users,id',
             'nis'  => 'required|string',
             'name' => 'required|string|max:255',
             'role' => 'required|string'
         ]);
 
-        // 2. Cari user berdasarkan ID, lalu perbarui datanya
-        $user = User::findOrFail($id);
+        // 2. Cari user berdasarkan ID (karena NIS sekarang bisa diubah)
+        $user = User::findOrFail($request->id);
         
+        // 3. Simpan perubahan (NIS, Name, dan Role)
         $user->update([
             'nis'  => $request->nis,
             'name' => $request->name,
