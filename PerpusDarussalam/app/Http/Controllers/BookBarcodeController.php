@@ -17,7 +17,9 @@ class BookBarcodeController extends Controller
             'judul'         => 'required|string',
             'penulis'       => 'required|string',
             'penerbit'      => 'required|string',
-            'tahun_terbit'  => 'required|digits:4', 
+            'tahun_terbit'  => 'required|digits:4',
+            'isbn'          => 'required|string',
+            'tanggal_pembelian' => 'required|date',
             'stok'          => 'integer|min:0',
             'cover'         => 'nullable|string', 
         ]);
@@ -29,6 +31,8 @@ class BookBarcodeController extends Controller
             'penulis'       => $request->penulis,
             'penerbit'      => $request->penerbit,
             'tahun_terbit'  => $request->tahun_terbit,
+            'isbn'          => $request->isbn,
+            'tanggal_pembelian' => $request->tanggal_pembelian,
             'stok'          => $request->stok ?? 0,
             'cover'         => $request->cover,
         ]);

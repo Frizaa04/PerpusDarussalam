@@ -6,31 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-  public function up(): void
+    public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
+        Schema::create('ebooks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('categories_id')
                 ->constrained('categories')
                 ->cascadeOnDelete();
-            $table->string('kode_buku')->unique();
+            $table->string('kode_ebook')->unique();
             $table->string('judul');
             $table->string('penulis');
             $table->string('penerbit');
             $table->year('tahun_terbit');
-            $table->string('isbn'); 
-            $table->date('tanggal_pembelian');
-            $table->integer('stok')->default(0);
-            $table->string('cover')->nullable();
+            $table->string('isbn')->nullable();
+            $table->string('file_pdf'); // Menyimpan nama file/path dokumen e-book
+            $table->string('cover')->nullable(); // Menyimpan cover e-book
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('books');
+        Schema::dropIfExists('ebooks');
     }
 };
