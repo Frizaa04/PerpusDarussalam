@@ -71,21 +71,24 @@ class CirculationController extends Controller
                 return back()->withErrors(['error' => 'Buku dengan judul tersebut tidak ditemukan!']);
             }
 
-            // 4. Cek stok buku (SESUAIKAN: kolom di database adalah 'stok')
+            // 4. Cek stok buku
             if ($buku->stok <= 0) {
                 return back()->withErrors(['error' => 'Stok buku habis!']);
             }
 
-            // 5. Simpan ke database (SESUAIKAN DENGAN MIGRASI ANDA)
+            $tanggalPinjam = now();
+            $tanggalJatuhTempo = $tanggalPinjam->copy()->addWeek(); 
+
+            // 5. Simpan ke database
             Borrowing::create([
                 'user_id'             => $user->id,
                 'book_id'             => $buku->id,
                 'tanggal_pinjam'      => now(),
-                'tanggal_jatuh_tempo' => $request->due_date,
+                'tanggal_jatuh_tempo' => $tanggalJatuhTempo,
                 'status'              => 'dipinjam'
             ]);
 
-            // 6. Kurangi stok (SESUAIKAN: kolom di database adalah 'stok')
+            // 6. Kurangi stok
             $buku->decrement('stok');
 
             return redirect()->route('sirkulasi.index')->with('success', 'Peminjaman berhasil dicatat!');

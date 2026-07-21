@@ -1,9 +1,8 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User; 
+use App\Models\User; // Pastikan Model User di-import
 
 class MemberController extends Controller
 {
@@ -11,45 +10,40 @@ class MemberController extends Controller
     {
         $search = $request->query('search');
 
-        // Kumpulkan data siswa dummy
-        $allStudents = collect([
-            (object)['nis' => '2411102441211', 'name' => 'Febri Hamzah Jemikan Nata', 'role' => 'Siswa'],
-            (object)['nis' => '2411102441212', 'name' => 'Muhamad Aditya Nugroho', 'role' => 'Siswa'],
-            (object)['nis' => '2411102441213', 'name' => 'Muhammad Al Baihaqi', 'role' => 'Siswa'],
-            (object)['nis' => '2411102441214', 'name' => 'Rofi Raissa Adiyatma', 'role' => 'Siswa'],
-            (object)['nis' => '2411102441215', 'name' => 'Muhammad Diky Anwar', 'role' => 'Siswa'],
-            (object)['nis' => '2411102441216', 'name' => 'Aisha Hannah Heriawan', 'role' => 'Siswa'],
-            (object)['nis' => '2411102441217', 'name' => 'Raditya Andromeda Barito', 'role' => 'Admin'],
-            (object)['nis' => '2411102441218', 'name' => 'Lucky Putra Mahendra', 'role' => 'Siswa'],
-        ]);
+        // Mulai query dari Model User database
+        $query = User::query();
 
-        // Logika filter pencarian
+        // Logika filter pencarian berdasarkan nama atau NIS
         if ($search) {
-            $students = $allStudents->filter(function ($student) use ($search) {
-                return false !== stripos($student->name, $search) || false !== stripos($student->nis, $search);
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('nis', 'LIKE', "%{$search}%");
             });
-        } else {
-            $students = $allStudents;
         }
+
+        // Ambil data dari database
+        $students = $query->get();
 
         return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request, string $id)
     {
-        // Validasi input
+        // 1. Validasi input
         $request->validate([
-            'nis' => 'required',
+            'nis'  => 'required|string',
             'name' => 'required|string|max:255',
             'role' => 'required|string'
         ]);
 
-        // Catatan: Jika nanti sudah tersambung dengan Database Eloquent, gunakan logika ini:
-        // $user = User::where('nis', $request->nis)->first();
-        // $user->update([
-        //     'name' => $request->name,
-        //     'role' => $request->role,
-        // ]);
+        // 2. Cari user berdasarkan ID, lalu perbarui datanya
+        $user = User::findOrFail($id);
+        
+        $user->update([
+            'nis'  => $request->nis,
+            'name' => $request->name,
+            'role' => $request->role,
+        ]);
 
         return redirect()->route('member.index')->with('success', 'Data user berhasil diperbarui!');
     }

@@ -22,6 +22,8 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+
+    public $timestamps =false;
     protected function casts(): array
     {
         return [
