@@ -6,13 +6,17 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CirculationController; 
 
+// Dashboard Admin
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
+// Manajemen Siswa / User
 Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
 Route::put('/manajemen-siswa/update', [MemberController::class, 'update'])->name('member.update');
 
+// Katalog Buku
 Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
 Route::post('/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
 Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
 
 Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');
+Route::post('/sirkulasi', [CirculationController::class, 'store'])->name('circulation.store');

@@ -44,11 +44,11 @@
                                 <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
                                     <td class="p-3 text-sm font-bold text-white/90">{{ $student->nis }}</td>
                                     <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
-                                    <td class="p-3 text-sm font-bold text-white/90">{{ $student->role ?? 'Siswa' }}</td>
+                                    <td class="p-3 text-sm font-bold text-white/90">{{ ucfirst($student->role ?? 'Siswa') }}</td>
                                     <td class="p-3 text-sm text-center">
                                         <!-- Tombol Pemicu Modal Pop-up -->
                                         <button type="button" 
-                                                onclick="openEditModal('{{ $student->nis }}', '{{ $student->name }}', '{{ $student->role ?? 'Siswa' }}')"
+                                                onclick="openEditModal('{{ $student->id }}', '{{ $student->nis }}', '{{ $student->name }}', '{{ $student->role ?? 'Siswa' }}')"
                                                 class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
                                             Edit Data
                                         </button>
@@ -83,9 +83,13 @@
             @csrf
             @method('PUT')
 
+            <!-- ID Tersembunyi untuk Acuan Update -->
+            <input type="hidden" id="modalId" name="id">
+
             <div>
-                <label class="block text-sm font-semibold mb-1 text-emerald-100">Nis</label>
-                <input type="text" id="modalNis" name="nis" readonly class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-2 rounded outline-none border border-white/20 cursor-not-allowed">
+                <label class="block text-sm font-semibold mb-1 text-emerald-100">NIS</label>
+                <!-- Atribut readonly sudah dihapus agar NIS bisa diubah -->
+                <input type="text" id="modalNis" name="nis" required class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-2 rounded outline-none focus:ring-2 focus:ring-white border border-white/20">
             </div>
 
             <div>
@@ -113,10 +117,20 @@
 
 <!-- SCRIPT UNTUK CONTROL MODAL -->
 <script>
-    function openEditModal(nis, name, role) {
+    function openEditModal(id, nis, name, role) {
+        document.getElementById('modalId').value = id;
         document.getElementById('modalNis').value = nis;
         document.getElementById('modalName').value = name;
-        document.getElementById('modalRole').value = role;
+        
+        // Pilih opsi role secara case-insensitive
+        const roleSelect = document.getElementById('modalRole');
+        for (let i = 0; i < roleSelect.options.length; i++) {
+            if (roleSelect.options[i].value.toLowerCase() === role.toLowerCase()) {
+                roleSelect.selectedIndex = i;
+                break;
+            }
+        }
+
         document.getElementById('editModal').classList.remove('hidden');
     }
 
@@ -124,7 +138,6 @@
         document.getElementById('editModal').classList.add('hidden');
     }
 
-    // Menutup modal jika klik di luar area box modal
     window.onclick = function(event) {
         const modal = document.getElementById('editModal');
         if (event.target === modal) {

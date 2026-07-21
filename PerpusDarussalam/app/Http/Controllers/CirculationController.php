@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class CirculationController extends Controller
 {
-
     public function index(Request $request)
     {
-        // Melakukan pengambilan hasil peminjaman untuk ditampilkan
         $search = $request->query('search');
+        $lateOnly = $request->query('late'); // Filter peminjaman telat
+
         $queryBuilder = Borrowing::with(['user', 'book']);
 
+        // Filter Pencarian
         if ($search) {
             $queryBuilder->where(function($q) use ($search) {
                 $q->whereHas('user', function($userQuery) use ($search) {
@@ -30,40 +31,51 @@ class CirculationController extends Controller
             });
         }
 
-        $dbCirculations = $queryBuilder->get();
-        
-        
+        // Filter Hanya Peminjaman Telat
+        if ($lateOnly) {
+            $queryBuilder->where('status', 'dipinjam')
+                        ->where('tanggal_jatuh_tempo', '<', now());
+        }
+
+        $dbCirculations = $queryBuilder->latest()->get();
+
         $circulations = $dbCirculations->map(function ($item) {
+            // Logika Penentuan Status
+            $status = $item->status ?? 'Peminjaman';
+            if ($item->status === 'dipinjam' && Carbon::parse($item->tanggal_jatuh_tempo)->isPast()) {
+                $status = 'Telat';
+            } elseif ($item->status === 'dikembalikan') {
+                $status = 'Selesai';
+            } else {
+                $status = 'Peminjaman';
+            }
+
             return (object)[
+                'id'          => $item->id,
                 'nis'         => $item->user->nis ?? '-',                 
                 'name'        => $item->user->name ?? 'Tanpa Nama',       
                 'book_title'  => $item->book->judul ?? 'Buku Terhapus',   
+                'status'      => $status,
                 'borrow_date' => $item->tanggal_pinjam ? Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') : '-',
                 'return_date' => $item->tanggal_kembali ? Carbon::parse($item->tanggal_kembali)->format('d/m/Y') : '-'
             ];
         });
 
-        return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search'));
+        return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search', 'lateOnly'));
     }
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'nis_nip'    => 'required', 
             'judul_buku' => 'required',
-            'due_date'   => 'required|date',
+            'due_date'   => 'nullable|date',
         ]);
 
-        // Gunakan Transaction agar aman dari race condition
         return DB::transaction(function () use ($request) {
-            
-            // 2. Cari berdasarkan NIS dan Judul Buku
             $user = User::where('nis', $request->nis_nip)->first();
-            // SESUAIKAN: Kolom di database adalah 'judul', bukan 'title'
             $buku = Book::where('judul', $request->judul_buku)->lockForUpdate()->first();
 
-            // 3. Cek apakah data ditemukan
             if (!$user) {
                 return back()->withErrors(['error' => 'Anggota dengan NIS tersebut tidak ditemukan!']);
             }
@@ -71,27 +83,24 @@ class CirculationController extends Controller
                 return back()->withErrors(['error' => 'Buku dengan judul tersebut tidak ditemukan!']);
             }
 
-            // 4. Cek stok buku
             if ($buku->stok <= 0) {
                 return back()->withErrors(['error' => 'Stok buku habis!']);
             }
 
-            $tanggalPinjam = now();
+            $tanggalPinjam = $request->due_date ? Carbon::parse($request->due_date) : now();
             $tanggalJatuhTempo = $tanggalPinjam->copy()->addWeek(); 
 
-            // 5. Simpan ke database
             Borrowing::create([
                 'user_id'             => $user->id,
                 'book_id'             => $buku->id,
-                'tanggal_pinjam'      => now(),
+                'tanggal_pinjam'      => $tanggalPinjam,
                 'tanggal_jatuh_tempo' => $tanggalJatuhTempo,
                 'status'              => 'dipinjam'
             ]);
 
-            // 6. Kurangi stok
             $buku->decrement('stok');
 
-            return redirect()->route('sirkulasi.index')->with('success', 'Peminjaman berhasil dicatat!');
+            return redirect()->route('circulation.index')->with('success', 'Peminjaman berhasil dicatat!');
         });
     }
 }
