@@ -20,3 +20,9 @@ Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('boo
 
 Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');
 Route::post('/sirkulasi', [CirculationController::class, 'store'])->name('circulation.store');
+
+Route::post('/logout', function () {
+    // Logika logout sementara / sederhana
+    auth()->logout();
+    return redirect('/katalog-buku'); // atau redirect ke halaman login
+})->name('logout');
