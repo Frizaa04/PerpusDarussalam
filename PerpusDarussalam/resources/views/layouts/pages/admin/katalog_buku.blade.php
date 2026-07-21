@@ -171,6 +171,11 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-semibold mb-1">Tahun Terbit</label>
+                    <input type="number" name="tahun_terbit" placeholder="..." required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                </div>
+
+                <div>
                     <label class="block text-sm font-semibold mb-1">Penulis</label>
                     <input type="text" name="penulis" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                 </div>
@@ -250,6 +255,11 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-semibold mb-1">Tahun Terbit</label>
+                    <input type="number" id="editTahunTerbit" name="tahun_terbit" placeholder="2024" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                </div>
+
+                <div>
                     <label class="block text-sm font-semibold mb-1">Penulis</label>
                     <input type="text" id="editPenulis" name="penulis" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                 </div>
@@ -318,7 +328,7 @@
     }
 
     // Modal Edit Buku
-    function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku) {
+    function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku, tahunTerbit) {
         document.getElementById('editBookId').value = id;
         document.getElementById('editJudul').value = judul;
         document.getElementById('editPenulis').value = penulis;
@@ -330,7 +340,8 @@
         document.getElementById('editStok').value = stok;
         document.getElementById('editRak').value = rak;
         document.getElementById('editKodeBuku').value = kodeBuku;
-        
+        document.getElementById('editTahunTerbit').value = tahunTerbit;
+
         document.getElementById('editModal').classList.remove('hidden');
     }
     function closeEditModal() {

@@ -11,7 +11,7 @@ return new class extends Migration
      */
   public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
+        Schema::create('Books', function (Blueprint $table) {
             $table->id();
             $table->foreignId('categories_id')
                 ->constrained('categories')
@@ -25,6 +25,8 @@ return new class extends Migration
             $table->date('tanggal_pembelian');
             $table->integer('stok')->default(0);
             $table->string('cover')->nullable();
+            $table->string('deskripsi');
+            $table->string('rak');
             $table->timestamps();
         });
     }

@@ -6,17 +6,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Book extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'kode_buku',
+        'categories_id',
+        'judul',
+        'penulis',
+        'penerbit',
+        'isbn',
+        'tanggal_pembelian',
+        'tahun_terbit',
+        'stok',
+        'deskripsi',
+        'rak',
+        'cover',
+    ];
 
-    public function borrowings(){
-        return $this->hasMany(Borrowing::class);    
+    public function borrowings()
+    {
+        return $this->hasMany(Borrowing::class);
     }
 
-    public function categories(){
-        return $this->belongsTo(Category::class);
+    public function categories()
+    {
+        return $this->belongsTo(Category::class, 'categories_id');
     }
 
-    public function logs(){
-    return $this->hasMany(BookLogs::class);
+    public function logs()
+    {
+        return $this->hasMany(BookLogs::class);
     }
 }
