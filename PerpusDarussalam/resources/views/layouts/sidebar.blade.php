@@ -38,9 +38,9 @@
                 <span class="tracking-wider text-sm uppercase">Sirkulasi</span>
             </a>
 
-            <!-- Menu Absen -->
-            <a href="#" 
-               class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition hover:bg-[#004d40]">
+            <!-- Menu Absen (Sudah Diperbarui) -->
+            <a href="{{ route('absen.index') }}" 
+               class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition {{ Route::is('absen.index') ? 'bg-[#003d33] shadow-sm' : 'hover:bg-[#004d40]' }}">
                 <span class="material-icons text-xl">edit</span> 
                 <span class="tracking-wider text-sm uppercase">Absen</span>
             </a>
