@@ -22,6 +22,8 @@ Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('boo
 // Sirkulasi
 Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');
 Route::post('/sirkulasi', [CirculationController::class, 'store'])->name('circulation.store');
+Route::post('/sirkulasi/return/{id}', [CirculationController::class, 'returnBook'])->name('circulation.return');
+Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
 
 // Absen / Kunjungan
 Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');

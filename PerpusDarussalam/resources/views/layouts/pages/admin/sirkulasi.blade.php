@@ -69,38 +69,46 @@
                             </tr>
                         </thead>
                         <tbody class="text-white divide-y divide-white/40">
-                            @forelse($circulations as $index => $item)
-                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                    <td class="p-3 text-sm font-bold text-center text-white/90">{{ $index + 1 }}</td>
-                                    <td class="p-3 text-sm font-bold text-white/90">{{ $item->nis }}</td>
-                                    <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
-                                    <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">
-                                        {{ $item->status }}
-                                    </td>
-                                    <td class="p-3 text-sm text-white/90">{{ $item->borrow_date }}</td>
-                                    <td class="p-3 text-sm text-white/90">{{ $item->return_date }}</td>
-                                    <td class="p-3 text-sm text-center">
-                                        @if($item->status != 'Selesai')
-                                            <!-- Tombol Aksi X dan Checkmark (Foto 1 & 2) -->
-                                            <div class="flex justify-center items-center gap-1">
-                                                <button type="button" class="bg-red-600 text-white p-1 rounded hover:bg-red-700 transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow">
+                        @forelse($circulations as $index => $item)
+                            <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                <td class="p-3 text-sm font-bold text-center text-white/90">{{ $index + 1 }}</td>
+                                <td class="p-3 text-sm font-bold text-white/90">{{ $item->nis }}</td>
+                                <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
+                                <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">
+                                    {{ $item->status }}
+                                </td>
+                                <td class="p-3 text-sm text-white/90">{{ $item->borrow_date }}</td>
+                                <td class="p-3 text-sm text-white/90">{{ $item->return_date }}</td>
+                                <td class="p-3 text-sm text-center">
+                                    @if($item->status != 'Selesai' && $item->status != 'dikembalikan')
+                                        <div class="flex justify-center items-center gap-1">
+                                            <!-- Tombol Batalkan / Hapus -->
+                                            <form action="{{ route('circulation.cancel',$item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan peminjaman ini?')">
+                                                @csrf
+                                                <button type="submit" class="bg-red-600 text-white p-1 rounded hover:bg-red-700 transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow" title="Batalkan">
                                                     &#10005;
                                                 </button>
-                                                <button type="button" class="bg-[#004d40] text-white p-1 rounded hover:bg-[#003d30] transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow">
+                                            </form>
+
+                                            <!-- Tombol Selesai / Dikembalikan -->
+                                            <form action="{{ route('circulation.return', $item->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="bg-[#004d40] text-white p-1 rounded hover:bg-[#003d30] transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow" title="Selesai / Dikembalikan">
                                                     &#10003;
                                                 </button>
-                                            </div>
-                                        @else
-                                            <span class="text-white/70">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <span class="text-white/70">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
                     </table>
                 </div>
 
@@ -117,36 +125,46 @@
     </main>
 </div>
 
-<!-- ================= POP-UP MODAL PEMINJAMAN BARU (FOTO 3) ================= -->
+<!-- ================= POP-UP MODAL PEMINJAMAN BARU ================= -->
 <div id="borrowModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
     <div class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-xs p-5 relative border border-emerald-400/30">
-        <!-- Tombol Close (X) -->
+        
         <button type="button" onclick="closeBorrowModal()" class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
             &#10005;
         </button>
 
         <h3 class="text-xl font-bold mb-4 tracking-wide">Peminjaman Baru</h3>
 
+        <!-- Tampilkan Error Validasi jika ada -->
+        @if ($errors->any())
+            <div class="mb-3 p-2 bg-red-600 text-white rounded text-xs">
+                @foreach ($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
+
         <form action="{{ route('circulation.store') }}" method="POST" class="space-y-3">
             @csrf
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Nis</label>
-                <input type="text" name="nis_nip" placeholder="..." required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
+                <input type="text" name="nis_nip" placeholder="..." value="{{ old('nis_nip') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
             </div>
 
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Nama</label>
-                <input type="text" name="nama" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
+                <input type="text" name="nama" placeholder="..." value="{{ old('nama') }}" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
             </div>
 
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Judul Buku</label>
-                <input type="text" name="judul_buku" placeholder="..." required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
+                <input type="text" name="judul_buku" placeholder="..." value="{{ old('judul_buku') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
             </div>
 
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Tanggal Pinjam</label>
-                <input type="date" name="due_date" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                <!-- Ubah name="due_date" menjadi name="tanggal_pinjam" -->
+                <input type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam') }}" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
             </div>
 
             <div class="pt-2 text-center">

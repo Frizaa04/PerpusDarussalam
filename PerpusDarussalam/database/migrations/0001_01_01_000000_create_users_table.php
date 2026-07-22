@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('role')->nullable();
             $table->string('alamat');
             $table->string('file_url');
+            $table->timestamps();
         });
     }
 
