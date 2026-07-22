@@ -30,8 +30,8 @@ class AdminDashboardController extends Controller
 
         // Ambil data transaksi peminjaman & pengembalian terbaru langsung dari Database
         $recentActivities = Borrowing::with(['user', 'book'])
-            ->latest('updated_at') // Urutkan dari aktivitas paling baru
-            ->take(5)              // Ambil 5 transaksi terakhir
+            ->latest('updated_at') 
+            ->take(5)              
             ->get()
             ->map(function ($item) {
                 // Jika statusnya dikembalikan, tindakan = Pengembalian & waktu diambil dari updated_at

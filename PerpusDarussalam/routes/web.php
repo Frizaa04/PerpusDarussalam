@@ -5,7 +5,8 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CirculationController; 
-use App\Http\Controllers\AbsenController; // Import AbsenController
+use App\Http\Controllers\AbsenController; 
+use App\Http\Controllers\LaporanController; 
 
 // Dashboard Admin
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -28,9 +29,12 @@ Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBo
 // Absen / Kunjungan
 Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 
+// Laporan Utama & Laporan Detail Koleksi (BARU)
+Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
+
 // Logout
 Route::post('/logout', function () {
-    // Logika logout sementara / sederhana
     auth()->logout();
-    return redirect('/katalog-buku'); // atau redirect ke halaman login
+    return redirect('/katalog-buku');
 })->name('logout');
