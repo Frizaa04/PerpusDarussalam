@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'nis', 'role'])]
+#[Fillable(['name', 'email', 'password', 'nis', 'role', 'jenis_kelamin', 'alamat', 'foto'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -22,8 +22,6 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-
-    public $timestamps =false;
     protected function casts(): array
     {
         return [
@@ -41,7 +39,7 @@ class User extends Authenticatable
     }
 
     public function visits(){
-        return $this->hasMany(Visits::class);
+        return $this->hasMany(visits::class);
     }
 
     public function bookLogs(){
