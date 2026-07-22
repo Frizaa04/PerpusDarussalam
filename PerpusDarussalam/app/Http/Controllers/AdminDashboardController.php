@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\visits; 
-use App\Models\Borrowing;    
+use App\Models\Borrowing; 
+use Carbon\Carbon;   
 
 class AdminDashboardController extends Controller
 {
@@ -27,13 +28,23 @@ class AdminDashboardController extends Controller
                                   ->whereDate('updated_at', today())
                                   ->count();
 
-        // Data dummy aktivitas terbaru
-        $recentActivities = [
-            ['waktu' => '14:20', 'tindakan' => 'Peminjaman', 'detail_buku' => 'Algoritma dan Struktur Data', 'user' => 'Febri Hamzah Jemikan Nata'],
-            ['waktu' => '11:10', 'tindakan' => 'Pengembalian', 'detail_buku' => 'Basis Data Pemula', 'user' => 'Muhamad Aditya Nugroho'],
-            ['waktu' => '08:10', 'tindakan' => 'Tambah Buku Baru', 'detail_buku' => 'Ivanna', 'user' => 'Admin'],
-            ['waktu' => '07:30', 'tindakan' => 'Tambah Stok', 'detail_buku' => 'One Punch Man', 'user' => 'Admin'],
-        ];
+        // Ambil data transaksi peminjaman & pengembalian terbaru langsung dari Database
+        $recentActivities = Borrowing::with(['user', 'book'])
+            ->latest('updated_at') // Urutkan dari aktivitas paling baru
+            ->take(5)              // Ambil 5 transaksi terakhir
+            ->get()
+            ->map(function ($item) {
+                // Jika statusnya dikembalikan, tindakan = Pengembalian & waktu diambil dari updated_at
+                $isReturn = $item->status === 'dikembalikan';
+                $time = $isReturn ? $item->updated_at : $item->created_at;
+
+                return [
+                    'waktu'       => Carbon::parse($time)->format('H:i'),
+                    'tindakan'    => $isReturn ? 'Pengembalian' : 'Peminjaman',
+                    'detail_buku' => $item->book->judul ?? 'Buku Terhapus',
+                    'user'        => $item->user->name ?? 'Tanpa Nama',
+                ];
+            });
 
         return view('layouts.pages.admin.dashboard', compact(
             'todayVisitors', 

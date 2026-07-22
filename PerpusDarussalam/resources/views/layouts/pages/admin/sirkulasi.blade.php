@@ -9,9 +9,18 @@
     <main class="flex-1 flex flex-col">
 
         <!-- Header Atas -->
-        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
-            <div class="flex items-center h-full">
-                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-full py-1 object-contain">
+        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center gap-4 shadow-sm h-20">
+            <button type="button" class="text-gray-600 hover:text-[#004d40] transition">
+                <span class="material-icons text-2xl">notifications</span>
+            </button>
+            <form action="{{ Route::has('logout') ? route('logout') : '#' }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-[#005a4e] hover:bg-[#004d40] text-white px-4 py-1.5 rounded font-bold text-sm tracking-wide transition shadow-sm">
+                    LogOut
+                </button>
+            </form>
+            <div class="flex items-center h-full pl-2">
+                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-14 py-1 object-contain">
             </div>
         </header>
 
@@ -45,7 +54,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-white tracking-wide">Sirkulasi Peminjaman & Pengembalian</h2>
                     
-                    <!-- Checkbox Peminjaman Telat (Sesuai Foto 1 & 2) -->
+                    <!-- Checkbox Peminjaman Telat -->
                     <form id="lateFilterForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center gap-2 text-white font-medium text-sm">
                         @if($search)
                             <input type="hidden" name="search" value="{{ $search }}">
@@ -63,8 +72,9 @@
                                 <th class="p-3 text-sm font-bold tracking-wider">Nis</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul Buku</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Status</th>
-                                <th class="p-3 text-sm font-bold tracking-wider">Tgl Pinjam</th>
-                                <th class="p-3 text-sm font-bold tracking-wider">Tgl Kembali</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Tanggal Pinjam</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Tanggal Jatuh Tempo</th> <!-- KOLOM BARU -->
+                                <th class="p-3 text-sm font-bold tracking-wider">Tanggal Kembali</th>
                                 <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -78,12 +88,13 @@
                                     {{ $item->status }}
                                 </td>
                                 <td class="p-3 text-sm text-white/90">{{ $item->borrow_date }}</td>
-                                <td class="p-3 text-sm text-white/90">{{ $item->return_date }}</td>
+                                <td class="p-3 text-sm text-white/90">{{ $item->due_date ?? '-' }}</td>
+                                <td class="p-3 text-sm text-white/90">{{ $item->return_date ?? '-' }}</td>
                                 <td class="p-3 text-sm text-center">
                                     @if($item->status != 'Selesai' && $item->status != 'dikembalikan')
                                         <div class="flex justify-center items-center gap-1">
                                             <!-- Tombol Batalkan / Hapus -->
-                                            <form action="{{ route('circulation.cancel',$item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan peminjaman ini?')">
+                                            <form action="{{ route('circulation.cancel', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan peminjaman ini?')">
                                                 @csrf
                                                 <button type="submit" class="bg-red-600 text-white p-1 rounded hover:bg-red-700 transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow" title="Batalkan">
                                                     &#10005;
@@ -105,7 +116,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
+                                <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -163,7 +174,6 @@
 
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Tanggal Pinjam</label>
-                <!-- Ubah name="due_date" menjadi name="tanggal_pinjam" -->
                 <input type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam') }}" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
             </div>
 

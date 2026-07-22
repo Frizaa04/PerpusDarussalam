@@ -57,6 +57,7 @@ class CirculationController extends Controller
                 'book_title'  => $item->book->judul ?? 'Buku Terhapus',   
                 'status'      => $status,
                 'borrow_date' => $item->tanggal_pinjam ? Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') : '-',
+                'due_date'    => $item->tanggal_jatuh_tempo ? Carbon::parse($item->tanggal_jatuh_tempo)->format('d/m/Y') : '-',
                 'return_date' => $item->tanggal_kembali ? Carbon::parse($item->tanggal_kembali)->format('d/m/Y') : '-'
             ];
         });
