@@ -69,7 +69,9 @@ class CirculationController extends Controller
         $request->validate([
             'nis_nip'    => 'required', 
             'judul_buku' => 'required',
-            'due_date'   => 'nullable|date',
+            // Sesuaikan nama field dengan yang dikirim dari form HTML Anda, 
+            // misal: 'tanggal_pinjam' atau 'due_date'
+            'tanggal_pinjam' => 'nullable|date', 
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -77,18 +79,21 @@ class CirculationController extends Controller
             $buku = Book::where('judul', $request->judul_buku)->lockForUpdate()->first();
 
             if (!$user) {
-                return back()->withErrors(['error' => 'Anggota dengan NIS tersebut tidak ditemukan!']);
+                return back()->withErrors(['error' => 'Anggota dengan NIS tersebut tidak ditemukan!'])->withInput();
             }
             if (!$buku) {
-                return back()->withErrors(['error' => 'Buku dengan judul tersebut tidak ditemukan!']);
+                return back()->withErrors(['error' => 'Buku dengan judul tersebut tidak ditemukan!'])->withInput();
             }
 
             if ($buku->stok <= 0) {
-                return back()->withErrors(['error' => 'Stok buku habis!']);
+                return back()->withErrors(['error' => 'Stok buku habis!'])->withInput();
             }
 
-            $tanggalPinjam = $request->due_date ? Carbon::parse($request->due_date) : now();
-            $tanggalJatuhTempo = $tanggalPinjam->copy()->addWeek(); 
+            // Tentukan tanggal pinjam (jika kosong diisi hari ini)
+            $tanggalPinjam = $request->tanggal_pinjam ? Carbon::parse($request->tanggal_pinjam) : now();
+            
+            // Tentukan jatuh tempo otomatis 1 minggu (7 hari) dari tanggal pinjam
+            $tanggalJatuhTempo = $tanggalPinjam->copy()->addDays(7); 
 
             Borrowing::create([
                 'user_id'             => $user->id,
@@ -102,5 +107,48 @@ class CirculationController extends Controller
 
             return redirect()->route('circulation.index')->with('success', 'Peminjaman berhasil dicatat!');
         });
+    }
+
+    public function returnBook($id)
+    {
+        return DB::transaction(function () use ($id) {
+            $borrowing = Borrowing::with('book')->findOrFail($id);
+
+            if ($borrowing->status === 'dipinjam' || $borrowing->status === 'terlambat') {
+                // Perbarui status dan catat tanggal kembali hari ini
+                $borrowing->update([
+                    'status' => 'dikembalikan', 
+                    'tanggal_kembali' => now(),
+                ]);
+
+                // Kembalikan stok buku
+                if ($borrowing->book) {
+                    $borrowing->book->increment('stok');
+                }
+            }
+
+            return redirect()->route('circulation.index')->with('success', 'Buku berhasil dikembalikan!');
+        });
+    }
+
+    public function cancelBorrow($id)
+    {
+        DB::transaction(function () use ($id) {
+
+            $borrowing = Borrowing::findOrFail($id);
+
+            if ($borrowing->status == 'dipinjam') {
+
+                $borrowing->book->increment('stok');
+
+                $borrowing->delete();
+                // atau
+                // $borrowing->status = 'dibatalkan';
+                // $borrowing->save();
+            }
+
+        });
+
+        return back()->with('success','Peminjaman dibatalkan.');
     }
 }
