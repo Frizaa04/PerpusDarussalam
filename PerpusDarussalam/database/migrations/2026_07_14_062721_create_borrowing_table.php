@@ -6,36 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('Borrowings', function (Blueprint $table) {
+        Schema::create('borrowings', function (Blueprint $table) {
             $table->id();
+            
+            // Relasi ke tabel users (peminjam)
             $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete();
-            $table->foreignId('book_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                  ->constrained('users')
+                  ->cascadeOnDelete();
+                  
+            $table->foreignId('book_item_id')
+                  ->constrained('book_items')
+                  ->cascadeOnDelete();
+                  
             $table->date('tanggal_pinjam');
             $table->date('tanggal_jatuh_tempo');
             $table->date('tanggal_kembali')->nullable();
+            
             $table->enum('status', [
                 'dipinjam',
                 'dikembalikan',
                 'terlambat'
             ])->default('dipinjam');
+            
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('Borrowing');
+        // Perbaiki juga nama tabel saat rollback
+        Schema::dropIfExists('borrowings');
     }
 };
