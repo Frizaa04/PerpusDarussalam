@@ -57,10 +57,11 @@
                     </form>
                 </div>
 
-                <!-- Tombol Print / Cetak (Ikon Printer Hijau seperti di foto 2) -->
-                <button onclick="window.print()" class="bg-[#004d40] text-white p-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2" title="Cetak Laporan">
-                    <span class="material-icons text-xl">print</span>
-                </button>
+                <!-- Tombol Unduh Excel Baru -->
+                <a href="{{ route('laporan.koleksi.export', ['date' => $selectedDate->format('Y-m-d')]) }}" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Unduh Laporan Excel">
+                    <span class="material-icons text-xl">file_download</span>
+                    <span>Unduh Excel</span>
+                </a>
             </div>
 
             <!-- Garis Pembatas Hijau -->

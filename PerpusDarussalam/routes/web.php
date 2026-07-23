@@ -15,7 +15,6 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-
 // ==========================================
 // AUTHENTICATION USER (Pemustaka)
 // ==========================================
@@ -62,6 +61,7 @@ Route::middleware(['admin'])->group(function () {
     // Laporan Utama & Laporan Detail Koleksi
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
+    Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
 
     // Logout Admin Legacy (bisa pakai /admin/logout)
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');

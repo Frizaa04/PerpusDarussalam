@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\visits;
 use App\Models\Borrowing;
 use Carbon\Carbon;
+use App\Exports\KoleksiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanController extends Controller
 {
@@ -79,5 +81,13 @@ class LaporanController extends Controller
             'totalStokBukuFisik', 'kategoriReferensi', 'kategoriBacaan',
             'dates', 'selectedDate'
         ));
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $tanggal = $request->query('date', today()->format('Y-m-d'));
+        $namaFile = 'Laporan_Koleksi_' . $tanggal . '.xlsx';
+
+        return Excel::download(new KoleksiExport($tanggal), $namaFile);
     }
 }
