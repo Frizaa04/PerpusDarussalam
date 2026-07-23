@@ -16,7 +16,9 @@ class MemberController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('nis', 'LIKE', "%{$search}%");
+                  ->orWhere('nis', 'LIKE', "%{$search}%")
+                  ->orWhere('nip', 'LIKE', "%{$search}%")
+                  ->orWhere('nik', 'LIKE', "%{$search}%");
             });
         }
 
@@ -30,15 +32,15 @@ class MemberController extends Controller
         // 1. Validasi input
         $request->validate([
             'id'   => 'required|exists:users,id',
-            'nis'  => 'required|string',
+            'nis'  => 'nullable|string',
             'name' => 'required|string|max:255',
             'role' => 'required|string'
         ]);
 
-        // 2. Cari user berdasarkan ID (karena NIS sekarang bisa diubah)
+        // 2. Cari user berdasarkan ID
         $user = User::findOrFail($request->id);
         
-        // 3. Simpan perubahan (NIS, Name, dan Role)
+        // 3. Simpan perubahan
         $user->update([
             'nis'  => $request->nis,
             'name' => $request->name,

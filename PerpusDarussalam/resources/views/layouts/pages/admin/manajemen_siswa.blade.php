@@ -33,7 +33,7 @@
                     <table class="min-w-full text-left border-collapse border border-white/40">
                         <thead>
                             <tr class="bg-[#004d40] text-white divide-x divide-white/40">
-                                <th class="p-3 text-sm font-bold tracking-wider">NIS</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Nama</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Peran</th>
                                 <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
@@ -42,16 +42,18 @@
                         <tbody class="text-white divide-y divide-white/40">
                             @forelse($students as $student)
                                 <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                    <td class="p-3 text-sm font-bold text-white/90">{{ $student->nis }}</td>
+                                    <td class="p-3 text-sm font-bold text-white/90">
+                                        {{ $student->nis ?? $student->nip ?? $student->nik ?? '-' }}
+                                    </td>
                                     <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
                                     <td class="p-3 text-sm font-bold text-white/90">{{ ucfirst($student->role ?? 'Siswa') }}</td>
                                     <td class="p-3 text-sm text-center">
                                         <!-- Tombol Pemicu Modal Pop-up -->
                                         <button type="button" 
-                                                onclick="openEditModal('{{ $student->id }}', '{{ $student->nis }}', '{{ $student->name }}', '{{ $student->role ?? 'Siswa' }}')"
+                                                onclick="openEditModal('{{ $student->id }}', '{{ $student->nis ?? $student->nip ?? $student->nik ?? '' }}', '{{ $student->name }}', '{{ $student->role ?? 'Siswa' }}')"
                                                 class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
-                                            Edit Data
-                                        </button>
+                                                Edit Data
+                                            </button>
                                     </td>
                                 </tr>
                             @empty

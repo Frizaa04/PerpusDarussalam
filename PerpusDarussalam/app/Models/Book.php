@@ -35,4 +35,10 @@ class Book extends Model
     {
         return $this->hasMany(BookLogs::class);
     }
+
+    // Tambahkan relasi ini agar terhubung ke tabel book_items
+    public function bookItems()
+    {
+        return $this->hasMany(BookItem::class, 'book_id');
+    }
 }
