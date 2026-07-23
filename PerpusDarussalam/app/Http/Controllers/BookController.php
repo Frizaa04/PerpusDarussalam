@@ -58,11 +58,23 @@ class BookController extends Controller
             $coverPath = $request->file('cover')->store('covers', 'public');
         }
 
-        return DB::transaction(function () use ($request, $categoryId, $coverPath) {
-            // 1. Simpan data buku utama
+        return DB::transaction(function () use ($request, $category, $categoryId, $coverPath) {
+            
+            // 1. Buat format kode buku yang rapi dan terstruktur
+            // Contoh hasil: FIK-2026-001 (Kategori - Tahun Terbit - Nomor Urut)
+            $kategoriSingkatan = $category ? strtoupper(substr($category->nama, 0, 3)) : 'UMM';
+            $tahun = $request->tahun_terbit ?? date('Y');
+            
+            // Hitung urutan berdasarkan kategori yang sama agar penomorannya kontinu
+            $urutan = Book::where('categories_id', $categoryId)->count() + 1;
+            $nomorUrut = str_pad($urutan, 3, '0', STR_PAD_LEFT);
+            
+            $kodeBukuRapi = $kategoriSingkatan . '-' . $tahun . '-' . $nomorUrut;
+
+            // 2. Simpan data buku utama
             $book = Book::create([
                 'categories_id'     => $categoryId,
-                'kode_buku'         => 'BK-' . time(),
+                'kode_buku'         => $kodeBukuRapi, // Menggunakan kode baru yang rapi
                 'judul'             => $request->judul,
                 'penulis'           => $request->penulis ?? 'Anonim',
                 'penerbit'          => $request->penerbit ?? 'Umum',
@@ -70,12 +82,12 @@ class BookController extends Controller
                 'tanggal_pembelian' => $request->tanggal_pembelian ?? now()->toDateString(),
                 'deskripsi'         => $request->deskripsi ?? null,
                 'rak'               => $request->rak ?? null,
-                'tahun_terbit'      => $request->tahun_terbit ?? date('Y'),
+                'tahun_terbit'      => $tahun,
                 'stok'              => $request->stok,
                 'cover'             => $coverPath,
             ]);
 
-            // 2. Otomatis generate eksemplar fisik ke tabel book_items berdasarkan stok
+            // 3. Otomatis generate eksemplar fisik ke tabel book_items berdasarkan stok
             for ($i = 1; $i <= $request->stok; $i++) {
                 BookItem::create([
                     'book_id'          => $book->id,

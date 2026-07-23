@@ -32,9 +32,9 @@ Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name(
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
-// Absen / Kunjungan
+// Absen / Kunjungan (Public)
 Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
-Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store'); // <-- TAMBAHAN INI AGAR TIDAK ERROR
+Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
 
 // ==========================================
 // ROUTE DASHBOARD ADMIN (Diberi Middleware Admin)
@@ -58,7 +58,10 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/sirkulasi/return/{id}', [CirculationController::class, 'returnBook'])->name('circulation.return');
     Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
 
-    // Absen / Kunjungan
+    // API Cek Anggota Otomatis (AJAX untuk form peminjaman baru)
+    Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisNip']);
+
+    // Absen / Kunjungan (Admin view)
     Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 
     // Laporan Utama & Laporan Detail Koleksi
@@ -66,6 +69,6 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
 
-    // Logout Admin Legacy (bisa pakai /admin/logout)
+    // Logout Admin Legacy
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 });
