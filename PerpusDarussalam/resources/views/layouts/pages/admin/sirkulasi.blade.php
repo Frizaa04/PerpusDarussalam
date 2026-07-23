@@ -69,7 +69,7 @@
                         <thead>
                             <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                 <th class="p-3 text-sm font-bold tracking-wider w-12 text-center">No</th>
-                                <th class="p-3 text-sm font-bold tracking-wider">Nis</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul Buku</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Status</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Tanggal Pinjam</th>
@@ -82,7 +82,7 @@
                         @forelse($circulations as $index => $item)
                             <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
                                 <td class="p-3 text-sm font-bold text-center text-white/90">{{ $index + 1 }}</td>
-                                <td class="p-3 text-sm font-bold text-white/90">{{ $item->nis }}</td>
+                                <td class="p-3 text-sm font-bold text-white/90">{{ $item->identitas }}</td>
                                 <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
                                 <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">
                                     {{ $item->status }}
@@ -157,29 +157,33 @@
 
         <form action="{{ route('circulation.store') }}" method="POST" class="space-y-3">
             @csrf
+            
+            <!-- Input Scan Kartu Anggota -->
             <div>
-                <label class="block text-sm font-semibold mb-1 text-white">Nis</label>
-                <input type="text" name="nis_nip" placeholder="..." value="{{ old('nis_nip') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
+                <label class="block text-sm font-semibold mb-1 text-white">No. Identitas (NIS / NIP / NIK)</label>
+                <input type="text" id="inputScanKartu" name="identitas" placeholder="Scan Barcode Kartu Perpus..." value="{{ old('identitas') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none">
             </div>
 
+            <!-- Input Nama Otomatis Muncul -->
             <div>
-                <label class="block text-sm font-semibold mb-1 text-white">Nama</label>
-                <input type="text" name="nama" placeholder="..." value="{{ old('nama') }}" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
+                <label class="block text-sm font-semibold mb-1 text-white">Nama Anggota</label>
+                <input type="text" id="inputNama" name="nama" placeholder="Otomatis terisi..." readonly class="w-full bg-gray-300 text-gray-700 text-sm font-medium px-3 py-1.5 rounded outline-none cursor-not-allowed" value="{{ old('nama') }}">
             </div>
 
+            <!-- Input Scan Buku (Nomor Inventaris) -->
             <div>
-                <label class="block text-sm font-semibold mb-1 text-white">Judul Buku</label>
-                <input type="text" name="judul_buku" placeholder="..." value="{{ old('judul_buku') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none placeholder-gray-600 focus:ring-2 focus:ring-white">
+                <label class="block text-sm font-semibold mb-1 text-white">Nomor Inventaris Buku</label>
+                <input type="text" id="inputScanBuku" name="book_item_id" placeholder="Scan Barcode Buku (Cth: FIK-2026-001-INV-001)..." value="{{ old('book_item_id') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none">
             </div>
 
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Tanggal Pinjam</label>
-                <input type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam') }}" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                <input type="date" name="tanggal_pinjam" value="{{ old('tanggal_pinjam', date('Y-m-d')) }}" class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none">
             </div>
 
             <div class="pt-2 text-center">
                 <button type="submit" class="bg-white text-[#004d40] hover:bg-emerald-50 px-6 py-1.5 rounded font-bold transition shadow-md w-full">
-                    Konfirmasi
+                    Konfirmasi Peminjaman
                 </button>
             </div>
         </form>
@@ -190,6 +194,10 @@
 <script>
     function openBorrowModal() {
         document.getElementById('borrowModal').classList.remove('hidden');
+        // Fokuskan otomatis ke input kartu perpus saat modal dibuka
+        setTimeout(() => {
+            document.getElementById('inputScanKartu').focus();
+        }, 100);
     }
 
     function closeBorrowModal() {
@@ -202,5 +210,52 @@
             closeBorrowModal();
         }
     }
+
+    // Logika Scan Barcode Kartu & Buku
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputIdentitas = document.getElementById('inputScanKartu');
+        const inputNama = document.getElementById('inputNama');
+        const inputBookItem = document.getElementById('inputScanBuku');
+
+        // 1. Saat Barcode Kartu Anggota di-scan (diakhiri tombol Enter dari scanner)
+        if (inputIdentitas) {
+            inputIdentitas.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Mencegah form submit otomatis
+                    let nomor = this.value.trim();
+
+                    if (nomor.length > 0) {
+                        fetch(`/api/check-member/${nomor}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    inputNama.value = data.name;
+                                    // Pindahkan fokus secara otomatis ke input scan buku setelah kartu berhasil
+                                    if (inputBookItem) {
+                                        inputBookItem.focus();
+                                    }
+                                } else {
+                                    inputNama.value = 'Anggota tidak ditemukan';
+                                    inputIdentitas.value = '';
+                                    inputIdentitas.focus();
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                }
+            });
+        }
+
+        // 2. (Opsional) Jika ingin memastikan input buku langsung fokus setelah modal siap
+        if (inputBookItem) {
+            inputBookItem.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Jika butuh validasi instan kode inventaris bisa ditambahkan di sini,
+                    // atau dibiarkan agar langsung siap disubmit.
+                }
+            });
+        }
+    });
 </script>
 @endsection
