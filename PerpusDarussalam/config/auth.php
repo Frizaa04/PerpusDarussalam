@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Admin; // <-- DITAMBAHKAN: Import Model Admin
 
 return [
 
@@ -42,6 +43,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // DITAMBAHKAN: Guard khusus untuk Admin
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -65,6 +72,12 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        // DITAMBAHKAN: Provider yang mengarah ke Model Admin
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => Admin::class,
         ],
 
         // 'users' => [
