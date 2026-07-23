@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\BookItem; // Jangan lupa import model BookItem
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB; // Import DB untuk transaction
 
 class BookController extends Controller
 {
-
     public function index(Request $request)
     {
         $search = $request->query('search');
@@ -33,111 +34,135 @@ class BookController extends Controller
         }
 
         $books = $queryBuilder->get();
-
         $allCategories = Category::all();
 
         return view('layouts.pages.admin.katalog_buku', compact('books', 'search', 'allCategories'));
     }
 
-
     public function store(Request $request)
-{
-    // 1. Validasi sesuai field yang dikirim dari HTML FE lu saat ini
-    $request->validate([
-        'judul'     => 'required|string|max:255',
-        'kategori'  => 'nullable|string',
-        'stok'      => 'required|numeric',
-        'deskripsi' => 'nullable|string',
-        'rak'       => 'nullable|string',
-        'cover'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
+    {
+        $request->validate([
+            'judul'     => 'required|string|max:255',
+            'kategori'  => 'nullable|string',
+            'stok'      => 'required|numeric|min:1',
+            'deskripsi' => 'nullable|string',
+            'rak'       => 'nullable|string',
+            'cover'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    // Cari ID kategori berdasarkan nama kategori yang dikirim dari form (misal: "Novel")
-    // Jika tidak ketemu, pakai ID kategori pertama sebagai fallback
-    $category = Category::where('nama', $request->kategori)->first();
-    $categoryId = $category ? $category->id : (Category::first()->id ?? 1);
+        $category = Category::where('nama', $request->kategori)->first();
+        $categoryId = $category ? $category->id : (Category::first()->id ?? 1);
 
-    $coverPath = null;
-    if ($request->hasFile('cover')) {
-        $coverPath = $request->file('cover')->store('covers', 'public');
-    }
-
-    // 2. Simpan ke database dengan nilai default untuk field yang tidak ada di Form FE
-    Book::create([
-        'categories_id' => $categoryId,
-        'kode_buku'     => 'BK-' . time(), // Dibuat otomatis unik jika FE belum ada input kode_buku
-        'judul'         => $request->judul,
-        'penulis'       => $request->penulis ?? 'Anonim',
-        'penerbit'      => $request->penerbit ?? 'Umum',
-        'isbn'          => $request->isbn ?? '000-0-00-000000-0',
-        'tanggal_pembelian' => $request->tanggal_pembelian ?? now()->toDateString(),
-        'deskripsi'     => $request->deskripsi ?? null,
-        'rak'           => $request->rak ?? null,
-        'tahun_terbit'  => $request->tahun_terbit ?? date('Y'),
-        'stok'          => $request->stok,
-        'cover'         => $coverPath,
-    ]);
-
-    return redirect()->route('book.index')->with('success', 'Buku baru berhasil ditambahkan ke database!');
-}
-
-public function update(Request $request)
-{
-    // 1. Cari buku
-    $book = Book::findOrFail($request->id);
-
-    // 2. Jika categories_id yang dikirim dari form berupa NAMA KATEGORI (bukan ID angka),
-    // kita cari/buatkan ID-nya dulu secara otomatis!
-    $categoryId = $request->categories_id;
-    if (!is_numeric($categoryId)) {
-        $category = \App\Models\Category::firstOrCreate(['nama' => $categoryId ?? 'Umum']);
-        $categoryId = $category->id;
-    }
-
-    // 3. Validasi
-    $request->validate([
-        'kode_buku'         => 'required|string|max:255|unique:books,kode_buku,' . $book->id,
-        'judul'             => 'required|string|max:255',
-        'penulis'           => 'required|string|max:255',
-        'penerbit'          => 'required|string|max:255',
-        'isbn'              => 'required|string|max:255',
-        'tahun_terbit'      => 'required|digits:4',
-        'tanggal_pembelian' => 'required',
-        'deskripsi'         => 'nullable|string',
-        'rak'               => 'nullable|string',
-        'stok'              => 'required|integer|min:0',
-        'cover'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
-
-    // 4. Siapkan Data Update
-    $dataToUpdate = [
-        'kode_buku'         => $request->kode_buku,
-        'categories_id'     => $categoryId, // Pake ID yang terjamin ada
-        'judul'             => $request->judul,
-        'penulis'           => $request->penulis,
-        'penerbit'          => $request->penerbit,
-        'isbn'              => $request->isbn,
-        'tanggal_pembelian' => date('Y-m-d', strtotime($request->tanggal_pembelian)),
-        'tahun_terbit'      => $request->tahun_terbit,
-        'stok'              => $request->stok,
-        'deskripsi'         => $request->deskripsi ?? null,
-        'rak'               => $request->rak ?? null,
-    ];
-
-    // 5. Handle Cover
-    if ($request->hasFile('cover')) {
-        if ($book->cover && \Illuminate\Support\Facades\Storage::disk('public')->exists($book->cover)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($book->cover);
+        $coverPath = null;
+        if ($request->hasFile('cover')) {
+            $coverPath = $request->file('cover')->store('covers', 'public');
         }
-        $dataToUpdate['cover'] = $request->file('cover')->store('covers', 'public');
+
+        return DB::transaction(function () use ($request, $categoryId, $coverPath) {
+            // 1. Simpan data buku utama
+            $book = Book::create([
+                'categories_id'     => $categoryId,
+                'kode_buku'         => 'BK-' . time(),
+                'judul'             => $request->judul,
+                'penulis'           => $request->penulis ?? 'Anonim',
+                'penerbit'          => $request->penerbit ?? 'Umum',
+                'isbn'              => $request->isbn ?? '000-0-00-000000-0',
+                'tanggal_pembelian' => $request->tanggal_pembelian ?? now()->toDateString(),
+                'deskripsi'         => $request->deskripsi ?? null,
+                'rak'               => $request->rak ?? null,
+                'tahun_terbit'      => $request->tahun_terbit ?? date('Y'),
+                'stok'              => $request->stok,
+                'cover'             => $coverPath,
+            ]);
+
+            // 2. Otomatis generate eksemplar fisik ke tabel book_items berdasarkan stok
+            for ($i = 1; $i <= $request->stok; $i++) {
+                BookItem::create([
+                    'book_id'          => $book->id,
+                    'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $i),
+                    'kondisi'          => 'baik',
+                    'status_pinjam'    => 'tersedia',
+                ]);
+            }
+
+            return redirect()->route('book.index')->with('success', 'Buku baru dan nomor inventaris berhasil ditambahkan!');
+        });
     }
 
-    // 6. Eksekusi Update
-    $book->update($dataToUpdate);
+    public function update(Request $request)
+    {
+        $book = Book::findOrFail($request->id);
 
-    return redirect()->route('book.index')->with('success', 'Data buku berhasil diperbarui!');
-}
+        $categoryId = $request->categories_id;
+        if (!is_numeric($categoryId)) {
+            $category = Category::firstOrCreate(['nama' => $categoryId ?? 'Umum']);
+            $categoryId = $category->id;
+        }
 
+        $request->validate([
+            'kode_buku'         => 'required|string|max:255|unique:books,kode_buku,' . $book->id,
+            'judul'             => 'required|string|max:255',
+            'penulis'           => 'required|string|max:255',
+            'penerbit'          => 'required|string|max:255',
+            'isbn'              => 'required|string|max:255',
+            'tahun_terbit'      => 'required|digits:4',
+            'tanggal_pembelian' => 'required',
+            'deskripsi'         => 'nullable|string',
+            'rak'               => 'nullable|string',
+            'stok'              => 'required|integer|min:0',
+            'cover'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        return DB::transaction(function () use ($request, $book, $categoryId) {
+            $oldStok = $book->stok;
+            $newStok = (int) $request->stok;
+
+            $dataToUpdate = [
+                'kode_buku'         => $request->kode_buku,
+                'categories_id'     => $categoryId,
+                'judul'             => $request->judul,
+                'penulis'           => $request->penulis,
+                'penerbit'          => $request->penerbit,
+                'isbn'              => $request->isbn,
+                'tanggal_pembelian' => date('Y-m-d', strtotime($request->tanggal_pembelian)),
+                'tahun_terbit'      => $request->tahun_terbit,
+                'stok'              => $newStok,
+                'deskripsi'         => $request->deskripsi ?? null,
+                'rak'               => $request->rak ?? null,
+            ];
+
+            if ($request->hasFile('cover')) {
+                if ($book->cover && Storage::disk('public')->exists($book->cover)) {
+                    Storage::disk('public')->delete($book->cover);
+                }
+                $dataToUpdate['cover'] = $request->file('cover')->store('covers', 'public');
+            }
+
+            $book->update($dataToUpdate);
+
+            // Sesuaikan item fisik di tabel book_items jika stok bertambah/berkurang
+            if ($newStok > $oldStok) {
+                // Jika stok bertambah, buat item fisik baru kelanjutan dari jumlah sebelumnya
+                for ($i = $oldStok + 1; $i <= $newStok; $i++) {
+                    BookItem::create([
+                        'book_id'          => $book->id,
+                        'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $i),
+                        'kondisi'          => 'baik',
+                        'status_pinjam'    => 'tersedia',
+                    ]);
+                }
+            } elseif ($newStok < $oldStok) {
+                // Jika stok dikurangi, hapus item fisik yang belum dipinjam dari urutan paling belakang
+                $book->bookItems()
+                     ->where('status_pinjam', 'tersedia')
+                     ->orderBy('id', 'desc')
+                     ->take($oldStok - $newStok)
+                     ->delete();
+            }
+
+            return redirect()->route('book.index')->with('success', 'Data buku dan inventaris berhasil diperbarui!');
+        });
+    }
 
     public function destroy($id)
     {
@@ -147,7 +172,7 @@ public function update(Request $request)
             Storage::disk('public')->delete($book->cover);
         }
 
-        $book->delete();
+        $book->delete(); // Karena menggunakan cascadeOnDelete di migrasi, book_items otomatis ikut terhapus
 
         return redirect()->route('book.index')->with('success', 'Buku berhasil dihapus dari database!');
     }

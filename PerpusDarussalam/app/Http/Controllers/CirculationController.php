@@ -68,27 +68,33 @@ class CirculationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nis_nip'    => 'required', 
-            'judul_buku' => 'required',
-            // Sesuaikan nama field dengan yang dikirim dari form HTML Anda, 
-            // misal: 'tanggal_pinjam' atau 'due_date'
+            'nis_nip'        => 'required', 
+            'book_item_id'   => 'required', // Ubah dari judul_buku menjadi kode/id item buku yang di-scan
             'tanggal_pinjam' => 'nullable|date', 
         ]);
 
         return DB::transaction(function () use ($request) {
-            $user = User::where('nis', $request->nis_nip)->first();
-            $buku = Book::where('judul', $request->judul_buku)->lockForUpdate()->first();
+            // 1. Cari user secara fleksibel (bisa NIS, NIP, atau NIK)
+            $user = User::where('nis', $request->nis_nip)
+                        ->orWhere('nip', $request->nis_nip)
+                        ->orWhere('nik', $request->nis_nip)
+                        ->first();
+
+            // 2. Cari item buku berdasarkan ID / Barcode (misal kolomnya 'id' atau 'kode_item')
+            $buku = BookItem::where('id', $request->book_item_id)
+                            ->orWhere('kode_item', $request->book_item_id)
+                            ->lockForUpdate()
+                            ->first();
 
             if (!$user) {
-                return back()->withErrors(['error' => 'Anggota dengan NIS tersebut tidak ditemukan!'])->withInput();
+                return back()->withErrors(['error' => 'Anggota (NIS/NIP/NIK) tidak ditemukan!'])->withInput();
             }
             if (!$buku) {
-                return back()->withErrors(['error' => 'Buku dengan judul tersebut tidak ditemukan!'])->withInput();
+                return back()->withErrors(['error' => 'Item Buku tidak ditemukan!'])->withInput();
             }
 
-            if ($buku->stok <= 0) {
-                return back()->withErrors(['error' => 'Stok buku habis!'])->withInput();
-            }
+            // Cek stok atau status ketersediaan item buku jika ada
+            // (Sesuaikan dengan struktur tabel book_items Anda)
 
             // Tentukan tanggal pinjam (jika kosong diisi hari ini)
             $tanggalPinjam = $request->tanggal_pinjam ? Carbon::parse($request->tanggal_pinjam) : now();
@@ -98,13 +104,14 @@ class CirculationController extends Controller
 
             Borrowing::create([
                 'user_id'             => $user->id,
-                'book_id'             => $buku->id,
+                'book_item_id'        => $buku->id, // Sesuaikan dengan nama kolom migration Anda
                 'tanggal_pinjam'      => $tanggalPinjam,
                 'tanggal_jatuh_tempo' => $tanggalJatuhTempo,
                 'status'              => 'dipinjam'
             ]);
 
-            $buku->decrement('stok');
+            // Jika tabel book_items punya kolom status, bisa di-update jadi dipinjam
+            // $buku->update(['status' => 'dipinjam']);
 
             return redirect()->route('circulation.index')->with('success', 'Peminjaman berhasil dicatat!');
         });

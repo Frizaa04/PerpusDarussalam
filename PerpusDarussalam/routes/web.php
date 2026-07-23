@@ -32,6 +32,9 @@ Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name(
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
+// Absen / Kunjungan
+Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
+Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store'); // <-- TAMBAHAN INI AGAR TIDAK ERROR
 
 // ==========================================
 // ROUTE DASHBOARD ADMIN (Diberi Middleware Admin)

@@ -38,6 +38,20 @@
                 <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold transition">19</a>
             </div>
 
+            <!-- Form Input untuk Barcode Scanner -->
+            <form action="{{ route('absen.store') }}" method="POST" class="mb-4">
+                @csrf
+                <div class="flex items-center gap-2">
+                    <input type="text" name="kode" id="scanner-input" 
+                        class="bg-gray-700 text-white px-4 py-2 rounded border border-gray-600 focus:outline-none focus:border-green-500 w-full md:w-1/3" 
+                        placeholder="Klik di sini lalu scan barcode..." 
+                        autofocus autocomplete="off" required>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold">
+                        Proses
+                    </button>
+                </div>
+            </form>
+
             <!-- Box Tabel Daftar Kunjungan -->
             <div class="bg-[#a2b4ba] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
                 <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Daftar Kunjungan</h2>
@@ -52,21 +66,21 @@
                             </tr>
                         </thead>
                         <tbody class="text-white divide-y divide-white/40">
-                            @forelse($visits as $visit)
+                           @forelse($visits as $visit)
                                 <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
                                     <!-- Format Waktu: 20 Jul 2026, 13:20 -->
                                     <td class="p-3 text-sm font-semibold text-white/90">
-                                        {{ $visit->visited_at ? $visit->visited_at->format('d M Y, H:i') : '-' }}
+                                        {{ $visit->visited_at ? \Carbon\Carbon::parse($visit->visited_at)->format('d M Y, H:i') : '-' }}
                                     </td>
                                     
-                                    <!-- Nis (Mengambil dari kolom nis di tabel user jika ada, fallback ke id / -) -->
+                                    <!-- Identitas (Mendukung NIS, NIP, atau NIK) -->
                                     <td class="p-3 text-sm font-semibold text-white/90">
-                                        {{ $visit->user->nis ?? $visit->user->username ?? '-' }}
+                                        {{ $visit->user->nis ?? $visit->user->nip ?? $visit->user->nik ?? '-' }}
                                     </td>
                                     
                                     <!-- Nama User -->
                                     <td class="p-3 text-sm font-semibold text-white/90">
-                                        {{ $visit->user->name ?? $visit->user->nama ?? '-' }}
+                                        {{ $visit->user->name ?? '-' }}
                                     </td>
                                 </tr>
                             @empty
@@ -92,4 +106,12 @@
         </div>
     </main>
 </div>
+
+<script>
+    // Memastikan kursor selalu fokus ke input scanner agar siap tembak kapan saja
+    document.addEventListener("click", function() {
+        document.getElementById("scanner-input").focus();
+    });
+</script>
+
 @endsection
