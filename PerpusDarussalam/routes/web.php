@@ -8,6 +8,7 @@ use App\Http\Controllers\CirculationController;
 use App\Http\Controllers\AbsenController; 
 use App\Http\Controllers\LaporanController; 
 use App\Http\Controllers\EbookController; 
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 
@@ -75,6 +76,11 @@ Route::middleware(['admin'])->group(function () {
     // Route Export Excel
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
     Route::get('/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
+
+    // Route untuk Notifikasi
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.readAll');
 
     // Logout Admin Legacy
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
