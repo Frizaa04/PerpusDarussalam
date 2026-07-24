@@ -13,7 +13,9 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanController extends Controller
 {
-    // Halaman Laporan Ringkasan Utama (Foto 1)
+    /**
+     * Halaman Utama Ringkasan Laporan
+     */
     public function index(Request $request)
     {
         $selectedDate = $request->query('date') ? Carbon::parse($request->query('date')) : today();
@@ -44,22 +46,22 @@ class LaporanController extends Controller
         ));
     }
 
-    // Halaman Laporan Detail Koleksi (Foto 2)
+    /**
+     * Halaman Laporan Detail Koleksi
+     */
     public function koleksi(Request $request)
     {
         $selectedDate = $request->query('date') ? Carbon::parse($request->query('date')) : today();
 
         // Query Statistik Koleksi
-        $totalKoleksi           = Book::sum('stok') ?? 0;
-        $totalJudulBukuFisik    = Book::count() ?? 0;
-        $totalEbook             = 0; // Sesuaikan jika ada model Ebook terpisah
-        $totalStokBukuFisik     = Book::sum('stok') ?? 0;
+        $totalKoleksi        = Book::sum('stok') ?? 0;
+        $totalJudulBukuFisik = Book::count() ?? 0;
+        $totalEbook          = 0; // Sesuaikan jika ada model Ebook terpisah
+        $totalStokBukuFisik  = Book::sum('stok') ?? 0;
 
         // Filter stok buku berdasarkan nama kategori via relasi 'categories'
         $kategoriReferensi = Book::whereHas('categories', function ($query) {
-            $query->where('nama', 'Referensi'); 
-            // Catatan: Jika nama kolom nama kategori di tabel categories kamu adalah 'nama' atau 'kategori', 
-            // sesuaikan 'nama_kategori' di atas (misal: 'nama', 'Referensi').
+            $query->where('nama', 'Referensi');
         })->sum('stok') ?? 0;
 
         $kategoriBacaan = Book::whereHas('categories', function ($query) {
@@ -83,6 +85,44 @@ class LaporanController extends Controller
         ));
     }
 
+    /**
+     * Halaman Laporan Detail Anggota
+     */
+    public function anggota(Request $request)
+    {
+        $selectedDate = $request->query('date') ? Carbon::parse($request->query('date')) : today();
+
+        // Query Statistik Anggota
+        $totalAnggota = User::count() ?? 0;
+        
+        // Sesuaikan kolom 'jenis_kelamin' dan 'role' sesuai struktur tabel users kamu
+        $lakiLaki  = User::where('jenis_kelamin', 'L')->count() ?? 0;
+        $perempuan = User::where('jenis_kelamin', 'P')->count() ?? 0;
+        
+        $siswa = User::where('role', 'siswa')->count() ?? 0;
+        $guru  = User::where('role', 'guru')->count() ?? 0;
+        $umum  = User::where('role', 'umum')->count() ?? 0;
+
+        $dates = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = today()->subDays($i);
+            $dates[] = [
+                'day'       => $date->format('d'),
+                'full_date' => $date->format('Y-m-d'),
+                'is_active' => $date->isSameDay($selectedDate),
+            ];
+        }
+
+        return view('layouts.pages.admin.laporan_anggota', compact(
+            'totalAnggota', 'lakiLaki', 'perempuan',
+            'siswa', 'guru', 'umum',
+            'dates', 'selectedDate'
+        ));
+    }
+
+    /**
+     * Export Laporan Koleksi ke Excel
+     */
     public function exportExcel(Request $request)
     {
         $tanggal = $request->query('date', today()->format('Y-m-d'));

@@ -29,19 +29,18 @@ class AdminDashboardController extends Controller
                                   ->count();
 
         // Ambil data transaksi peminjaman & pengembalian terbaru langsung dari Database
-        $recentActivities = Borrowing::with(['user', 'book'])
-            ->latest('updated_at') 
-            ->take(5)              
+        $recentActivities = Borrowing::with(['user', 'bookItem.book'])
+            ->latest('updated_at')
+            ->take(5)
             ->get()
             ->map(function ($item) {
-                // Jika statusnya dikembalikan, tindakan = Pengembalian & waktu diambil dari updated_at
                 $isReturn = $item->status === 'dikembalikan';
                 $time = $isReturn ? $item->updated_at : $item->created_at;
 
                 return [
                     'waktu'       => Carbon::parse($time)->format('H:i'),
                     'tindakan'    => $isReturn ? 'Pengembalian' : 'Peminjaman',
-                    'detail_buku' => $item->book->judul ?? 'Buku Terhapus',
+                    'detail_buku' => $item->bookItem->book->judul ?? 'Buku Terhapus',
                     'user'        => $item->user->name ?? 'Tanpa Nama',
                 ];
             });

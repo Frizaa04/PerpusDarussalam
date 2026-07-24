@@ -37,7 +37,7 @@
         <!-- Area Isi Konten Laporan -->
         <div class="p-8 space-y-8">
             
-            <!-- Bilah Navigasi Tanggal (13, 14, 15, 16, 17, 18, 19 + Icon Kalender) -->
+            <!-- Bilah Navigasi Tanggal -->
             <div class="flex items-center gap-3">
                 <div class="inline-flex bg-[#004d40] rounded border border-[#004d40] overflow-hidden shadow-sm">
                     @foreach($dates as $d)
@@ -65,17 +65,17 @@
             <!-- Grid 6 Card Statistik Laporan -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <!-- Card 1: Total Koleksi -->
-                <a href="{{ route('laporan.koleksi') }}" class="block bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:opacity-90 hover:scale-[1.02] transition cursor-pointer">
+                <!-- Card 1: Total Koleksi (Warna Hijau + Mengembang Saat Hover) -->
+                <a href="{{ route('laporan.koleksi') }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Koleksi</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $totalKoleksi }}</p>
                 </a>
 
-                <!-- Card 2: Total Anggota -->
-                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                <!-- Card 2: Total Anggota (Bisa Diklik + Hover Warna + Mengembang) -->
+                <a href="{{ route('laporan.anggota') }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Anggota</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $totalAnggota }}</p>
-                </div>
+                </a>
 
                 <!-- Card 3: Pengunjung -->
                 <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
