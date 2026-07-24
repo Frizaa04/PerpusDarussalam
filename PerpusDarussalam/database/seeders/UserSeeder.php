@@ -45,5 +45,16 @@ class UserSeeder extends Seeder
             'alamat'        => 'Jl. Ahmad Yani No. 12, Bontang',
             'foto'      => 'default.pdf',
         ]);
+
+        User::create([
+            'nis'           => '2411102441299',
+            'name'          => 'Putri Auliya Lestari',
+            'email'         => 'putri@example.com',
+            'password'      => 'password123',
+            'role'          => 'siswa',
+            'jenis_kelamin' => 'P',
+            'alamat'        => 'Jl. Merdeka No. 9, Sangatta',
+            'foto'      => 'default.pdf',
+        ]);
     }
 }
