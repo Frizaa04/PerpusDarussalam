@@ -15,7 +15,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Daftarkan semua seeder di sini berurutan
         $this->call([
             UserSeeder::class,
             BookSeeder::class,

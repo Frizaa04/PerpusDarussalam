@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('penerbit');
             $table->year('tahun_terbit');
             $table->string('isbn')->nullable();
-            $table->string('file_pdf'); // Menyimpan nama file/path dokumen e-book
-            $table->string('cover')->nullable(); // Menyimpan cover e-book
+            $table->string('file_pdf'); 
+            $table->string('cover')->nullable();
             $table->timestamps();
         });
     }

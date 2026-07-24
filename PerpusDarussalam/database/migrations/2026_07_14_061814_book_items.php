@@ -10,16 +10,10 @@ return new class extends Migration
     {
         Schema::create('book_items', function (Blueprint $table) {
             $table->id();
-            
-            // Menghubungkan ke tabel books id
             $table->foreignId('book_id')
                   ->constrained('books')
                   ->cascadeOnDelete();
-                  
-            // Nomor inventaris unik untuk tiap eksemplar fisik buku
             $table->string('nomor_inventaris')->unique(); 
-            
-            // Status kondisi dan ketersediaan fisik buku
             $table->enum('kondisi', ['baik', 'rusak_ringan', 'rusak_berat'])->default('baik');
             $table->enum('status_pinjam', ['tersedia', 'dipinjam'])->default('tersedia');
             

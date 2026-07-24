@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Visits extends Model
 {
-    // TAMBAHKAN BARIS INI
     protected $fillable = [
         'user_id',
         'visited_at',

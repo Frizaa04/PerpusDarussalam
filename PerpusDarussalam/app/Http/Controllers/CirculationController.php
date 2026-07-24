@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Borrowing; 
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\BookItem; // Jangan lupa import model BookItem
+use App\Models\BookItem;
 use Illuminate\Support\Facades\DB;
 
 class CirculationController extends Controller
@@ -16,7 +16,6 @@ class CirculationController extends Controller
         $search = $request->query('search');
         $lateOnly = $request->query('late');
 
-        // Ubah relasi dari 'book' menjadi 'bookItem.book' agar bisa membaca judul buku dari item fisiknya
         $queryBuilder = Borrowing::with(['user', 'bookItem.book']);
 
         // Filter Pencarian
@@ -37,7 +36,7 @@ class CirculationController extends Controller
             });
         }
 
-        // Filter Hanya Peminjaman Telat
+        // Filter hanya menampilkan peminjaman yang telat
         if ($lateOnly) {
             $queryBuilder->where('status', 'dipinjam')
                          ->where('tanggal_jatuh_tempo', '<', now());
@@ -57,7 +56,7 @@ class CirculationController extends Controller
 
             return (object)[
                 'id'            => $item->id,
-                'identitas'     => $item->user->nis ?? $item->user->nip ?? $item->user->nik ?? '-', // Menggabungkan ketiganya di sini
+                'identitas'     => $item->user->nis ?? $item->user->nip ?? $item->user->nik ?? '-',
                 'name'          => $item->user->name ?? 'Tanpa Nama',       
                 'book_title'    => $item->bookItem->book->judul ?? 'Buku Terhapus',   
                 'nomor_inv'     => $item->bookItem->nomor_inventaris ?? '-', 
@@ -75,18 +74,18 @@ class CirculationController extends Controller
     {
         $request->validate([
             'identitas'          => 'required', 
-            'book_item_id'     => 'required', // Menerima input nomor inventaris dari form frontend
+            'book_item_id'     => 'required', 
             'tanggal_pinjam'   => 'nullable|date', 
         ]);
 
         return DB::transaction(function () use ($request) {
-            // 1. Cari user secara fleksibel (NIS, NIP, atau NIK)
+            // Cari user secara fleksibel (NIS, NIP, atau NIK)
             $user = User::where('nis', $request->identitas)
                         ->orWhere('nip', $request->identitas)
                         ->orWhere('nik', $request->identitas)
                         ->first();
 
-            // 2. Cari item buku berdasarkan nomor inventaris fisik
+            // Cari item buku berdasarkan nomor inventaris fisik
             $bookItem = BookItem::where('nomor_inventaris', $request->book_item_id)
                                 ->orWhere('id', $request->book_item_id)
                                 ->lockForUpdate()
@@ -99,12 +98,12 @@ class CirculationController extends Controller
                 return back()->withErrors(['error' => 'Nomor Inventaris Buku tidak ditemukan!'])->withInput();
             }
 
-            // 3. Validasi apakah buku fisik sedang dipinjam
+            // Validasi apakah buku fisik sedang dipinjam
             if ($bookItem->status_pinjam === 'dipinjam') {
                 return back()->withErrors(['error' => 'Eksemplar buku ini sedang dipinjam oleh anggota lain!'])->withInput();
             }
 
-            // 4. Validasi kondisi fisik buku
+            // Validasi kondisi fisik buku
             if ($bookItem->kondisi === 'rusak_berat') {
                 return back()->withErrors(['error' => 'Buku ini berstatus rusak berat dan tidak layak dipinjamkan!'])->withInput();
             }
@@ -112,7 +111,7 @@ class CirculationController extends Controller
             $tanggalPinjam = $request->tanggal_pinjam ? Carbon::parse($request->tanggal_pinjam) : now();
             $tanggalJatuhTempo = $tanggalPinjam->copy()->addDays(7); 
 
-            // 5. Catat peminjaman
+            // Catat peminjaman
             Borrowing::create([
                 'user_id'             => $user->id,
                 'book_item_id'        => $bookItem->id, 
@@ -121,7 +120,7 @@ class CirculationController extends Controller
                 'status'              => 'dipinjam'
             ]);
 
-            // 6. Ubah status fisik buku menjadi dipinjam
+            // Ubah status fisik buku menjadi dipinjam
             $bookItem->update([
                 'status_pinjam' => 'dipinjam'
             ]);
