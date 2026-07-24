@@ -18,11 +18,7 @@ return new class extends Migration
                 'unread',
                 'read'
             ])->default('unread');
-            $table->enum('type', [
-                'overdue',
-                'return',
-                'borrow'
-            ])->default('overdue');
+            $table->string('type', 50);
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
