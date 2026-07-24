@@ -58,14 +58,14 @@ class KoleksiExport implements FromArray, WithStyles, ShouldAutoSize
         $data[] = ['ID Peminjaman', 'Nama Peminjam', 'Judul Buku', 'Status', 'Tanggal Pinjam'];
 
         // 5. Data Peminjaman
-        $borrowings = Borrowing::with(['user', 'book'])->get();
+        $borrowings = Borrowing::with(['user', 'bookItem'])->get();
         $this->jumlahPeminjaman = $borrowings->count();
 
         foreach ($borrowings as $borrowing) {
             $data[] = [
                 $borrowing->id,
                 $borrowing->user->name ?? '-',
-                $borrowing->book->title ?? $borrowing->book->judul ?? '-',
+                $borrowing->bookItem->book->title ?? $borrowing->bookItem->book->judul ?? '-',
                 $borrowing->status,
                 $borrowing->created_at->format('Y-m-d H:i:s'),
             ];
@@ -85,12 +85,12 @@ class KoleksiExport implements FromArray, WithStyles, ShouldAutoSize
             'font' => ['bold' => true, 'color' => ['argb' => Color::COLOR_WHITE]],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['argb' => '00B050'], // Warna Hijau seperti di gambar
+                'startColor' => ['argb' => '00B050'], 
             ],
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => '000000'], // Garis hitam pinggiran tabel
+                    'color' => ['argb' => '000000'],
                 ],
             ],
         ];

@@ -90,12 +90,18 @@
                                         </td>
                                         <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
                                         <td class="p-3 text-sm text-center">
-                                            <!-- Mode Normal: Tombol Edit Data -->
-                                            <div class="edit-mode-action">
+                                            <!-- Mode Normal: Tombol Edit Data & Kelola -->
+                                            <div class="edit-mode-action flex items-center justify-center gap-2">
                                                 <button type="button" 
                                                         onclick="openEditModal('{{ $book->id }}', '{{ $book->judul }}', '{{ $book->penulis }}', '{{ $book->penerbit }}', '{{ $book->deskripsi ?? '' }}', '{{ $book->isbn }}', '{{ $book->tanggal_pembelian }}', '{{ $book->categories_id }}', '{{ $book->stok }}', '{{ $book->rak ?? '' }}', '{{ $book->kode_buku }}')"
                                                         class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                     Edit Data
+                                                </button>
+
+                                                <button type="button" 
+                                                        onclick="openKelolaModal('{{ $book->id }}')"
+                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
+                                                    Kelola data buku
                                                 </button>
                                             </div>
 
@@ -346,6 +352,12 @@
     }
     function closeEditModal() {
         document.getElementById('editModal').classList.add('hidden');
+    }
+
+    // Modal Kelola Buku (Disiapkan untuk pemicu pop-up berikutnya)
+    function openKelolaModal(bookId) {
+        console.log("Membuka modal kelola untuk ID buku:", bookId);
+        // Nanti tinggal tambahkan penanganan pemicu modal kelola di sini
     }
 
     // Menutup modal saat klik overlay luar

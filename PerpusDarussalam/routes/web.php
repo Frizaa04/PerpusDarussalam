@@ -67,7 +67,9 @@ Route::middleware(['admin'])->group(function () {
     // Laporan Utama & Laporan Detail Koleksi
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
+    Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
+
 
     // Logout Admin Legacy
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
