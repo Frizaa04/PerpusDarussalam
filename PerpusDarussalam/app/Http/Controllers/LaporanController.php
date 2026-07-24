@@ -56,7 +56,7 @@ class LaporanController extends Controller
         // Query Statistik Koleksi
         $totalKoleksi        = Book::sum('stok') ?? 0;
         $totalJudulBukuFisik = Book::count() ?? 0;
-        $totalEbook          = 0; // Sesuaikan jika ada model Ebook terpisah
+        $totalEbook          = 0; 
         $totalStokBukuFisik  = Book::sum('stok') ?? 0;
 
         // Filter stok buku berdasarkan nama kategori via relasi 'categories'
@@ -95,7 +95,7 @@ class LaporanController extends Controller
         // Query Statistik Anggota
         $totalAnggota = User::count() ?? 0;
         
-        // Sesuaikan kolom 'jenis_kelamin' dan 'role' sesuai struktur tabel users kamu
+        // Sesuaikan kolom 'jenis_kelamin' dan 'role' sesuai struktur tabel users
         $lakiLaki  = User::where('jenis_kelamin', 'L')->count() ?? 0;
         $perempuan = User::where('jenis_kelamin', 'P')->count() ?? 0;
         

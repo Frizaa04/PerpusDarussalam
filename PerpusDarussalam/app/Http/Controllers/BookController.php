@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Category;
-use App\Models\BookItem; // Jangan lupa import model BookItem
+use App\Models\BookItem; 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB; // Import DB untuk transaction
+use Illuminate\Support\Facades\DB; 
 
 class BookController extends Controller
 {
@@ -47,7 +47,7 @@ class BookController extends Controller
             'stok'      => 'required|numeric|min:1',
             'deskripsi' => 'nullable|string',
             'rak'       => 'nullable|string',
-            'cover'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'cover'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $category = Category::where('nama', $request->kategori)->first();
@@ -60,7 +60,7 @@ class BookController extends Controller
 
         return DB::transaction(function () use ($request, $category, $categoryId, $coverPath) {
             
-            // 1. Buat format kode buku yang rapi dan terstruktur
+            // Buat format kode buku yang rapi dan terstruktur
             // Contoh hasil: FIK-2026-001 (Kategori - Tahun Terbit - Nomor Urut)
             $kategoriSingkatan = $category ? strtoupper(substr($category->nama, 0, 3)) : 'UMM';
             $tahun = $request->tahun_terbit ?? date('Y');
@@ -71,10 +71,10 @@ class BookController extends Controller
             
             $kodeBukuRapi = $kategoriSingkatan . '-' . $tahun . '-' . $nomorUrut;
 
-            // 2. Simpan data buku utama
+            // Simpan data buku utama
             $book = Book::create([
                 'categories_id'     => $categoryId,
-                'kode_buku'         => $kodeBukuRapi, // Menggunakan kode baru yang rapi
+                'kode_buku'         => $kodeBukuRapi, 
                 'judul'             => $request->judul,
                 'penulis'           => $request->penulis ?? 'Anonim',
                 'penerbit'          => $request->penerbit ?? 'Umum',
@@ -87,7 +87,7 @@ class BookController extends Controller
                 'cover'             => $coverPath,
             ]);
 
-            // 3. Otomatis generate eksemplar fisik ke tabel book_items berdasarkan stok
+            // Otomatis generate eksemplar fisik ke tabel book_items berdasarkan stok
             for ($i = 1; $i <= $request->stok; $i++) {
                 BookItem::create([
                     'book_id'          => $book->id,

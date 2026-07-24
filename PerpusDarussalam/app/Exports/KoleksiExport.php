@@ -29,12 +29,12 @@ class KoleksiExport implements FromArray, WithStyles, ShouldAutoSize
         $data = [];
 
         // ================= TABEL KOLEKSI =================
-        // 1. Header Buku
+        // Header Buku
         $data[] = ['ID Buku', 'Judul Buku', 'Stok', 'Kategori', 'Tanggal Dibuat'];
 
-        // 2. Data Buku
+        // Data Buku
         $books = Book::with('categories')->get();
-        $this->jumlahBuku = $books->count(); // Simpan jumlah buku untuk menghitung posisi baris Excel nanti
+        $this->jumlahBuku = $books->count();
 
         foreach ($books as $book) {
             $categories = $book->categories->pluck('nama')->implode(', ');
@@ -48,16 +48,16 @@ class KoleksiExport implements FromArray, WithStyles, ShouldAutoSize
         }
 
         // ================= PEMISAH =================
-        // 3. Tambahkan 2 baris kosong agar tabel tidak menempel
+        // Menambahkan 2 baris kosong agar tabel tidak menempel
         $data[] = ['', '', '', '', ''];
         $data[] = ['', '', '', '', ''];
 
 
         // ================= TABEL PEMINJAMAN =================
-        // 4. Header Peminjaman
+        // Header Peminjaman
         $data[] = ['ID Peminjaman', 'Nama Peminjam', 'Judul Buku', 'Status', 'Tanggal Pinjam'];
 
-        // 5. Data Peminjaman
+        // Data Peminjaman
         $borrowings = Borrowing::with(['user', 'bookItem'])->get();
         $this->jumlahPeminjaman = $borrowings->count();
 
@@ -76,11 +76,15 @@ class KoleksiExport implements FromArray, WithStyles, ShouldAutoSize
 
     public function styles(Worksheet $sheet)
     {
-        // Menentukan di baris ke berapa header peminjaman berada
-        // Rumus: 1 (Header Buku) + Jumlah Buku + 2 (Baris Kosong) + 1 (Header Peminjaman)
+        /* Menentukan di baris ke berapa header peminjaman berada
+         * Rumus: 1 (Header Buku) + Jumlah Buku + 2 (Baris Kosong) + 1 (Header Peminjaman) */
         $barisHeaderPeminjaman = 1 + $this->jumlahBuku + 2 + 1;
 
-        // Pengaturan Gaya Tabel (Background Hijau & Teks Putih Bold)
+        /*
+        Pengaturan tabel
+        - Background tabel untuk header berwarna hijau
+        - Border bagian luar berwarna hitam
+        */
         $styleHeaderHijau = [
             'font' => ['bold' => true, 'color' => ['argb' => Color::COLOR_WHITE]],
             'fill' => [
@@ -95,13 +99,13 @@ class KoleksiExport implements FromArray, WithStyles, ShouldAutoSize
             ],
         ];
 
-        // 1. Terapkan warna hijau ke Header Buku (Baris 1 dari kolom A sampai E)
+        // Terapkan warna hijau ke Header Buku (Baris 1 dari kolom A sampai E)
         $sheet->getStyle('A1:E1')->applyFromArray($styleHeaderHijau);
 
-        // 2. Terapkan warna hijau ke Header Peminjaman
+        // Terapkan warna hijau ke Header Peminjaman
         $sheet->getStyle('A' . $barisHeaderPeminjaman . ':E' . $barisHeaderPeminjaman)->applyFromArray($styleHeaderHijau);
 
-        // (Opsional) Tambahkan border hitam tipis untuk semua baris isi data agar lebih rapi
+        // Tambahkan border hitam tipis untuk semua baris isi data agar lebih rapi
         $sheet->getStyle('A2:E' . (1 + $this->jumlahBuku))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         
         $barisAkhirPeminjaman = $barisHeaderPeminjaman + $this->jumlahPeminjaman;

@@ -9,8 +9,8 @@ class MemberController extends Controller
 {
     public function index(Request $request)
     {
+    // Menampilkan seluruh data anggota dan fitur pencarian anggota
         $search = $request->query('search');
-
         $query = User::query();
 
         if ($search) {
@@ -29,7 +29,7 @@ class MemberController extends Controller
 
     public function update(Request $request)
     {
-        // 1. Validasi input
+        // Validasi input
         $request->validate([
             'id'   => 'required|exists:users,id',
             'nis'  => 'nullable|string',
@@ -37,10 +37,10 @@ class MemberController extends Controller
             'role' => 'required|string'
         ]);
 
-        // 2. Cari user berdasarkan ID
+        // Cari user berdasarkan ID
         $user = User::findOrFail($request->id);
         
-        // 3. Simpan perubahan
+        // Simpan perubahan
         $user->update([
             'nis'  => $request->nis,
             'name' => $request->name,

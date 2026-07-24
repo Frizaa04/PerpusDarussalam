@@ -12,7 +12,7 @@ class Borrowing extends Model
 
     protected $fillable = [
         'user_id',
-        'book_item_id', // Diubah dari book_id menjadi book_item_id
+        'book_item_id',
         'tanggal_pinjam',
         'tanggal_jatuh_tempo',
         'tanggal_kembali',
