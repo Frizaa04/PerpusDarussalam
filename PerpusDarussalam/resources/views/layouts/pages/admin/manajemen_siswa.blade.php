@@ -35,6 +35,7 @@
                             <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                 <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Nama</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Kelamin</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Peran</th>
                                 <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
                             </tr>
@@ -46,6 +47,7 @@
                                         {{ $student->nis ?? $student->nip ?? $student->nik ?? '-' }}
                                     </td>
                                     <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
+                                    <td class="p-3 text-sm font-bold text-white/90">{{ $student->jenis_kelamin ?? '-' }}</td>
                                     <td class="p-3 text-sm font-bold text-white/90">{{ ucfirst($student->role ?? 'Siswa') }}</td>
                                     <td class="p-3 text-sm text-center">
                                         <!-- Tombol Pemicu Modal Pop-up -->

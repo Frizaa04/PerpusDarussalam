@@ -68,6 +68,8 @@
                                     <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
                                     <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
                                     <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
+                                    <!-- Kolom Rak Baru -->
+                                    <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
                                     <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
                                     <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
                                 </tr>
@@ -88,12 +90,16 @@
                                         <td class="p-3 text-sm text-white/90">
                                             {{ $book->categories->first()->nama ?? ($book->kategori ?? '-') }}
                                         </td>
+                                        <!-- Data Rak -->
+                                        <td class="p-3 text-sm font-bold text-white/90">
+                                            {{ $book->rak ?? '-' }}
+                                        </td>
                                         <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
                                         <td class="p-3 text-sm text-center">
                                             <!-- Mode Normal: Tombol Edit Data & Kelola -->
                                             <div class="edit-mode-action flex items-center justify-center gap-2">
                                                 <button type="button" 
-                                                        onclick="openEditModal('{{ $book->id }}', '{{ $book->judul }}', '{{ $book->penulis }}', '{{ $book->penerbit }}', '{{ $book->deskripsi ?? '' }}', '{{ $book->isbn }}', '{{ $book->tanggal_pembelian }}', '{{ $book->categories_id }}', '{{ $book->stok }}', '{{ $book->rak ?? '' }}', '{{ $book->kode_buku }}')"
+                                                        onclick="openEditModal('{{ $book->id }}', '{{ $book->judul }}', '{{ $book->penulis }}', '{{ $book->penerbit }}', '{{ $book->deskripsi ?? '' }}', '{{ $book->isbn }}', '{{ $book->tanggal_pembelian }}', '{{ $book->categories_id }}', '{{ $book->stok }}', '{{ $book->rak ?? '' }}', '{{ $book->kode_buku }}', '{{ $book->tahun_terbit }}')"
                                                         class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                     Edit Data
                                                 </button>
@@ -113,7 +119,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="p-5 text-center text-sm font-semibold text-white/80">Data buku tidak ditemukan.</td>
+                                        <td colspan="6" class="p-5 text-center text-sm font-semibold text-white/80">Data buku tidak ditemukan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -156,12 +162,10 @@
             
             <!-- Form Grid 2 Kolom -->
             <div class="grid grid-cols-2 gap-4">
-                <!-- Kolom Kiri -->
                 <div>
                     <label class="block text-sm font-semibold mb-1">Cover</label>
                     <input type="file" name="cover" class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                 </div>
-                <!-- Kolom Kanan -->
                 <div>
                     <label class="block text-sm font-semibold mb-1">ISBN</label>
                     <input type="text" name="isbn" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
