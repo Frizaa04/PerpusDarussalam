@@ -24,7 +24,6 @@
             </div>
         </header>
 
-        <!-- Area Konten -->
         <div class="p-8 space-y-6">
             
             <!-- Filter Tanggal/Hari (Kotak Tanggal Atas) -->
@@ -38,7 +37,7 @@
                 <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold transition">19</a>
             </div>
 
-            <!-- Form Input untuk Barcode Scanner -->
+            <!-- Input untuk Barcode Scanner -->
             <form action="{{ route('absen.store') }}" method="POST" class="mb-4">
                 @csrf
                 <div class="flex items-center gap-2">

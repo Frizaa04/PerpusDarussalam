@@ -22,7 +22,7 @@ class LaporanController extends Controller
 
         $totalKoleksi = Book::sum('stok') ?? 0;
         $totalAnggota = User::count() ?? 0;
-        $pengunjung   = visits::whereDate('created_at', $selectedDate)->count();
+        $pengunjung   = visits::whereDate('visited_at', $selectedDate)->count();
         $bukuBaru     = Book::whereDate('created_at', $selectedDate)->count();
         $peminjaman   = Borrowing::whereDate('created_at', $selectedDate)->count();
         $pengembalian = Borrowing::where('status', 'dikembalikan')
@@ -121,6 +121,57 @@ class LaporanController extends Controller
     }
 
     /**
+     * Halaman Laporan Detail Pengunjung
+     */
+    public function pengunjung(Request $request)
+    {
+        $selectedDate = $request->query('date') ? Carbon::parse($request->query('date')) : today();
+
+        // Query visits berdasarkan tanggal visited_at
+        $visitsQuery = visits::whereDate('visited_at', $selectedDate);
+
+        // Total Pengunjung
+        $totalPengunjung = (clone $visitsQuery)->count();
+
+        // Hitung statistik berdasarkan data user terhubung
+        $lakiLaki = (clone $visitsQuery)->whereHas('user', function ($q) {
+            $q->where('jenis_kelamin', 'L');
+        })->count();
+
+        $perempuan = (clone $visitsQuery)->whereHas('user', function ($q) {
+            $q->where('jenis_kelamin', 'P');
+        })->count();
+
+        $siswa = (clone $visitsQuery)->whereHas('user', function ($q) {
+            $q->where('role', 'siswa');
+        })->count();
+
+        $guru = (clone $visitsQuery)->whereHas('user', function ($q) {
+            $q->where('role', 'guru');
+        })->count();
+
+        $umum = (clone $visitsQuery)->whereHas('user', function ($q) {
+            $q->where('role', 'umum');
+        })->count();
+
+        $dates = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = today()->subDays($i);
+            $dates[] = [
+                'day'       => $date->format('d'),
+                'full_date' => $date->format('Y-m-d'),
+                'is_active' => $date->isSameDay($selectedDate),
+            ];
+        }
+
+        return view('layouts.pages.admin.laporan_pengunjung', compact(
+            'totalPengunjung', 'lakiLaki', 'perempuan',
+            'siswa', 'guru', 'umum',
+            'dates', 'selectedDate'
+        ));
+    }
+
+    /**
      * Export Laporan Koleksi ke Excel
      */
     public function exportExcel(Request $request)
@@ -129,5 +180,19 @@ class LaporanController extends Controller
         $namaFile = 'Laporan_Koleksi_' . $tanggal . '.xlsx';
 
         return Excel::download(new KoleksiExport($tanggal), $namaFile);
+    }
+
+    /**
+     * Export Laporan Pengunjung ke Excel
+     */
+    public function exportPengunjungExcel(Request $request)
+    {
+        $tanggal = $request->query('date', today()->format('Y-m-d'));
+        $namaFile = 'Laporan_Pengunjung_' . $tanggal . '.xlsx';
+
+        // Jika nanti sudah membuat class PengunjungExport:
+        // return Excel::download(new \App\Exports\PengunjungExport($tanggal), $namaFile);
+
+        return back()->with('info', 'Fitur export pengunjung sedang disiapkan.');
     }
 }

@@ -19,7 +19,7 @@
         <div class="p-8 space-y-8">
             <h1 class="text-2xl font-bold text-[#004d40] tracking-wide">Selamat Datang, ADMIN BESAR</h1>
 
-            <!-- Statistik -->
+            <!-- Statistik card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Pengunjung hari ini</h3>

@@ -8,7 +8,7 @@
 
     <main class="flex-1 flex flex-col">
 
-        <!-- Header Atas (Disesuaikan dengan Foto 2/5: Lonceng + LogOut) -->
+        <!-- Header Atas  -->
         <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center gap-4 shadow-sm h-20">
             <button type="button" class="text-gray-600 hover:text-[#004d40] transition">
                 <span class="material-icons text-2xl">notifications</span>
@@ -27,7 +27,7 @@
         <!-- Area Konten -->
         <div class="p-8 space-y-6">
             
-            <!-- Baris Pencarian & Tombol Buku Baru -->
+            <!-- Pencarian & Tombol Buku Baru -->
             <div class="flex items-center gap-4">
                 <div class="max-w-md w-full">
                     <form action="{{ route('book.index') }}" method="GET" class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
@@ -38,7 +38,7 @@
                     </form>
                 </div>
 
-                <!-- Tombol + Buku Baru (Pemicu Modal Tambah Buku Foto 4) -->
+                <!-- Tombol dan Buku Baru -->
                 <button type="button" onclick="openAddModal()" class="border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded bg-white hover:bg-[#004d40] hover:text-white transition shadow-sm">
                     + Buku Baru
                 </button>
@@ -54,7 +54,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar Buku</h2>
                         
-                        <!-- Toggle Mode Hapus Buku (Sesuai Foto 2 & Foto 5) -->
+                        <!-- Mode Hapus Buku -->
                         <div class="flex items-center gap-2">
                             <label for="toggleDeleteMode" class="text-white font-bold text-sm select-none cursor-pointer">Hapus Buku</label>
                             <input type="checkbox" id="toggleDeleteMode" onchange="toggleDeleteMode(this)" class="w-5 h-5 rounded accent-[#004d40] cursor-pointer">
@@ -105,7 +105,7 @@
                                                 </button>
                                             </div>
 
-                                            <!-- Mode Hapus: Kotak Pilihan/Checkbox (Foto 5) -->
+                                            <!-- Mode Hapus: Kotak Pilihan/Checkbox  -->
                                             <div class="delete-mode-action hidden flex justify-center">
                                                 <input type="checkbox" name="book_ids[]" value="{{ $book->id }}" class="w-5 h-5 accent-[#004d40] cursor-pointer rounded border-2 border-white">
                                             </div>
@@ -141,10 +141,10 @@
     </main>
 </div>
 
-<!-- ================= POP-UP MODAL TAMBAH BUKU (FOTO 4) ================= -->
+<!-- ====== POP-UP MODAL TAMBAH BUKU ====== -->
 <div id="addModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
     <div class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-xl p-6 relative border border-emerald-400/30">
-        <!-- Tombol Close (X) -->
+        <!-- Tombol Close -->
         <button type="button" onclick="closeAddModal()" class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
             &#10005;
         </button>
@@ -223,10 +223,10 @@
     </div>
 </div>
 
-<!-- ================= POP-UP MODAL EDIT BUKU (FOTO 3) ================= -->
+<!-- ====== POP-UP MODAL EDIT BUKU ====== -->
 <div id="editModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
     <div class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-xl p-6 relative border border-emerald-400/30">
-        <!-- Tombol Close (X) -->
+        <!-- Tombol Close -->
         <button type="button" onclick="closeEditModal()" class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
             &#10005;
         </button>
@@ -240,7 +240,7 @@
             <input type="hidden" id="editBookId" name="id">
             <input type="hidden" id="editKodeBuku" name="kode_buku">
 
-            <!-- Form Grid 2 Kolom -->
+            <!-- Grid 2 Kolom -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-semibold mb-1">Cover</label>
@@ -308,7 +308,7 @@
 
 <!-- SCRIPT JS KONTROL MODAL & FITUR HAPUS -->
 <script>
-    // Toggle Mode Hapus / Checkbox Aksi
+    // Mode Hapus / Checkbox Aksi
     function toggleDeleteMode(checkbox) {
         const editActions = document.querySelectorAll('.edit-mode-action');
         const deleteActions = document.querySelectorAll('.delete-mode-action');
@@ -333,7 +333,7 @@
         document.getElementById('addModal').classList.add('hidden');
     }
 
-    // Modal Edit Buku
+    // Modal Edit Data
     function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku, tahunTerbit) {
         document.getElementById('editBookId').value = id;
         document.getElementById('editJudul').value = judul;
@@ -354,10 +354,9 @@
         document.getElementById('editModal').classList.add('hidden');
     }
 
-    // Modal Kelola Buku (Disiapkan untuk pemicu pop-up berikutnya)
+    // Modal Kelola Buku 
     function openKelolaModal(bookId) {
-        console.log("Membuka modal kelola untuk ID buku:", bookId);
-        // Nanti tinggal tambahkan penanganan pemicu modal kelola di sini
+        console.log("Membuka modal kelola untuk ID buku:", bookId);      
     }
 
     // Menutup modal saat klik overlay luar

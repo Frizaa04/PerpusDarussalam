@@ -34,7 +34,7 @@
             </div>
         </header>
 
-        <!-- Area Isi Konten Laporan -->
+        <!-- Area Isi Laporan -->
         <div class="p-8 space-y-8">
             
             <!-- Bilah Navigasi Tanggal & Tombol Aksi -->
@@ -50,7 +50,7 @@
                         @endforeach
                     </div>
 
-                    <!-- Picker Kalender Modal -->
+                    <!-- Picker Kalender -->
                     <form action="{{ route('laporan.anggota') }}" method="GET" class="flex items-center">
                         <label for="date-picker" class="cursor-pointer bg-[#004d40] text-white p-2.5 rounded hover:bg-[#003d30] transition shadow" title="Pilih Tanggal Lain">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
                     </form>
                 </div>
 
-                <!-- Bagian Kanan: Tombol Kembali & Cetak Laporan (Sesuaian Tampilan Foto 1) -->
+                <!-- Bagian Kanan: Tombol Kembali & Cetak Laporan -->
                 <div class="flex items-center gap-3">
                     <a href="{{ route('laporan.index') }}" class="inline-flex items-center gap-2 bg-[#004d40] text-white px-4 py-2.5 rounded font-bold hover:bg-[#003d30] transition shadow text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

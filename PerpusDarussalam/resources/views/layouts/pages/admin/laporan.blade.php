@@ -8,12 +8,12 @@
     <!-- Sidebar Navigasi -->
     @include('layouts.sidebar')
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col">
         
         <!-- Header Atas: Notifikasi, Logout, & Logo Darussalam -->
         <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20 gap-4">
-            <!-- Icon Lonceng Notifikasi -->
+            <!-- Icon Lonceng -->
             <button class="text-[#004d40] hover:opacity-80 transition" title="Notifikasi">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
@@ -37,7 +37,7 @@
         <!-- Area Isi Konten Laporan -->
         <div class="p-8 space-y-8">
             
-            <!-- Bilah Navigasi Tanggal -->
+            <!-- Navigasi Tanggal -->
             <div class="flex items-center gap-3">
                 <div class="inline-flex bg-[#004d40] rounded border border-[#004d40] overflow-hidden shadow-sm">
                     @foreach($dates as $d)
@@ -48,7 +48,7 @@
                     @endforeach
                 </div>
 
-                <!-- Picker Kalender Modal -->
+                <!-- Picker Kalender -->
                 <form action="{{ route('laporan.index') }}" method="GET" class="flex items-center">
                     <label for="date-picker" class="cursor-pointer bg-[#004d40] text-white p-2.5 rounded hover:bg-[#003d30] transition shadow" title="Pilih Tanggal Lain">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,29 +65,26 @@
             <!-- Grid 6 Card Statistik Laporan -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <!-- Card 1: Total Koleksi (Warna Hijau + Mengembang Saat Hover) -->
+                <!-- Card 1: Total Koleksi -->
                 <a href="{{ route('laporan.koleksi') }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Koleksi</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $totalKoleksi }}</p>
                 </a>
 
-                <!-- Card 2: Total Anggota (Bisa Diklik + Hover Warna + Mengembang) -->
+                <!-- Card 2: Total Anggota -->
                 <a href="{{ route('laporan.anggota') }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Anggota</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $totalAnggota }}</p>
                 </a>
 
                 <!-- Card 3: Pengunjung -->
-                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
-                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Pengunjung</h3>
+                <a href="{{ route('laporan.pengunjung', ['date' => $selectedDate->format('Y-m-d')]) }}" 
+                class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center transition-all duration-300 transform hover:scale-105 hover:bg-[#004d40] hover:shadow-lg cursor-pointer block">
+                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Absensi</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $pengunjung }}</p>
-                </div>
+                </a>
 
-                <!-- Card 4: Buku Baru -->
-                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
-                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Buku Baru</h3>
-                    <p class="text-4xl font-extrabold mt-4">{{ $bukuBaru }}</p>
-                </div>
+ 
 
                 <!-- Card 5: Peminjaman -->
                 <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">

@@ -46,15 +46,15 @@
             </a>
 
             <!-- Menu E-Book -->
-            <a href="#" 
-               class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition hover:bg-[#004d40]">
+            <a href="{{ route('ebook.index') }}" 
+               class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition {{ Route::is('ebook.index') ? 'bg-[#003d33] shadow-sm' : 'hover:bg-[#004d40]' }}">
                 <span class="material-icons text-xl">turned_in_not</span> 
                 <span class="tracking-wider text-sm uppercase">E-Book</span>
             </a>
 
             <!-- Menu Laporan -->
             <a href="{{ route('laporan.index') }}" 
-               class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition {{ Route::is('laporan.index') ? 'bg-[#003d33] shadow-sm' : 'hover:bg-[#004d40]' }}">
+               class="flex items-center gap-4 px-4 py-3.5 rounded font-bold text-white transition {{ Route::is('laporan.index') || Route::is('laporan.*') ? 'bg-[#003d33] shadow-sm' : 'hover:bg-[#004d40]' }}">
                 <span class="material-icons text-xl">insert_drive_file</span> 
                 <span class="tracking-wider text-sm uppercase">Laporan</span>
             </a>

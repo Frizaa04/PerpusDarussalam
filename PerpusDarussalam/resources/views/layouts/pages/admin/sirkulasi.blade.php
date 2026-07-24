@@ -24,7 +24,7 @@
             </div>
         </header>
 
-        <!-- Area Konten Sirkulasi -->
+        <!-- Area Sirkulasi -->
         <div class="p-8 space-y-6">
             
             <!-- Baris Pencarian & Tombol Peminjaman Baru -->
@@ -54,7 +54,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-white tracking-wide">Sirkulasi Peminjaman & Pengembalian</h2>
                     
-                    <!-- Checkbox Peminjaman Telat -->
+                    <!-- box Peminjaman Telat -->
                     <form id="lateFilterForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center gap-2 text-white font-medium text-sm">
                         @if($search)
                             <input type="hidden" name="search" value="{{ $search }}">
@@ -73,7 +73,7 @@
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul Buku</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Status</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Tanggal Pinjam</th>
-                                <th class="p-3 text-sm font-bold tracking-wider">Tanggal Jatuh Tempo</th> <!-- KOLOM BARU -->
+                                <th class="p-3 text-sm font-bold tracking-wider">Tanggal Jatuh Tempo</th> 
                                 <th class="p-3 text-sm font-bold tracking-wider">Tanggal Kembali</th>
                                 <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
                             </tr>
@@ -93,7 +93,7 @@
                                 <td class="p-3 text-sm text-center">
                                     @if($item->status != 'Selesai' && $item->status != 'dikembalikan')
                                         <div class="flex justify-center items-center gap-1">
-                                            <!-- Tombol Batalkan / Hapus -->
+                                            <!-- Tombol Batalkan -->
                                             <form action="{{ route('circulation.cancel', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan peminjaman ini?')">
                                                 @csrf
                                                 <button type="submit" class="bg-red-600 text-white p-1 rounded hover:bg-red-700 transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow" title="Batalkan">
@@ -101,7 +101,7 @@
                                                 </button>
                                             </form>
 
-                                            <!-- Tombol Selesai / Dikembalikan -->
+                                            <!-- Tombol Selesai -->
                                             <form action="{{ route('circulation.return', $item->id) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" class="bg-[#004d40] text-white p-1 rounded hover:bg-[#003d30] transition flex items-center justify-center w-6 h-6 text-xs font-bold shadow" title="Selesai / Dikembalikan">
@@ -136,7 +136,7 @@
     </main>
 </div>
 
-<!-- ================= POP-UP MODAL PEMINJAMAN BARU ================= -->
+<!-- ====== POP-UP MODAL PEMINJAMAN BARU ====== -->
 <div id="borrowModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
     <div class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-xs p-5 relative border border-emerald-400/30">
         
@@ -221,7 +221,7 @@
         if (inputIdentitas) {
             inputIdentitas.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault(); // Mencegah form submit otomatis
+                    e.preventDefault(); 
                     let nomor = this.value.trim();
 
                     if (nomor.length > 0) {
@@ -246,13 +246,10 @@
             });
         }
 
-        // 2. (Opsional) Jika ingin memastikan input buku langsung fokus setelah modal siap
         if (inputBookItem) {
             inputBookItem.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    // Jika butuh validasi instan kode inventaris bisa ditambahkan di sini,
-                    // atau dibiarkan agar langsung siap disubmit.
                 }
             });
         }
