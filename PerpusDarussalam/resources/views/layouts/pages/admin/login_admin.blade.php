@@ -11,7 +11,7 @@
 
     <div class="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-700">
         
-        <!-- Header Admin Card -->
+        <!-- Admin Panel -->
         <div class="bg-[#0f172a] px-8 py-6 text-center text-white border-b border-slate-700">
             <div class="flex justify-center mb-3">
                 <div class="p-3 bg-emerald-600/20 rounded-full text-emerald-400">
@@ -22,7 +22,7 @@
             <p class="text-xs text-slate-400 tracking-widest uppercase mt-1">Perpustakaan Madrasah Darussalam</p>
         </div>
 
-        <!-- Form Login Admin -->
+        <!-- Login Admin -->
         <div class="p-8 space-y-6 bg-slate-50">
 
             @if($errors->any())

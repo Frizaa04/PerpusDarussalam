@@ -72,7 +72,7 @@
 <!-- POP-UP MODAL EDIT DATA USER -->
 <div id="editModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
     <div class="bg-[#00695c] text-white rounded-lg shadow-2xl w-full max-w-sm p-6 relative border border-emerald-400/30">
-        <!-- Tombol Close (X) -->
+        <!-- Tombol Close -->
         <button type="button" onclick="closeEditModal()" class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
             &#10005;
         </button>
@@ -90,7 +90,6 @@
 
             <div>
                 <label class="block text-sm font-semibold mb-1 text-emerald-100">NIS</label>
-                <!-- Atribut readonly sudah dihapus agar NIS bisa diubah -->
                 <input type="text" id="modalNis" name="nis" required class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-2 rounded outline-none focus:ring-2 focus:ring-white border border-white/20">
             </div>
 

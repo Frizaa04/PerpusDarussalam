@@ -25,7 +25,7 @@
         <!-- Form Login -->
         <div class="p-8 space-y-6">
 
-            <!-- Alert Notifikasi Error -->
+            <!-- Notifikasi Error -->
             @if($errors->any())
                 <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded text-sm">
                     {{ $errors->first() }}

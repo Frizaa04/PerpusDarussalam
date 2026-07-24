@@ -7,6 +7,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CirculationController; 
 use App\Http\Controllers\AbsenController; 
 use App\Http\Controllers\LaporanController; 
+use App\Http\Controllers\EbookController; 
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 
@@ -15,9 +16,9 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// ==========================================
+
 // AUTHENTICATION USER (Pemustaka)
-// ==========================================
+
 Route::middleware('guest')->group(function () {
     Route::get('/user/login', [UserAuthController::class, 'showLoginForm'])->name('user.login');
     Route::post('/user/login', [UserAuthController::class, 'login'])->name('user.login.post');
@@ -25,9 +26,8 @@ Route::middleware('guest')->group(function () {
 Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
 
-// ==========================================
 // AUTHENTICATION ADMIN
-// ==========================================
+
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
@@ -36,9 +36,8 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
 
-// ==========================================
-// ROUTE DASHBOARD ADMIN (Diberi Middleware Admin)
-// ==========================================
+// ROUTE DASHBOARD ADMIN 
+
 Route::middleware(['admin'])->group(function () {
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -64,12 +63,18 @@ Route::middleware(['admin'])->group(function () {
     // Absen / Kunjungan (Admin view)
     Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 
-    // Laporan Utama & Laporan Detail Koleksi
+    // E-Book
+    Route::get('/e-book', [EbookController::class, 'index'])->name('ebook.index');
+
+    // Laporan Utama & Detail Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
     Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
+    Route::get('/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
+    
+    // Route Export Excel
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
-
+    Route::get('/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
 
     // Logout Admin Legacy
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
