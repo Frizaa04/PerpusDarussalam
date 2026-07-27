@@ -1,34 +1,37 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CirculationController; 
 use App\Http\Controllers\AbsenController; 
 use App\Http\Controllers\LaporanController; 
+use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\EbookController; 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 
-// Halaman Awal
+// Halaman Awal (Public)
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-
 // AUTHENTICATION USER (Pemustaka)
-
 Route::middleware('guest')->group(function () {
     Route::get('/user/login', [UserAuthController::class, 'showLoginForm'])->name('user.login');
     Route::post('/user/login', [UserAuthController::class, 'login'])->name('user.login.post');
 });
-Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
+// BERANDA & LOGOUT USER (Hanya Bisa Diakses Setelah Login)
+Route::middleware('auth')->group(function () {
+    Route::get('/home', [UserController::class, 'index'])->name('user.home');
+    Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
+});
 
 // AUTHENTICATION ADMIN
-
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
@@ -38,7 +41,6 @@ Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
 
 // ROUTE DASHBOARD ADMIN 
-
 Route::middleware(['admin'])->group(function () {
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -61,9 +63,6 @@ Route::middleware(['admin'])->group(function () {
     // API Cek Anggota Otomatis (AJAX untuk form peminjaman baru)
     Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisNip']);
 
-    // Absen / Kunjungan (Admin view)
-    Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
-
     // E-Book
     Route::get('/e-book', [EbookController::class, 'index'])->name('ebook.index');
 
@@ -73,6 +72,9 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
     Route::get('/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
     
+    // Laporan Keuangan
+    Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
+
     // Route Export Excel
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
     Route::get('/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');

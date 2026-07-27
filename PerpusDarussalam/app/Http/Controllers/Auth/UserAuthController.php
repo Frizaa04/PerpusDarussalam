@@ -8,40 +8,48 @@ use Illuminate\Support\Facades\Auth;
 
 class UserAuthController extends Controller
 {
-    // Menampilkan halaman form login user
     public function showLoginForm()
     {
+        // Jalur disesuaikan dengan folder layouts/pages/users/login_users.blade.php
         return view('layouts.pages.users.login_users');
     }
 
-    // Proses autentikasi/login
     public function login(Request $request)
     {
-        // Validasi input (bisa menggunakan Email atau NIS/NIP/NIK)
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $loginInput = $request->input('username');
+        $password = $request->input('password');
+
+        // Deteksi apakah input berupa email atau field kredensial lainnya (nis / nik / username)
+        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $fieldType => $loginInput,
+            'password'  => $password,
+        ];
+
+        if (Auth::guard('web')->attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Redirect ke halaman welcome/utama perpustakaan setelah berhasil login
-            return redirect()->route('welcome')->with('success', 'Selamat datang, ' . Auth::user()->name);
+            return redirect()->intended(route('user.home'));
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->onlyInput('email');
+            'username' => 'Kredensial yang dimasukkan tidak sesuai.',
+        ])->onlyInput('username');
     }
 
-    // Proses Logout User
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('user.login')->with('success', 'Anda telah keluar.');
+        return redirect()->route('user.login');
     }
 }
