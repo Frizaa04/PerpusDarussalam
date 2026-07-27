@@ -84,18 +84,10 @@
                     <p class="text-4xl font-extrabold mt-4">{{ $pengunjung }}</p>
                 </a>
 
- 
-
-                <!-- Card 5: Peminjaman -->
+                <!-- Card 4: Peminjaman -->
                 <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Peminjaman</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $peminjaman }}</p>
-                </div>
-
-                <!-- Card 6: Pengembalian -->
-                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
-                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Pengembalian</h3>
-                    <p class="text-4xl font-extrabold mt-4">{{ $pengembalian }}</p>
                 </div>
 
             </div>

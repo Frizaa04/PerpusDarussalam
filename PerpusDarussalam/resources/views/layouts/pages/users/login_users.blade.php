@@ -41,14 +41,14 @@
             <form action="{{ route('user.login.post') }}" method="POST" class="space-y-5">
                 @csrf
 
-                <!-- Input Email -->
+                <!-- Input Username / Email / NIK / NIS -->
                 <div>
-                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Email / NIK / NIS</label>
+                    <label for="username" class="block text-sm font-semibold text-gray-700 mb-1">Email / NIK / NIS</label>
                     <div class="relative">
                         <span class="material-icons absolute left-3 top-2.5 text-gray-400 text-xl">email</span>
-                        <input type="email" name="email" id="email" required value="{{ old('email') }}"
+                        <input type="text" name="username" id="username" required value="{{ old('username') }}"
                             class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#00695c] focus:border-[#00695c] outline-none text-sm transition"
-                            placeholder="masukkan email anda...">
+                            placeholder="masukkan email / NIK / NIS anda...">
                     </div>
                 </div>
 
