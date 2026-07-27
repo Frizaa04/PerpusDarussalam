@@ -34,16 +34,19 @@
         <!-- Body Area -->
         <div class="p-8 space-y-6">
             
-            <!-- Filter & Action Bar -->
-            <div class="flex items-center justify-between gap-4">
-                <div class="flex items-center w-full max-w-md">
-                    <input type="text" placeholder="Cari Data E-Book..." class="w-full px-4 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-1 focus:ring-[#004d40] text-sm">
-                    <button class="bg-[#004d40] text-white px-4 py-2 rounded-r hover:bg-[#003d30] transition flex items-center justify-center">
-                        <span class="material-icons text-lg">search</span>
-                    </button>
+            <!-- Pencarian & Tombol E-Book Baru -->
+            <div class="flex items-center gap-4 mb-6">
+                <div class="max-w-md w-full">
+                    <form action="{{ route('ebook.index') }}" method="GET" class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
+                        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari Data E-Book..." class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400 text-sm">
+                        <button type="submit" class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
+                            <span class="material-icons">search</span>
+                        </button>
+                    </form>
                 </div>
 
-                <button class="bg-white border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded hover:bg-[#004d40] hover:text-white transition text-sm flex items-center gap-1 shadow-sm">
+                <!-- Tombol E-Book Baru -->
+                <button type="button" onclick="openAddEbookModal()" class="border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded bg-white hover:bg-[#004d40] hover:text-white transition shadow-sm text-sm whitespace-nowrap">
                     + E-Book Baru
                 </button>
             </div>
@@ -81,10 +84,10 @@
                                 <td class="p-3">{{ $ebook['kategori'] }}</td>
                                 <td class="p-3">{{ $ebook['tahun'] }}</td>
                                 <td class="p-3 text-center space-x-2">
-                                    <button class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#003d30] transition">
+                                    <button onclick="openEditEbookModal('{{ $ebook['id'] }}', '{{ $ebook['judul'] }}', '{{ $ebook['categories_id'] }}', '{{ $ebook['tahun_terbit'] }}')" class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#003d30] transition">
                                         Edit Data
                                     </button>
-                                    <button class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#003d30] transition">
+                                    <button onclick="window.open('{{ asset('storage/' . $ebook->file_pdf) }}', '_blank')" class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#003d30] transition">
                                         Baca PDF
                                     </button>
                                 </td>
@@ -93,17 +96,124 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination Dummy -->
-                <div class="flex justify-center items-center mt-6 gap-2">
-                    <button class="w-8 h-8 rounded bg-white text-gray-800 font-bold text-xs shadow flex items-center justify-center">1</button>
-                    <button class="w-8 h-8 rounded bg-transparent text-white font-bold text-xs hover:bg-white/20 flex items-center justify-center">2</button>
-                    <button class="w-8 h-8 rounded bg-transparent text-white font-bold text-xs hover:bg-white/20 flex items-center justify-center">3</button>
-                    <button class="w-8 h-8 rounded bg-transparent text-white font-bold text-xs hover:bg-white/20 flex items-center justify-center">&gt;</button>
-                </div>
             </div>
 
         </div>
     </main>
 </div>
-@endsection
+
+<!-- ================= MODAL TAMBAH E-BOOK ================= -->
+<div id="addEbookModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-[#004d40] rounded-xl w-full max-w-xl p-6 shadow-2xl relative text-white">
+        <button onclick="closeAddEbookModal()" class="absolute top-4 right-4 text-white hover:text-gray-200 text-xl font-bold">&times;</button>
+        
+        <h3 class="text-xl font-bold mb-6">Tambah E-Book Baru</h3>
+        
+        <form action="{{ route('ebook.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Judul E-Book</label>
+                    <input type="text" name="judul" class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Kategori</label>
+                    <select name="categories_id" class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                        <option value="">Pilih Kategori</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Tahun Terbit</label>
+                    <input type="number" name="tahun" class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">File PDF E-Book</label>
+                    <input type="file" name="file_pdf" accept=".pdf" class="w-full text-xs text-white">
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-center">
+                <button type="submit" class="bg-white text-[#004d40] px-8 py-2 rounded font-bold text-sm hover:bg-gray-100 transition shadow">
+                    Konfirmasi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= MODAL EDIT E-BOOK ================= -->
+<div id="editEbookModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-[#004d40] rounded-xl w-full max-w-xl p-6 shadow-2xl relative text-white">
+        <button onclick="closeEditEbookModal()" class="absolute top-4 right-4 text-white hover:text-gray-200 text-xl font-bold">&times;</button>
+        
+        <h3 class="text-xl font-bold mb-6">Edit Data E-Book</h3>
+        
+        <form id="formEditEbook" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Judul E-Book</label>
+                    <input type="text" id="editEbookJudul" name="judul" class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Kategori</label>
+                    <select id="editEbookKategori" name="categories_id" class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                        <option value="">Pilih Kategori</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Tahun Terbit</label>
+                    <input type="number" id="editEbookTahun" name="tahun" class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1">Ganti File PDF (Opsional)</label>
+                    <input type="file" name="file_pdf" accept=".pdf" class="w-full text-xs text-white">
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-center">
+                <button type="submit" class="bg-white text-[#004d40] px-8 py-2 rounded font-bold text-sm hover:bg-gray-100 transition shadow">
+                    Konfirmasi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Fungsi untuk membuka modal Tambah E-Book
+    function openAddEbookModal() {
+        document.getElementById('addEbookModal').classList.remove('hidden');
+    }
+
+    // Fungsi untuk menutup modal Tambah E-Book
+    function closeAddEbookModal() {
+        document.getElementById('addEbookModal').classList.add('hidden');
+    }
+
+    function openEditEbookModal(id, judul, categoriesId, tahun) {
+        document.getElementById('editEbookJudul').value = judul;
+        document.getElementById('editEbookKategori').value = categoriesId;
+        document.getElementById('editEbookTahun').value = tahun;
+
+        // Mengatur action route update dinamis berdasarkan ID
+        document.getElementById('formEditEbook').action = '/e-book/' + id;
+
+        document.getElementById('editEbookModal').classList.remove('hidden');
+    }
+    function closeEditEbookModal() {
+        document.getElementById('editEbookModal').classList.add('hidden');
+    }
+
+    function bacaPdf(url) {
+        window.open(url, '_blank');
+    }
+</script>
