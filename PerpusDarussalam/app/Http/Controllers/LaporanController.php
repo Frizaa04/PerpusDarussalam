@@ -9,6 +9,8 @@ use App\Models\visits;
 use App\Models\Borrowing;
 use Carbon\Carbon;
 use App\Exports\KoleksiExport;
+use App\Exports\AnggotaExport;
+use App\Imports\AnggotaImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanController extends Controller
@@ -180,6 +182,28 @@ class LaporanController extends Controller
         $namaFile = 'Laporan_Koleksi_' . $tanggal . '.xlsx';
 
         return Excel::download(new KoleksiExport($tanggal), $namaFile);
+    }
+
+    public function exportAnggota()
+{
+    return Excel::download(new AnggotaExport, 'Laporan_Anggota_' . date('Y-m-d') . '.xlsx');
+}
+
+    /**
+     * Method untuk memproses import Excel Anggota
+     */
+    public function importAnggota(Request $request)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new AnggotaImport, $request->file('file_excel'));
+            return redirect()->back()->with('success', 'Data anggota berhasil di-import!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal meng-import data: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -77,7 +77,10 @@ Route::middleware(['admin'])->group(function () {
 
     // Route Export Excel
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
-    Route::get('/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
+    Route::get('/laporan/anggota/export', [LaporanController::class, 'exportAnggota'])->name('laporan.anggota.export');
+
+    // Route Import Excel
+    Route::post('/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
 
     // Route untuk Notifikasi
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
