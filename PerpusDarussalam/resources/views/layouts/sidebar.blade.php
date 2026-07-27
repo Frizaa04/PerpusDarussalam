@@ -37,8 +37,8 @@
         </a>
 
         <!-- TRANSAKSI -->
-        <a href="#" 
-           class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all hover:bg-white/10 opacity-90 hover:opacity-100">
+        <a href="{{ route('transaction.index') }}" 
+           class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all {{ request()->routeIs('transaction.*') ? 'bg-[#003d30] border-l-4 border-white' : 'hover:bg-white/10 opacity-90 hover:opacity-100' }}">
             <span class="material-icons text-xl mr-4 min-w-[24px]">edit</span>
             <span class="whitespace-nowrap uppercase">TRANSAKSI</span>
         </a>

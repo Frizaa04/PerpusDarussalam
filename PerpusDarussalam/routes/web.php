@@ -13,6 +13,8 @@ use App\Http\Controllers\EbookController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
+// Import Controller Transaksi
+use App\Http\Controllers\TransaksiController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -63,6 +65,13 @@ Route::middleware(['admin'])->group(function () {
     // API Cek Anggota Otomatis (AJAX untuk form peminjaman baru)
     Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisNip']);
 
+    // --- Halaman Transaksi Keuangan ---
+    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaction.index');
+    Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaction.store');
+    Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaction.edit');
+    Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaction.update');
+    Route::delete('/transaksi/bulk-delete', [TransaksiController::class, 'bulkDestroy'])->name('transaction.destroy.bulk');
+
     // E-Book
     Route::get('/e-book', [EbookController::class, 'index'])->name('ebook.index');
 
@@ -77,7 +86,8 @@ Route::middleware(['admin'])->group(function () {
 
     // Route Export Excel
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
-    Route::get('/laporan/anggota/export', [LaporanController::class, 'exportAnggota'])->name('laporan.anggota.export');
+    Route::get('/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
+    Route::get('/laporan/anggota/export', [LaporanController::class, 'exportAnggotaExcel'])->name('laporan.anggota.export');
 
     // Route Import Excel
     Route::post('/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
