@@ -74,12 +74,15 @@ Route::middleware(['admin'])->group(function () {
 
     // E-Book
     Route::get('/e-book', [EbookController::class, 'index'])->name('ebook.index');
+    Route::post('/e-book/store', [EbookController::class, 'store'])->name('ebook.store');
+    Route::put('/e-book/update/{id}', [EbookController::class, 'update'])->name('ebook.update');
+    Route::delete('/e-book/delete/{id}', [EbookController::class, 'destroy'])->name('ebook.destroy');
 
     // Laporan Utama & Detail Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
     Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
-    Route::get('/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
+    Route::get('/laporan/pengunjung/', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
     
     // Laporan Keuangan
     Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
