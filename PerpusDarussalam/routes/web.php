@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\BookItemController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -54,6 +55,12 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
     Route::post('/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
     Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
+
+    // Edit perbuku
+    Route::get('/book/{id}/items', [BookItemController::class, 'getItems']);
+    Route::post('/book/item/store', [BookItemController::class, 'store'])->name('book.item.store');
+    Route::put('/book/item/{id}', [BookItemController::class, 'update'])->name('book.item.update');
+    Route::delete('/book/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
 
     // Sirkulasi
     Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');

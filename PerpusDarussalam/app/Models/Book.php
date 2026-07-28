@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Book extends Model
@@ -20,6 +21,13 @@ class Book extends Model
         'rak',
         'cover',
     ];
+
+    protected function stok(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => $this->bookItems()->count(),
+        );
+    }
 
     public function borrowings()
     {
