@@ -79,9 +79,12 @@
                             </tr>
                         </thead>
                         <tbody class="text-white divide-y divide-white/40">
-                        @forelse($circulations as $index => $item)
+                        @forelse($circulations as $item)
                             <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                <td class="p-3 text-sm font-bold text-center text-white/90">{{ $index + 1 }}</td>
+                                <!-- Penomoran Dinamis Mengikut Halaman Paginasi -->
+                                <td class="p-3 text-sm font-bold text-center text-white/90">
+                                    {{ ($circulations->currentPage() - 1) * $circulations->perPage() + $loop->iteration }}
+                                </td>
                                 <td class="p-3 text-sm font-bold text-white/90">{{ $item->identitas }}</td>
                                 <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
                                 <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">
@@ -123,13 +126,53 @@
                     </table>
                 </div>
 
-                <!-- Navigasi Paginasi -->
-                <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold">
-                    <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">1</span>
-                    <a href="#" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">2</a>
-                    <a href="#" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">3</a>
-                    <a href="#" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
-                </div>
+                <!-- Navigasi Paginasi Custom Tailwind Hijau -->
+                @if ($circulations->hasPages())
+                    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+                        <!-- Informasi Jumlah Data -->
+                        <div class="text-sm font-semibold">
+                            Menampilkan <span class="font-bold">{{ $circulations->firstItem() }}</span> hingga <span class="font-bold">{{ $circulations->lastItem() }}</span> dari <span class="font-bold">{{ $circulations->total() }}</span> data
+                        </div>
+
+                        <!-- Tombol Halaman -->
+                        <div class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            {{-- Tombol Sebelumnya (Previous) --}}
+                            @if ($circulations->onFirstPage())
+                                <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#004d40] bg-[#004d40]/40 text-white/50 cursor-not-allowed text-sm font-medium">
+                                    &lsaquo;
+                                </span>
+                            @else
+                                <a href="{{ $circulations->previousPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
+                                    &lsaquo;
+                                </a>
+                            @endif
+
+                            {{-- Angka-angka Halaman --}}
+                            @foreach ($circulations->getUrlRange(1, $circulations->lastPage()) as $page => $url)
+                                @if ($page == $circulations->currentPage())
+                                    <span aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 border border-[#004d40] bg-[#004d40] text-white font-bold text-sm">
+                                        {{ $page }}
+                                    </span>
+                                @else
+                                    <a href="{{ $url }}" class="relative inline-flex items-center px-4 py-2 border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
+                                        {{ $page }}
+                                    </a>
+                                @endif
+                            @endforeach
+
+                            {{-- Tombol Selanjutnya (Next) --}}
+                            @if ($circulations->hasMorePages())
+                                <a href="{{ $circulations->nextPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
+                                    &rsaquo;
+                                </a>
+                            @else
+                                <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#004d40] bg-[#004d40]/40 text-white/50 cursor-not-allowed text-sm font-medium">
+                                    &rsaquo;
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
             </div>
         </div>
@@ -194,7 +237,6 @@
 <script>
     function openBorrowModal() {
         document.getElementById('borrowModal').classList.remove('hidden');
-        // Fokuskan otomatis ke input kartu perpus saat modal dibuka
         setTimeout(() => {
             document.getElementById('inputScanKartu').focus();
         }, 100);
@@ -211,13 +253,11 @@
         }
     }
 
-    // Logika Scan Barcode Kartu & Buku
     document.addEventListener('DOMContentLoaded', function () {
         const inputIdentitas = document.getElementById('inputScanKartu');
         const inputNama = document.getElementById('inputNama');
         const inputBookItem = document.getElementById('inputScanBuku');
 
-        // 1. Saat Barcode Kartu Anggota di-scan (diakhiri tombol Enter dari scanner)
         if (inputIdentitas) {
             inputIdentitas.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
@@ -230,7 +270,6 @@
                             .then(data => {
                                 if (data.success) {
                                     inputNama.value = data.name;
-                                    // Pindahkan fokus secara otomatis ke input scan buku setelah kartu berhasil
                                     if (inputBookItem) {
                                         inputBookItem.focus();
                                     }

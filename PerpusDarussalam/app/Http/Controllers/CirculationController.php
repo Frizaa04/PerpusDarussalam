@@ -11,10 +11,9 @@ use App\Services\NotificationService;
 
 class CirculationController extends Controller
 {
-    public function index(Request $request,NotificationService $notificationService)
+    public function index(Request $request, NotificationService $notificationService)
     {
-        $notificationService
-            ->generateLateNotifications();
+        $notificationService->generateLateNotifications();
 
         $search = $request->query('search');
         $lateOnly = $request->query('late');
@@ -29,7 +28,7 @@ class CirculationController extends Controller
                               ->orWhere('nis', 'LIKE', "%{$search}%")
                               ->orWhere('nip', 'LIKE', "%{$search}%")
                               ->orWhere('nik', 'LIKE', "%{$search}%");
-                                    })
+                })
                 ->orWhereHas('bookItem.book', function($bookQuery) use ($search) {
                     $bookQuery->where('judul', 'LIKE', "%{$search}%");
                 })
@@ -45,9 +44,8 @@ class CirculationController extends Controller
                          ->where('tanggal_jatuh_tempo', '<', now());
         }
 
-        $dbCirculations = $queryBuilder->latest()->get();
-
-        $circulations = $dbCirculations->map(function ($item) {
+        // --- UBAH DARI ->get() MENJADI ->paginate(10) DENGAN through() ---
+        $circulations = $queryBuilder->latest()->paginate(10)->through(function ($item) {
             $status = $item->status ?? 'Peminjaman';
             if ($item->status === 'dipinjam' && Carbon::parse($item->tanggal_jatuh_tempo)->isPast()) {
                 $status = 'Telat';
@@ -70,35 +68,35 @@ class CirculationController extends Controller
             ];
         });
 
+        // Pertahankan query string pencarian saat berpindah halaman
+        $circulations->appends($request->all());
+
         return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search', 'lateOnly'));
     }
 
     public function store(Request $request, BorrowingService $service)
-{
-    $request->validate([
-        'identitas' => 'required',
-        'book_item_id' => 'required',
-        'tanggal_pinjam' => 'nullable|date',
-    ]);
+    {
+        $request->validate([
+            'identitas' => 'required',
+            'book_item_id' => 'required',
+            'tanggal_pinjam' => 'nullable|date',
+        ]);
 
-    try {
+        try {
+            $service->borrow($request->all());
 
-        $service->borrow($request->all());
+            return redirect()
+                ->route('circulation.index')
+                ->with('success', 'Peminjaman berhasil.');
 
-        return redirect()
-            ->route('circulation.index')
-            ->with('success', 'Peminjaman berhasil.');
-
-    } catch (\Exception $e) {
-
-        return back()
-            ->withErrors([
-                'error' => $e->getMessage()
-            ])
-            ->withInput();
-
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors([
+                    'error' => $e->getMessage()
+                ])
+                ->withInput();
+        }
     }
-}
 
     public function getUserByNikNisNip($nomor)
     {

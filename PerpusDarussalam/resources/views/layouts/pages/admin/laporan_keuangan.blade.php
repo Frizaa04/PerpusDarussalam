@@ -52,7 +52,7 @@
 
                 <hr class="border-t-2 border-[#004d40]">
 
-                <!-- Grid Card Ringkasan (Gaya & Style disamakan persis seperti Laporan Biasa) -->
+                <!-- Grid Card Ringkasan -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
                     <!-- Card 1: Pembuatan Kartu -->
@@ -69,7 +69,7 @@
                         <p class="text-4xl font-extrabold mt-4">{{ $kehilanganKartuCount }}</p>
                     </a>
 
-                    <!-- Card 3: Keterlambatan Buku -->
+                    <!-- Card 3: Keterlambatan Buku (Terhubung ke Transaksi denda_keterlambatan) -->
                     <a href="{{ route('laporan.keuangan', ['date' => $selectedDate, 'category' => 'denda_keterlambatan']) }}" 
                        class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Keterlambatan Buku</h3>
@@ -132,7 +132,7 @@
                         @elseif($category === 'kehilangan_kartu')
                             Tabel Daftar Transaksi Kehilangan Kartu
                         @else
-                            Tabel Daftar Denda Keterlambatan
+                            Tabel Daftar Transaksi Keterlambatan Buku
                         @endif
                     </h2>
 
@@ -142,12 +142,6 @@
                                 <tr class="bg-[#004d40] text-white divide-x divide-white/30">
                                     <th class="p-3 text-sm font-bold">No</th>
                                     <th class="p-3 text-sm font-bold">Nama</th>
-
-                                    @if($category === 'denda_keterlambatan')
-                                        <th class="p-3 text-sm font-bold">Judul Buku</th>
-                                        <th class="p-3 text-sm font-bold">Jumlah Hari</th>
-                                    @endif
-
                                     <th class="p-3 text-sm font-bold">Nominal</th>
                                     <th class="p-3 text-sm font-bold">Tanggal</th>
                                     <th class="p-3 text-sm font-bold">Keterangan</th>
@@ -162,43 +156,20 @@
                                         <td class="p-3 text-sm font-medium">
                                             {{ $item->user->name ?? 'Pemustaka' }}
                                         </td>
-
-                                        @if($category === 'denda_keterlambatan')
-                                            <td class="p-3 text-sm font-medium">
-                                                {{ $item->bookItem->book->title ?? '-' }}
-                                            </td>
-                                            <td class="p-3 text-sm font-medium">
-                                                @php
-                                                    $due  = \Carbon\Carbon::parse($item->tanggal_jatuh_tempo);
-                                                    $ret  = $item->tanggal_kembali ? \Carbon\Carbon::parse($item->tanggal_kembali) : \Carbon\Carbon::now();
-                                                    $days = $due->diffInDays($ret, false);
-                                                    $days = $days > 0 ? $days : 1;
-                                                @endphp
-                                                {{ $days }} Hari
-                                            </td>
-                                            <td class="p-3 text-sm font-medium">
-                                                Rp. {{ number_format($days * 20000, 0, ',', '.') }}
-                                            </td>
-                                            <td class="p-3 text-sm font-medium">
-                                                {{ \Carbon\Carbon::parse($item->tanggal_kembali ?? now())->format('d/m/Y') }}
-                                            </td>
-                                        @else
-                                            <td class="p-3 text-sm font-medium">
-                                                Rp. {{ number_format($item->nominal, 0, ',', '.') }}
-                                            </td>
-                                            <td class="p-3 text-sm font-medium">
-                                                {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}
-                                            </td>
-                                        @endif
-
+                                        <td class="p-3 text-sm font-medium">
+                                            Rp. {{ number_format($item->nominal, 0, ',', '.') }}
+                                        </td>
+                                        <td class="p-3 text-sm font-medium">
+                                            {{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}
+                                        </td>
                                         <td class="p-3 text-sm font-medium italic">
                                             {{ $item->keterangan ?? '...' }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $category === 'denda_keterlambatan' ? 7 : 5 }}" class="p-6 text-center text-sm font-semibold text-white/90">
-                                            Belum ada data transaksi/denda untuk tanggal ini.
+                                        <td colspan="5" class="p-6 text-center text-sm font-semibold text-white/90">
+                                            Belum ada data transaksi untuk tanggal ini.
                                         </td>
                                     </tr>
                                 @endforelse

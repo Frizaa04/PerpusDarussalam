@@ -2,111 +2,151 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Transaction; 
+use App\Models\Transaction;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
 {
+    /**
+     * Menampilkan daftar transaksi dengan pencarian dan paginasi.
+     */
     public function index(Request $request)
     {
-        // Mendapatkan query pencarian
-        $search = $request->query('search');
-        
-        // Membangun query dasar dengan eager loading 'user' untuk performa
+        $search = $request->input('search');
+
         $query = Transaction::with('user');
 
-        // Jika ada pencarian, filter berdasarkan nama user atau jenis transaksi
+        // Fitur Pencarian
         if ($search) {
-            $query->where(function($q) use ($search) {
-                // Cari berdasarkan nama user yang berelasi
-                $q->whereHas('user', function($userQuery) use ($search) {
-                    $userQuery->where('name', 'LIKE', "%{$search}%");
-                })
-                // Atau cari berdasarkan jenis transaksi (enum)
-                ->orWhere('jenis', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('jenis', 'like', "%{$search}%")
+                  ->orWhere('keterangan', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($u) use ($search) {
+                      $u->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                        // Hilangkan tanda komentar (//) di bawah ini jika menggunakan kolom nis/nip pada tabel users:
+                        // ->orWhere('nis', 'like', "%{$search}%")
+                        // ->orWhere('nip', 'like', "%{$search}%");
+                  });
             });
         }
 
-        // Urutkan berdasarkan tanggal terbaru dan gunakan paginasi
+        // Urutkan berdasarkan tanggal terbaru & gunakan paginasi (10 data per halaman)
         $transactions = $query->orderBy('tanggal', 'desc')->paginate(10);
 
-        // Map data enum menjadi teks yang mudah dibaca untuk tampilan
-        $transactions->getCollection()->transform(function ($transaction) {
-            $labels = [
-                'pembuatan_kartu' => 'Pembuatan Kartu',
-                'kehilangan_kartu' => 'Kehilangan Kartu',
-                'denda_keterlambatan' => 'Denda Keterlambatan',
-            ];
-            $transaction->jenis_label = $labels[$transaction->jenis] ?? $transaction->jenis;
-            return $transaction;
-        });
+        // Pertahankan parameter search saat ganti halaman paginasi
+        $transactions->appends($request->all());
 
         return view('layouts.pages.admin.transaksi', compact('transactions', 'search'));
     }
 
+    /**
+     * Menyimpan data transaksi baru ke database.
+     */
     public function store(Request $request)
     {
-        // 1. Validasi Input sesuai atribut form
+        // Validasi Input
         $request->validate([
-            'no_identitas' => 'required',
-            'nominal'      => 'required|numeric',
-            'jenis'        => 'required',
-            'tanggal'      => 'required',
-            'keterangan'   => 'nullable|string',
+            'no_identitas' => 'nullable|string|max:255',
+            'nominal'      => 'required|numeric|min:0',
+            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan',
+            'tanggal'      => 'required|date',
+            'keterangan'   => 'nullable|string|max:255',
         ]);
 
-        // 2. Cari User berdasarkan No Identitas (NIS/NIP/NIK)
-        $user = User::where('nis', $request->no_identitas)
-                    ->orWhere('nip', $request->no_identitas)
-                    ->orWhere('nik', $request->no_identitas)
-                    ->first();
+        $userId = null;
 
-        // 3. Normalisasi nilai Enum agar sesuai dengan database ('pembuatan_kartu', dll)
-        $jenisMapping = [
-            'Pembuatan Kartu'     => 'pembuatan_kartu',
-            'Kehilangan Kartu'    => 'kehilangan_kartu',
-            'Denda Keterlambatan' => 'denda_keterlambatan',
-            'pembuatan_kartu'     => 'pembuatan_kartu',
-            'kehilangan_kartu'    => 'kehilangan_kartu',
-            'denda_keterlambatan' => 'denda_keterlambatan',
-        ];
+        // Jika No Identitas diisi, cari user yang cocok di database
+        if ($request->filled('no_identitas')) {
+            $identitas = trim($request->no_identitas);
 
-        $jenisFormatted = $jenisMapping[$request->jenis] ?? $request->jenis;
+            $user = User::where('id', $identitas)
+                        ->orWhere('email', $identitas)
+                        // Hilangkan tanda komentar (//) pada baris berikut sesuai nama kolom di tabel users kamu:
+                        // ->orWhere('nis', $identitas)
+                        // ->orWhere('nip', $identitas)
+                        // ->orWhere('no_identitas', $identitas)
+                        // ->orWhere('username', $identitas)
+                        ->first();
 
-        // 4. Konversi format tanggal ke YYYY-MM-DD
-        try {
-            $tanggalFormatted = Carbon::parse($request->tanggal)->format('Y-m-d');
-        } catch (\Exception $e) {
-            $tanggalFormatted = now()->format('Y-m-d');
+            if ($user) {
+                $userId = $user->id;
+            }
         }
 
-        // 5. Simpan Data ke Database
+        // Simpan Data Transaksi
         Transaction::create([
-            'user_id'    => $user ? $user->id : null,
-            'jenis'      => $jenisFormatted,
+            'user_id'    => $userId,
+            'jenis'      => $request->jenis,
             'nominal'    => $request->nominal,
+            'tanggal'    => $request->tanggal,
             'keterangan' => $request->keterangan,
-            'tanggal'    => $tanggalFormatted,
         ]);
 
-        return redirect()->back()->with('success', 'Transaksi berhasil disimpan!');
+        return redirect()->route('transaction.index')->with('success', 'Transaksi berhasil ditambahkan!');
     }
 
-    public function bulkDestroy(Request $request)
+    /**
+     * Memperbarui data transaksi di database.
+     */
+    public function update(Request $request, $id)
     {
-        // Validasi input array
+        $transaction = Transaction::findOrFail($id);
+
+        // Validasi Input
         $request->validate([
-            'ids'   => 'required|array',
-            'ids.*' => 'exists:transactions,id',
-        ], [
-            'ids.required' => 'Pilih minimal satu data transaksi yang ingin dihapus.'
+            'no_identitas' => 'nullable|string|max:255',
+            'nominal'      => 'required|numeric|min:0',
+            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan',
+            'tanggal'      => 'required|date',
+            'keterangan'   => 'nullable|string|max:255',
         ]);
 
-        // Proses hapus masal berdasarkan ID
-        Transaction::whereIn('id', $request->ids)->delete();
+        $userId = null;
 
-        return redirect()->back()->with('success', 'Data transaksi yang dipilih berhasil dihapus!');
+        if ($request->filled('no_identitas')) {
+            $identitas = trim($request->no_identitas);
+
+            $user = User::where('id', $identitas)
+                        ->orWhere('email', $identitas)
+                        // ->orWhere('nis', $identitas)
+                        // ->orWhere('nip', $identitas)
+                        // ->orWhere('no_identitas', $identitas)
+                        ->first();
+
+            if ($user) {
+                $userId = $user->id;
+            }
+        }
+
+        // Update Data Transaksi
+        $transaction->update([
+            'user_id'    => $userId,
+            'jenis'      => $request->jenis,
+            'nominal'    => $request->nominal,
+            'tanggal'    => $request->tanggal,
+            'keterangan' => $request->keterangan,
+        ]);
+
+        return redirect()->route('transaction.index')->with('success', 'Data transaksi berhasil diperbarui!');
+    }
+
+    /**
+     * Menghapus satu atau beberapa data transaksi secara masal (Bulk Delete).
+     */
+    public function destroyBulk(Request $request)
+    {
+        $ids = $request->input('ids');
+
+        if (!$ids || !is_array($ids) || count($ids) === 0) {
+            return redirect()->route('transaction.index')->withErrors(['Pilih minimal satu data transaksi untuk dihapus.']);
+        }
+
+        // Hapus data transaksi berdasarkan array ID yang dicentang
+        Transaction::whereIn('id', $ids)->delete();
+
+        return redirect()->route('transaction.index')->with('success', count($ids) . ' data transaksi berhasil dihapus!');
     }
 }

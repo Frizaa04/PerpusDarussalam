@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaction;
-use App\Models\Borrowing;
 use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
@@ -29,6 +28,7 @@ class LaporanKeuanganController extends Controller
         }
 
         // 3. Menghitung JUMLAH ORANG / TRANSAKSI untuk Card Utama
+        // Keterlambatan buku juga mengambil count dari tabel transactions
         $pembuatanKartuCount = Transaction::where('jenis', 'pembuatan_kartu')
             ->whereDate('tanggal', $selectedDate)
             ->count();
@@ -37,52 +37,31 @@ class LaporanKeuanganController extends Controller
             ->whereDate('tanggal', $selectedDate)
             ->count();
 
-        $keterlambatanBukuCount = Borrowing::where('status', 'terlambat')
-            ->whereDate('tanggal_kembali', $selectedDate)
+        $keterlambatanBukuCount = Transaction::where('jenis', 'denda_keterlambatan')
+            ->whereDate('tanggal', $selectedDate)
             ->count();
 
         // 4. Data Detail & Total Nominal ketika Card Di-klik
         $dataList = null;
         $totalCategory = 0;
 
-        if ($category === 'pembuatan_kartu' || $category === 'kehilangan_kartu') {
+        if ($category) {
             $query = Transaction::with('user')
                 ->where('jenis', $category)
                 ->whereDate('tanggal', $selectedDate);
 
+            // Filter pencarian nama user
             if ($search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'LIKE', "%{$search}%");
                 });
             }
 
+            // Hitung total nominal untuk kategori terpilih
             $totalCategory = (clone $query)->sum('nominal');
-            $dataList      = $query->orderBy('tanggal', 'desc')->paginate(10);
 
-        } elseif ($category === 'denda_keterlambatan') {
-            $query = Borrowing::with(['user', 'bookItem.book'])
-                ->where('status', 'terlambat')
-                ->whereDate('tanggal_kembali', $selectedDate);
-
-            if ($search) {
-                $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'LIKE', "%{$search}%");
-                });
-            }
-
-            // Hitung total nominal denda untuk kategori ini
-            $totalCategory = Borrowing::where('status', 'terlambat')
-                ->whereDate('tanggal_kembali', $selectedDate)
-                ->get()
-                ->sum(function ($b) {
-                    $due  = Carbon::parse($b->tanggal_jatuh_tempo);
-                    $ret  = $b->tanggal_kembali ? Carbon::parse($b->tanggal_kembali) : Carbon::now();
-                    $days = $due->diffInDays($ret, false);
-                    $days = $days > 0 ? $days : 1;
-                    return $days * 20000;
-                });
-
-            $dataList = $query->orderBy('tanggal_kembali', 'desc')->paginate(10);
+            // Ambil data transaksi beserta paginasi
+            $dataList = $query->orderBy('tanggal', 'desc')->paginate(10);
         }
 
         return view('layouts.pages.admin.laporan_keuangan', compact(
