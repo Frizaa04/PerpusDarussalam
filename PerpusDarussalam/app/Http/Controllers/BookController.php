@@ -80,14 +80,24 @@ class BookController extends Controller
             ->with('success', 'Data buku dan inventaris berhasil diperbarui!');
     }
 
-    public function destroy($id, BookService $bookService)
+    public function destroyMultiple(Request $request, BookService $bookService)
     {
-        $book = Book::findOrFail($id);
+        $ids = $request->ids;
 
-        $bookService->deleteBook($book);
+        if (!$ids || !is_array($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada buku yang dipilih untuk dihapus.');
+        }
+
+        // Ambil semua buku berdasarkan ID yang dicentang
+        $books = Book::whereIn('id', $ids)->get();
+
+        foreach ($books as $book) {
+            // Memanfaatkan service yang sudah ada untuk menghapus buku (termasuk file cover dan relasinya)
+            $bookService->deleteBook($book);
+        }
 
         return redirect()
             ->route('book.index')
-            ->with('success','Buku berhasil dihapus.');
+            ->with('success', 'Buku yang dipilih berhasil dihapus!');
     }
 }

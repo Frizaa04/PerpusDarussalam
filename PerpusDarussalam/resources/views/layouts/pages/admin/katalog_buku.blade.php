@@ -45,7 +45,7 @@
             </div>
 
             <!-- Form/Wrapper Tabel untuk Aksi Hapus Massal -->
-            <form id="deleteForm" action="#" method="POST">
+            <form id="deleteForm" action="{{ route('book.destroyMultiple') }}" method="POST">
                 @csrf
                 @method('DELETE')
 
@@ -54,10 +54,26 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar Buku</h2>
                         
-                        <!-- Mode Hapus Buku -->
+
+                        <!-- Tombol Aksi di Header (Hapus Buku & Konfirmasi Hapus Berdampingan) -->
                         <div class="flex items-center gap-2">
-                            <label for="toggleDeleteMode" class="text-white font-bold text-sm select-none cursor-pointer">Hapus Buku</label>
-                            <input type="checkbox" id="toggleDeleteMode" onchange="toggleDeleteMode(this)" class="w-5 h-5 rounded accent-[#004d40] cursor-pointer">
+                            <!-- Pengecekan Select All (Hanya muncul saat mode hapus aktif) -->
+                            <div id="selectAllContainer" class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
+                                <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)" class="w-4 h-4 accent-red-600 cursor-pointer rounded">
+                                <label for="selectAllCheckbox" class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
+                            </div>
+                            <!-- Tombol Konfirmasi Hapus (Awalnya Tersembunyi di Sebelah Kiri Tombol Hapus Buku) -->
+                            <button type="submit" id="btnConfirmDelete" onclick="return confirm('Yakin ingin menghapus buku yang dipilih?')" class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
+                                Konfirmasi Hapus
+                            </button>
+
+                            <!-- Tombol Mode Hapus -->
+                            <button type="button" id="btnToggleDelete" onclick="toggleDeleteMode()" class="bg-[#004d40] hover:bg-[#003d30] text-white font-bold px-3 py-1.5 rounded text-sm transition shadow flex items-center gap-1.5 select-none">
+                                <svg id="trashIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span>Hapus Buku</span>
+                            </button>
                         </div>
                     </div>
                     
@@ -68,7 +84,6 @@
                                     <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
                                     <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
                                     <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
-                                    <!-- Kolom Rak Baru -->
                                     <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
                                     <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
                                     <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
@@ -90,7 +105,6 @@
                                         <td class="p-3 text-sm text-white/90">
                                             {{ $book->categories->first()->nama ?? ($book->kategori ?? '-') }}
                                         </td>
-                                        <!-- Data Rak -->
                                         <td class="p-3 text-sm font-bold text-white/90">
                                             {{ $book->rak ?? '-' }}
                                         </td>
@@ -105,15 +119,16 @@
                                                 </button>
 
                                                 <button type="button" 
-                                                        onclick="openKelolaModal('{{ $book->id }}')"
+                                                        onclick="openKelolaModal('{{ $book->id }}', '{{ $book->judul }}')"
                                                         class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                     Kelola data buku
                                                 </button>
                                             </div>
 
-                                            <!-- Mode Hapus: Kotak Pilihan/Checkbox  -->
-                                            <div class="delete-mode-action hidden flex justify-center">
-                                                <input type="checkbox" name="book_ids[]" value="{{ $book->id }}" class="w-5 h-5 accent-[#004d40] cursor-pointer rounded border-2 border-white">
+                                            <!-- Mode Hapus: Checkbox di Kolom Aksi -->
+                                            <div class="delete-mode-action hidden flex items-center justify-center gap-2">
+                                                <input type="checkbox" name="ids[]" value="{{ $book->id }}" class="book-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
+                                                <span class="text-xs font-semibold text-red-200 italic">Centang untuk hapus</span>
                                             </div>
                                         </td>
                                     </tr>
@@ -124,13 +139,6 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- Tombol Konfirmasi Hapus Buku (Hanya Tampil Saat Mode Hapus Aktif) -->
-                    <div id="deleteConfirmContainer" class="hidden mt-4 text-right">
-                        <button type="submit" onclick="return confirm('Yakin ingin menghapus buku yang dipilih?')" class="bg-red-700 hover:bg-red-800 text-white font-bold px-5 py-2 rounded text-sm transition shadow-md">
-                            Konfirmasi Hapus
-                        </button>
                     </div>
 
                     <!-- Paginasi -->
@@ -310,6 +318,115 @@
     </div>
 </div>
 
+<!-- ====== POP-UP MODAL KELOLA BUKU ITEM (SATUAN/EKSEMPLAR) ====== -->
+<div id="kelolaModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+    <div class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-2xl p-6 relative border border-emerald-400/30 max-h-[90vh] overflow-y-auto">
+        <!-- Tombol Close -->
+        <button type="button" onclick="closeKelolaModal()" class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
+            &#10005;
+        </button>
+
+        <h3 class="text-xl font-bold mb-1 tracking-wide">Kelola Data Buku Item</h3>
+        <p id="kelolaBookTitle" class="text-xs text-emerald-200 mb-4 font-medium"></p>
+
+        <!-- Form Tambah Item Baru untuk Buku Ini -->
+        <form action="{{ route('book.item.store') }}" method="POST" class="bg-[#004d40] p-4 rounded-md mb-5 border border-white/25 space-y-3 shadow-inner">
+            @csrf
+            <input type="hidden" id="kelolaBookId" name="book_id">
+            <h4 class="text-sm font-bold tracking-wide border-b border-white/20 pb-1">Tambah Eksemplar / Item Baru</h4>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Nomor Inventaris</label>
+                    <input type="text" name="nomor_inventaris" placeholder="Contoh: INV-001" required class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Kondisi</label>
+                    <select name="kondisi" class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                        <option value="baik">Baik</option>
+                        <option value="rusak_ringan">Rusak Ringan</option>
+                        <option value="rusak_berat">Rusak Berat</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Status Pinjam</label>
+                    <select name="status_pinjam" class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                        <option value="tersedia">Tersedia</option>
+                        <option value="dipinjam">Dipinjam</option>
+                    </select>
+                </div>
+            </div>
+            <div class="text-right pt-1">
+                <button type="submit" class="bg-white text-[#004d40] hover:bg-emerald-50 px-4 py-1.5 rounded text-xs font-bold transition shadow">
+                    + Tambah Item
+                </button>
+            </div>
+        </form>
+
+        <!-- List / Daftar Item Eksemplar Buku -->
+        <h4 class="text-sm font-bold mb-2 tracking-wide">Pilih Eksemplar untuk Diedit / Dihapus</h4>
+        <div class="overflow-x-auto rounded border border-white/30">
+            <table class="min-w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-[#003d30] text-white border-b border-white/30">
+                        <th class="p-2.5">No. Inventaris</th>
+                        <th class="p-2.5">Kondisi</th>
+                        <th class="p-2.5">Status</th>
+                        <th class="p-2.5 text-center">Aksi (Pilih Bagian)</th>
+                    </tr>
+                </thead>
+                <tbody id="kelolaItemList" class="divide-y divide-white/20 bg-[#005a4e]">
+                    <tr>
+                        <td colspan="4" class="p-4 text-center text-white/70">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ====== SUB-MODAL EDIT ITEM SPESIFIK (MUNCUL KETIKA TOMBOL EDIT DI KLIK) ====== -->
+<div id="editItemModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[60] p-4">
+    <div class="bg-[#004d40] text-white rounded-md shadow-2xl w-full max-w-sm p-5 relative border border-white/30">
+        <button type="button" onclick="closeEditItemModal()" class="absolute top-2.5 right-3 text-white hover:text-gray-300 text-lg font-bold">
+            &#10005;
+        </button>
+
+        <h3 class="text-base font-bold mb-3 tracking-wide border-b border-white/20 pb-1">Edit Detail Eksemplar</h3>
+
+        <form id="formEditItem" method="POST" class="space-y-3 text-xs">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label class="block font-semibold mb-1">Nomor Inventaris</label>
+                <input type="text" id="editNomorInventaris" name="nomor_inventaris" required class="w-full bg-[#b0bec5] text-gray-800 font-medium px-2.5 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Kondisi</label>
+                <select id="editKondisiItem" name="kondisi" class="w-full bg-[#b0bec5] text-gray-800 font-medium px-2.5 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                    <option value="baik">Baik</option>
+                    <option value="rusak_ringan">Rusak Ringan</option>
+                    <option value="rusak_berat">Rusak Berat</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Status Pinjam</label>
+                <select id="editStatusPinjamItem" name="status_pinjam" class="w-full bg-[#b0bec5] text-gray-800 font-medium px-2.5 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                    <option value="tersedia">Tersedia</option>
+                    <option value="dipinjam">Dipinjam</option>
+                </select>
+            </div>
+
+            <div class="text-center pt-2">
+                <button type="submit" class="bg-white text-[#004d40] hover:bg-emerald-50 px-5 py-1.5 rounded font-bold transition shadow">
+                    Simpan Perubahan Item
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- SCRIPT JS KONTROL MODAL & FITUR HAPUS -->
 <script>
     // Mode Hapus / Checkbox Aksi
@@ -358,9 +475,81 @@
         document.getElementById('editModal').classList.add('hidden');
     }
 
-    // Modal Kelola Buku 
-    function openKelolaModal(bookId) {
-        console.log("Membuka modal kelola untuk ID buku:", bookId);      
+    // Membuka modal utama list item buku
+    function openKelolaModal(bookId, bookTitle) {
+        document.getElementById('kelolaBookId').value = bookId;
+        document.getElementById('kelolaBookTitle').innerText = "Judul Buku: " + bookTitle;
+        document.getElementById('kelolaModal').classList.remove('hidden');
+
+        let tbody = document.getElementById('kelolaItemList');
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>`;
+
+        // Ambil data item berdasarkan ID buku lewat endpoint
+        fetch(`/book/${bookId}/items`)
+            .then(response => response.json())
+            .then(data => {
+                tbody.innerHTML = '';
+                if(data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-white/70">Belum ada eksemplar terdaftar untuk buku ini.</td></tr>`;
+                    return;
+                }
+
+                // Render list item ke dalam tabel di dalam pop-up
+                data.forEach(item => {
+                    let badgeColor = item.status_pinjam === 'tersedia' ? 'bg-emerald-600' : 'bg-amber-600';
+                    let kondisiFormatted = item.kondisi.replace('_', ' ');
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-white/10 transition-colors">
+                            <td class="p-2.5 font-bold">${item.nomor_inventaris}</td>
+                            <td class="p-2.5 capitalize">${kondisiFormatted}</td>
+                            <td class="p-2.5 uppercase"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} text-white">${item.status_pinjam}</span></td>
+                            <td class="p-2.5 text-center space-x-1">
+                                <!-- Tombol Pilih untuk Edit Item Tertentu -->
+                                <button type="button" 
+                                    onclick="openEditItemModal(${item.id}, '${item.nomor_inventaris}', '${item.kondisi}', '${item.status_pinjam}')" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow">
+                                    Edit Bagian Ini
+                                </button>
+                                
+                                <!-- Tombol Hapus Item -->
+                                <form action="/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
+                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-300">Gagal memuat data eksemplar.</td></tr>`;
+            });
+    }
+
+    function closeKelolaModal() {
+        document.getElementById('kelolaModal').classList.add('hidden');
+    }
+
+    // Membuka sub-modal edit item spesifik yang dipilih dari list
+    function openEditItemModal(itemId, nomorInv, kondisi, statusPinjam) {
+        document.getElementById('editNomorInventaris').value = nomorInv;
+        document.getElementById('editKondisiItem').value = kondisi;
+        document.getElementById('editStatusPinjamItem').value = statusPinjam;
+        
+        // Arahkan action form update ke URL route item yang bersangkutan
+        document.getElementById('formEditItem').action = `/book/item/${itemId}`;
+        
+        // Tampilkan modal edit item kecil di atas modal kelola
+        document.getElementById('editItemModal').classList.remove('hidden');
+    }
+
+    function closeEditItemModal() {
+        document.getElementById('editItemModal').classList.add('hidden');
     }
 
     // Menutup modal saat klik overlay luar
@@ -370,5 +559,46 @@
         if (event.target === addModal) closeAddModal();
         if (event.target === editModal) closeEditModal();
     }
+
+    let isDeleteModeActive = false;
+
+    function toggleDeleteMode() {
+        isDeleteModeActive = !isDeleteModeActive;
+
+        let btnToggle = document.getElementById('btnToggleDelete');
+        let btnConfirm = document.getElementById('btnConfirmDelete');
+        let selectAllContainer = document.getElementById('selectAllContainer'); // <-- Tambahan ini
+        let editActions = document.querySelectorAll('.edit-mode-action');
+        let deleteActions = document.querySelectorAll('.delete-mode-action');
+
+        if (isDeleteModeActive) {
+            btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
+            btnToggle.classList.add('bg-red-600', 'hover:bg-red-700');
+
+            btnConfirm.classList.remove('hidden');
+            selectAllContainer.classList.remove('hidden'); // <-- Munculkan centang all
+
+            editActions.forEach(el => el.classList.add('hidden'));
+            deleteActions.forEach(el => el.classList.remove('hidden'));
+        } else {
+            btnToggle.classList.remove('bg-red-600', 'hover:bg-red-700');
+            btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
+
+            btnConfirm.classList.add('hidden');
+            selectAllContainer.classList.add('hidden'); // <-- Sembunyikan centang all
+
+            editActions.forEach(el => el.classList.remove('hidden'));
+            deleteActions.forEach(el => el.classList.add('hidden'));
+
+            document.getElementById('selectAllCheckbox').checked = false;
+            document.querySelectorAll('.book-checkbox').forEach(cb => cb.checked = false);
+        }
+    }
+    function toggleSelectAll(source) {
+    let checkboxes = document.querySelectorAll('.book-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = source.checked;
+    });
+}
 </script>
 @endsection
