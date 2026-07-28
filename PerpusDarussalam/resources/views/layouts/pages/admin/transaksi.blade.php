@@ -144,10 +144,53 @@
                         </table>
                     </div>
 
-                    <!-- Pagination Bawah -->
-                    <div class="mt-6 tx-pagination">
-                        {{ $transactions->appends(['search' => $search])->links() }}
-                    </div>
+                    <!-- Navigasi Paginasi Custom Tailwind Hijau (Tanpa Style CSS) -->
+                    @if ($transactions->hasPages())
+                        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+                            <!-- Informasi Jumlah Data -->
+                            <div class="text-sm font-semibold">
+                                Menampilkan <span class="font-bold">{{ $transactions->firstItem() }}</span> hingga <span class="font-bold">{{ $transactions->lastItem() }}</span> dari <span class="font-bold">{{ $transactions->total() }}</span> data
+                            </div>
+
+                            <!-- Tombol Halaman -->
+                            <div class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {{-- Tombol Sebelumnya (Previous) --}}
+                                @if ($transactions->onFirstPage())
+                                    <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#004d40] bg-[#004d40]/40 text-white/50 cursor-not-allowed text-sm font-medium">
+                                        &lsaquo;
+                                    </span>
+                                @else
+                                    <a href="{{ $transactions->previousPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
+                                        &lsaquo;
+                                    </a>
+                                @endif
+
+                                {{-- Angka-angka Halaman --}}
+                                @foreach ($transactions->getUrlRange(1, $transactions->lastPage()) as $page => $url)
+                                    @if ($page == $transactions->currentPage())
+                                        <span aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 border border-[#004d40] bg-[#004d40] text-white font-bold text-sm">
+                                            {{ $page }}
+                                        </span>
+                                    @else
+                                        <a href="{{ $url }}" class="relative inline-flex items-center px-4 py-2 border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
+                                            {{ $page }}
+                                        </a>
+                                    @endif
+                                @endforeach
+
+                                {{-- Tombol Selanjutnya (Next) --}}
+                                @if ($transactions->hasMorePages())
+                                    <a href="{{ $transactions->nextPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
+                                        &rsaquo;
+                                    </a>
+                                @else
+                                    <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#004d40] bg-[#004d40]/40 text-white/50 cursor-not-allowed text-sm font-medium">
+                                        &rsaquo;
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
 
                 </div>
             </form>
@@ -282,21 +325,4 @@
         }
     });
 </script>
-
-<style>
-    .tx-pagination nav p {
-        color: rgba(255, 255, 255, 0.8) !important;
-    }
-    .tx-pagination nav div:last-child span span, 
-    .tx-pagination nav div:last-child a {
-        background-color: white !important;
-        color: #004d40 !important;
-        border-color: #e5e7eb !important;
-    }
-    .tx-pagination nav div:last-child span[aria-current="page"] span {
-        background-color: #004d40 !important;
-        color: white !important;
-        border-color: #004d40 !important;
-    }
-</style>
 @endsection
