@@ -21,4 +21,19 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
+    public function getJenisLabelAttribute()
+    {
+        return match ($this->jenis) {
+            'pembuatan_kartu'    => 'Pembuatan Kartu',
+            'kehilangan_kartu'   => 'Kehilangan Kartu',
+            'denda_keterlambatan'=> 'Denda Keterlambatan',
+            default              => ucwords(str_replace('_', ' ', $this->jenis ?? '-')),
+        };
+    }
+
+    public function getFormattedNominalAttribute()
+    {
+        return 'Rp ' . number_format($this->nominal ?? 0, 0, ',', '.');
+    }
 }
