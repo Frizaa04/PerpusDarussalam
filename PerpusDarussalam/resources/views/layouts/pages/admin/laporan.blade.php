@@ -62,7 +62,7 @@
             <!-- Garis Pembatas Hijau -->
             <hr class="border-t-2 border-[#004d40]">
 
-            <!-- Grid 6 Card Statistik Laporan -->
+            <!-- Grid 4 Card Statistik Laporan -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <!-- Card 1: Total Koleksi -->
@@ -77,18 +77,19 @@
                     <p class="text-4xl font-extrabold mt-4">{{ $totalAnggota }}</p>
                 </a>
 
-                <!-- Card 3: Pengunjung -->
+                <!-- Card 3: Absensi -->
                 <a href="{{ route('laporan.pengunjung', ['date' => $selectedDate->format('Y-m-d')]) }}" 
-                class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center transition-all duration-300 transform hover:scale-105 hover:bg-[#004d40] hover:shadow-lg cursor-pointer block">
+                   class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Absensi</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $pengunjung }}</p>
                 </a>
 
-                <!-- Card 4: Peminjaman -->
-                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                <!-- Card 4: Peminjaman (Berubah Efek Hover & Mengarah ke Detail Peminjaman) -->
+                <a href="{{ route('laporan.peminjaman', ['date' => $selectedDate->format('Y-m-d')]) }}" 
+                   class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Peminjaman</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $peminjaman }}</p>
-                </div>
+                </a>
 
             </div>
 

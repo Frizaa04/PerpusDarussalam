@@ -98,4 +98,36 @@ class LaporanService
         }
         return $dates;
     }
+
+    public function getPeminjamanData(?string $dateInput): array
+    {
+        $dateInput = $dateInput ?? now()->format('Y-m-d');
+        $selectedDate = Carbon::parse($dateInput);
+
+        // Filter tanggal untuk navigasi atas
+        $dates = [];
+        for ($i = -3; $i <= 3; $i++) {
+            $d = $selectedDate->copy()->addDays($i);
+            $dates[] = [
+                'day'       => $d->format('d'),
+                'full_date' => $d->format('Y-m-d'),
+                'is_active' => $d->isSameDay($selectedDate),
+            ];
+        }
+
+        // Ambil data statistik peminjaman menggunakan kolom 'tanggal_pinjam'
+        $totalPeminjaman   = Borrowing::whereDate('tanggal_pinjam', $selectedDate)->count();
+        $sedangDipinjam    = Borrowing::whereDate('tanggal_pinjam', $selectedDate)->where('status', 'dipinjam')->count();
+        $sudahDikembalikan = Borrowing::whereDate('tanggal_pinjam', $selectedDate)->where('status', 'dikembalikan')->count();
+        $terlambat         = Borrowing::whereDate('tanggal_pinjam', $selectedDate)->where('status', 'terlambat')->count();
+
+        return compact(
+            'dates',
+            'selectedDate',
+            'totalPeminjaman',
+            'sedangDipinjam',
+            'sudahDikembalikan',
+            'terlambat'
+        );
+    }
 }

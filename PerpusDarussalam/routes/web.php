@@ -13,7 +13,6 @@ use App\Http\Controllers\EbookController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
-// Import Controller Transaksi
 use App\Http\Controllers\TransaksiController;
 
 // Halaman Awal (Public)
@@ -62,10 +61,10 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/sirkulasi/return/{id}', [CirculationController::class, 'returnBook'])->name('circulation.return');
     Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
 
-    // API Cek Anggota Otomatis (AJAX untuk form peminjaman baru)
+    // API Cek Anggota Otomatis
     Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisNip']);
 
-    // --- Halaman Transaksi Keuangan ---
+    // Halaman Transaksi Keuangan
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaction.index');
     Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaction.store');
     Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaction.edit');
@@ -82,7 +81,8 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
     Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
-    Route::get('/laporan/pengunjung/', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
+    Route::get('/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
+    Route::get('/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
     
     // Laporan Keuangan
     Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
@@ -95,7 +95,7 @@ Route::middleware(['admin'])->group(function () {
     // Route Import Excel
     Route::post('/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
 
-    // Route untuk Notifikasi
+    // Route Notifikasi
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
     Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.readAll');
