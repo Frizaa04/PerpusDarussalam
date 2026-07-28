@@ -30,6 +30,23 @@
 
         <!-- Isi Data Transaksi -->
         <div class="p-8 space-y-6">
+
+            <!-- Notifikasi Pesan Sukses / Error Validasi -->
+            @if (session('success'))
+                <div class="bg-green-600 text-white p-4 rounded shadow">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="bg-red-600 text-white p-4 rounded shadow">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             
             <!-- Baris Pencarian & Tombol Tambah -->
             <div class="flex items-center gap-3">
@@ -41,7 +58,7 @@
                     </button>
                 </form>
 
-                <!-- Tombol + Transaksi Baru (Memicu Pop-up Modal) -->
+                <!-- Tombol + Transaksi Baru -->
                 <button type="button" onclick="openModal()" class="border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded bg-white hover:bg-emerald-50 transition text-sm shadow-sm flex items-center gap-1.5 whitespace-nowrap">
                     <span class="material-icons text-lg">add</span>
                     <span>Transaksi</span>
@@ -49,22 +66,29 @@
             </div>
 
             <!-- Form Hapusan Massal / Bulk Delete -->
-            <form id="form-delete-bulk" action="#" method="POST">
+            <form id="form-delete-bulk" action="{{ route('transaction.destroy.bulk') }}" method="POST">
                 @csrf
                 @method('DELETE')
 
-                <!-- Box Tabel (Latar belakang abu-abu) -->
+                <!-- Box Tabel -->
                 <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
                     
                     <!-- Header Atas Tabel -->
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-white tracking-wide uppercase">Tabel Daftar Transaksi</h2>
                         
-                        <!-- Pilihan Hapus Transaksi + Checkbox Utama -->
-                        <label class="flex items-center gap-2 text-white font-bold cursor-pointer select-none">
-                            <span>Hapus Transaksi</span>
-                            <input type="checkbox" id="check-all" class="w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
-                        </label>
+                        <div class="flex items-center gap-3">
+                            <!-- Tombol Dynamic: Hapus Data -> Konfirmasi -->
+                            <button type="button" id="btn-toggle-delete" onclick="handleDeleteClick()" class="bg-[#004d40] text-white font-bold px-4 py-1.5 rounded hover:bg-[#003d30] transition text-sm shadow">
+                                Hapus Data
+                            </button>
+
+                            <!-- Checkbox Select All (Tersembunyi Awal) -->
+                            <label id="label-check-all" class="flex items-center gap-2 text-white font-bold cursor-pointer select-none hidden">
+                                <span>Pilih Semua</span>
+                                <input type="checkbox" id="check-all" class="w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
+                            </label>
+                        </div>
                     </div>
                     
                     <div class="overflow-x-auto rounded">
@@ -106,7 +130,8 @@
                                                 <a href="{{ route('transaction.edit', $transaction->id) }}" class="inline-block bg-[#004d40] text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-[#003d30] transition border border-white/20">
                                                     Edit Data
                                                 </a>
-                                                <input type="checkbox" name="ids[]" value="{{ $transaction->id }}" class="item-checkbox w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
+                                                <!-- Checkbox per Baris (Tersembunyi Awal) -->
+                                                <input type="checkbox" name="ids[]" value="{{ $transaction->id }}" class="item-checkbox w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer hidden">
                                             </div>
                                         </td>
                                     </tr>
@@ -132,7 +157,7 @@
 </div>
 
 <!-- ================= MODAL POP-UP TAMBAH TRANSAKSI ================= -->
-<div id="modal-transaction" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
+<div id="modal-transaction" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm {{ $errors->any() ? '' : 'hidden' }}">
     <div class="bg-[#004d40] text-white rounded-lg p-6 w-full max-w-2xl shadow-2xl relative border border-emerald-600">
         
         <!-- Header Modal & Tombol Close (X) -->
@@ -151,25 +176,25 @@
                 <!-- Kolom Kiri 1: No Identitas -->
                 <div>
                     <label class="block text-sm font-medium mb-1">No Identitas</label>
-                    <input type="text" name="user_id" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    <input type="text" name="no_identitas" value="{{ old('no_identitas') }}" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
                 </div>
 
                 <!-- Kolom Kanan 1: Nominal -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Nominal</label>
-                    <input type="number" name="nominal" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    <input type="number" name="nominal" value="{{ old('nominal') }}" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
                 </div>
 
-                <!-- Kolom Kiri 2: Nama -->
+                <!-- Kolom Kiri 2: Nama (Opsional) -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Nama</label>
-                    <input type="text" name="name" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    <input type="text" name="name" value="{{ old('name') }}" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
                 </div>
 
                 <!-- Kolom Kanan 2: Keterangan -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Keterangan</label>
-                    <input type="text" name="keterangan" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    <input type="text" name="keterangan" value="{{ old('keterangan') }}" placeholder="..." class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
                 </div>
 
                 <!-- Kolom Kiri 3: Jenis Transaksi -->
@@ -177,20 +202,20 @@
                     <label class="block text-sm font-medium mb-1">Jenis Transaksi</label>
                     <select name="jenis" class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white cursor-pointer">
                         <option value="" disabled selected>...</option>
-                        <option value="pembuatan_kartu">Pembuatan Kartu</option>
-                        <option value="kehilangan_kartu">Kehilangan Kartu</option>
-                        <option value="denda_keterlambatan">Denda Keterlambatan</option>
+                        <option value="pembuatan_kartu" {{ old('jenis') == 'pembuatan_kartu' ? 'selected' : '' }}>Pembuatan Kartu</option>
+                        <option value="kehilangan_kartu" {{ old('jenis') == 'kehilangan_kartu' ? 'selected' : '' }}>Kehilangan Kartu</option>
+                        <option value="denda_keterlambatan" {{ old('jenis') == 'denda_keterlambatan' ? 'selected' : '' }}>Denda Keterlambatan</option>
                     </select>
                 </div>
 
                 <!-- Kolom Kanan 3: Tanggal Transaksi -->
                 <div>
                     <label class="block text-sm font-medium mb-1">Tanggal Transaksi</label>
-                    <input type="date" name="tanggal" class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
                 </div>
             </div>
 
-            <!-- Tombol Konfirmasi (Tengah Bawah) -->
+            <!-- Tombol Konfirmasi Modal -->
             <div class="mt-8 flex justify-center">
                 <button type="submit" class="bg-white text-[#004d40] font-bold px-8 py-2 rounded shadow hover:bg-gray-100 transition">
                     Konfirmasi
@@ -201,8 +226,40 @@
     </div>
 </div>
 
-<!-- Script Modal & Toggle Checkbox -->
+<!-- Script Modal & Toggle Delete Mode -->
 <script>
+    let isDeleteMode = false;
+
+    function handleDeleteClick() {
+        const btn = document.getElementById('btn-toggle-delete');
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const checkAllLabel = document.getElementById('label-check-all');
+        const form = document.getElementById('form-delete-bulk');
+
+        if (!isDeleteMode) {
+            // Klik Pertama: Ubah status ke mode hapus & tampilkan checkbox
+            isDeleteMode = true;
+            btn.innerText = 'Konfirmasi';
+            btn.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
+            btn.classList.add('bg-red-600', 'hover:bg-red-700');
+
+            checkboxes.forEach(cb => cb.classList.remove('hidden'));
+            checkAllLabel.classList.remove('hidden');
+        } else {
+            // Klik Kedua: Submit Form Hapus
+            const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+            
+            if (checkedBoxes.length === 0) {
+                alert('Silakan pilih minimal satu data transaksi yang ingin dihapus.');
+                return;
+            }
+
+            if (confirm('Apakah Anda yakin ingin menghapus data yang dipilih?')) {
+                form.submit();
+            }
+        }
+    }
+
     function openModal() {
         document.getElementById('modal-transaction').classList.remove('hidden');
     }
@@ -211,6 +268,7 @@
         document.getElementById('modal-transaction').classList.add('hidden');
     }
 
+    // Toggle Select All
     document.addEventListener('DOMContentLoaded', function () {
         const checkAll = document.getElementById('check-all');
         const itemCheckboxes = document.querySelectorAll('.item-checkbox');

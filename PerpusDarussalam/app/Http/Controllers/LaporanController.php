@@ -98,6 +98,15 @@ class LaporanController extends Controller
         return Excel::download(new AnggotaExport, 'Laporan_Anggota_' . date('Y-m-d') . '.xlsx');
     }
 
+    public function peminjaman(Request $request)
+    {
+        // Panggil service untuk mengambil array data
+        $data = $this->laporanService->getPeminjamanData($request->get('date'));
+
+        // Pass array data langsung ke view
+        return view('layouts.pages.admin.laporan_peminjaman', $data);
+    }
+
 
     public function importAnggota(Request $request)
     {
