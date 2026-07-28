@@ -78,19 +78,24 @@
                         <h2 class="text-xl font-bold text-white tracking-wide uppercase">Tabel Daftar Transaksi</h2>
                         
                         <div class="flex items-center gap-3">
-                            <!-- Tombol Dynamic: Hapus Data -> Konfirmasi -->
-                            <button type="button" id="btn-toggle-delete" onclick="handleDeleteClick()" class="bg-[#004d40] text-white font-bold px-4 py-1.5 rounded hover:bg-[#003d30] transition text-sm shadow">
-                                Hapus Data
+                            <!-- 1. Tombol Konfirmasi Hapus (Awalnya Tersembunyi, Muncul saat Mode Hapus) -->
+                            <button type="button" id="btn-submit-delete" onclick="submitDeleteForm()" class="bg-red-700 text-white font-bold px-4 py-1.5 rounded hover:bg-red-800 transition text-sm shadow hidden">
+                                Konfirmasi Hapus
                             </button>
 
-                            <!-- Checkbox Select All (Tersembunyi Awal) -->
-                            <label id="label-check-all" class="flex items-center gap-2 text-white font-bold cursor-pointer select-none hidden">
+                            <!-- 2. Tombol Trigger Utama (Hijau "Hapus Data" -> Merah "Hapus Transaksi" untuk Cancel) -->
+                            <button type="button" id="btn-toggle-delete" onclick="toggleDeleteMode()" class="bg-[#004d40] text-white font-bold px-4 py-1.5 rounded hover:bg-[#003d30] transition text-sm shadow flex items-center gap-1.5">
+                                <span class="material-icons text-base">delete</span>
+                                <span id="text-btn-toggle">Hapus Data</span>
+                            </button>
+
+                            <label id="label-check-all" class="flex items-center gap-2 text-white font-bold cursor-pointer select-none hidden ml-2">
                                 <span>Pilih Semua</span>
                                 <input type="checkbox" id="check-all" class="w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="overflow-x-auto rounded">
                         <table class="min-w-full text-left border-collapse border border-white/40">
                             <thead>
@@ -117,7 +122,7 @@
                                             {{ $transaction->jenis_label }}
                                         </td>
                                         <td class="p-3 text-sm font-medium text-white/90">
-                                            Rp.{{ number_format($transaction->nominal, 0, ',', '.') }}
+                                            Rp.{{ number_format($transaction->nominal ?? 0, 0, ',', '.') }}
                                         </td>
                                         <td class="p-3 text-sm font-medium text-white/90">
                                             {{ \Carbon\Carbon::parse($transaction->tanggal)->format('d/m/Y') }}
@@ -127,11 +132,11 @@
                                         </td>
                                         <td class="p-3 text-sm font-medium text-center">
                                             <div class="flex items-center justify-center gap-3">
-                                                <a href="{{ route('transaction.edit', $transaction->id) }}" class="inline-block bg-[#004d40] text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-[#003d30] transition border border-white/20">
+                                                <a href="{{ route('transaction.edit', $transaction->id) }}" class="edit-mode-action bg-[#004d40] text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-[#003d30] transition border border-white/20">
                                                     Edit Data
                                                 </a>
                                                 <!-- Checkbox per Baris (Tersembunyi Awal) -->
-                                                <input type="checkbox" name="ids[]" value="{{ $transaction->id }}" class="item-checkbox w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer hidden">
+                                                <input type="checkbox" name="ids[]" value="{{ $transaction->id }}" class="item-checkbox delete-mode-action w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer hidden">
                                             </div>
                                         </td>
                                     </tr>
@@ -271,56 +276,70 @@
 
 <!-- Script Modal & Toggle Delete Mode -->
 <script>
-    let isDeleteMode = false;
+    let isDeleteActive = false;
 
-    function handleDeleteClick() {
-        const btn = document.getElementById('btn-toggle-delete');
-        const checkboxes = document.querySelectorAll('.item-checkbox');
-        const checkAllLabel = document.getElementById('label-check-all');
-        const form = document.getElementById('form-delete-bulk');
+    function toggleDeleteMode() {
+        const btnToggle = document.getElementById('btn-toggle-delete');
+        const textBtn = document.getElementById('text-btn-toggle');
+        const btnSubmit = document.getElementById('btn-submit-delete');
+        const editActions = document.querySelectorAll('.edit-mode-action');
+        const deleteActions = document.querySelectorAll('.delete-mode-action');
+        const labelCheckAll = document.getElementById('label-check-all');
+        const checkAll = document.getElementById('check-all');
 
-        if (!isDeleteMode) {
-            // Klik Pertama: Ubah status ke mode hapus & tampilkan checkbox
-            isDeleteMode = true;
-            btn.innerText = 'Konfirmasi';
-            btn.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
-            btn.classList.add('bg-red-600', 'hover:bg-red-700');
+        isDeleteActive = !isDeleteActive;
 
-            checkboxes.forEach(cb => cb.classList.remove('hidden'));
-            checkAllLabel.classList.remove('hidden');
+        if (isDeleteActive) {
+            btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
+            btnToggle.classList.add('bg-red-600', 'hover:bg-red-700');
+            textBtn.innerText = 'Hapus Transaksi'; // Atau 'Batal'
+
+            btnSubmit.classList.remove('hidden');
+            labelCheckAll.classList.remove('hidden');
+            deleteActions.forEach(el => el.classList.remove('hidden'));
+
+            editActions.forEach(el => el.classList.add('hidden'));
+
         } else {
-            // Klik Kedua: Submit Form Hapus
-            const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
-            
-            if (checkedBoxes.length === 0) {
-                alert('Silakan pilih minimal satu data transaksi yang ingin dihapus.');
-                return;
-            }
+            btnToggle.classList.remove('bg-red-600', 'hover:bg-red-700');
+            btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
+            textBtn.innerText = 'Hapus Data';
 
-            if (confirm('Apakah Anda yakin ingin menghapus data yang dipilih?')) {
-                form.submit();
-            }
+            btnSubmit.classList.add('hidden');
+            labelCheckAll.classList.add('hidden');
+            deleteActions.forEach(el => {
+                el.classList.add('hidden');
+                if (el.type === 'checkbox') el.checked = false;
+            });
+
+            editActions.forEach(el => el.classList.remove('hidden'));
+
+            if (checkAll) checkAll.checked = false;
         }
     }
 
-    function openModal() {
-        document.getElementById('modal-transaction').classList.remove('hidden');
+    function submitDeleteForm() {
+        const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+        const form = document.getElementById('form-delete-bulk');
+
+        if (checkedBoxes.length === 0) {
+            alert('Silakan pilih minimal satu data transaksi yang ingin dihapus.');
+            return;
+        }
+
+        if (confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} data transaksi yang dipilih?`)) {
+            form.submit();
+        }
     }
 
-    function closeModal() {
-        document.getElementById('modal-transaction').classList.add('hidden');
-    }
+    function openModal() { document.getElementById('modal-transaction').classList.remove('hidden'); }
+    function closeModal() { document.getElementById('modal-transaction').classList.add('hidden'); }
 
-    // Toggle Select All
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', () => {
         const checkAll = document.getElementById('check-all');
-        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-
         if (checkAll) {
             checkAll.addEventListener('change', function () {
-                itemCheckboxes.forEach(cb => {
-                    cb.checked = this.checked;
-                });
+                document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = this.checked);
             });
         }
     });

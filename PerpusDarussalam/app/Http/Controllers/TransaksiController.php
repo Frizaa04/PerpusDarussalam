@@ -25,7 +25,10 @@ class TransaksiController extends Controller
                   ->orWhereHas('user', function ($u) use ($search) {
                       $u->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('id', 'like', "%{$search}%");
+                        ->orWhere('id', 'like', "%{$search}%")
+                        ->orWhere('nis', 'like', "%{$search}%")
+                        ->orWhere('nip', 'like', "%{$search}%")
+                        ->orWhere('nik', 'like', "%{$search}%");
                         // Hilangkan tanda komentar (//) di bawah ini jika menggunakan kolom nis/nip pada tabel users:
                         // ->orWhere('nis', 'like', "%{$search}%")
                         // ->orWhere('nip', 'like', "%{$search}%");
@@ -64,11 +67,10 @@ class TransaksiController extends Controller
 
             $user = User::where('id', $identitas)
                         ->orWhere('email', $identitas)
-                        // Hilangkan tanda komentar (//) pada baris berikut sesuai nama kolom di tabel users kamu:
-                        // ->orWhere('nis', $identitas)
-                        // ->orWhere('nip', $identitas)
-                        // ->orWhere('no_identitas', $identitas)
-                        // ->orWhere('username', $identitas)
+                        ->orWhere('nis', $identitas)
+                        ->orWhere('nip', $identitas)
+                        ->orWhere('nik', $identitas)
+                        ->orWhere('id', $identitas)
                         ->first();
 
             if ($user) {
@@ -111,9 +113,9 @@ class TransaksiController extends Controller
 
             $user = User::where('id', $identitas)
                         ->orWhere('email', $identitas)
-                        // ->orWhere('nis', $identitas)
-                        // ->orWhere('nip', $identitas)
-                        // ->orWhere('no_identitas', $identitas)
+                        ->orWhere('nis', $identitas)
+                        ->orWhere('nip', $identitas)
+                        ->orWhere('nik', $identitas)
                         ->first();
 
             if ($user) {
@@ -136,7 +138,7 @@ class TransaksiController extends Controller
     /**
      * Menghapus satu atau beberapa data transaksi secara masal (Bulk Delete).
      */
-    public function destroyBulk(Request $request)
+    public function bulkDestroy(Request $request)
     {
         $ids = $request->input('ids');
 
