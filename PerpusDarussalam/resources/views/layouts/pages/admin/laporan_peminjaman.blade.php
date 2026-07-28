@@ -10,26 +10,6 @@
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col">
-        
-        <!-- Header Atas -->
-        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20 gap-4">
-            <button class="text-[#004d40] hover:opacity-80 transition" title="Notifikasi">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-                </svg>
-            </button>
-
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="bg-[#004d40] text-white px-4 py-1.5 rounded text-sm font-bold hover:bg-[#003d30] transition shadow">
-                    LogOut
-                </button>
-            </form>
-
-            <div class="flex items-center h-full ml-2">
-                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Madrasah Darussalam IBS" class="h-14 object-contain">
-            </div>
-        </header>
 
         <!-- Content -->
         <div class="p-8 space-y-8">

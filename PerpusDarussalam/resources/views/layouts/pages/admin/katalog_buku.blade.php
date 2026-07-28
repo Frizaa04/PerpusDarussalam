@@ -8,22 +8,6 @@
 
     <main class="flex-1 flex flex-col">
 
-        <!-- Header Atas  -->
-        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center gap-4 shadow-sm h-20">
-            <button type="button" class="text-gray-600 hover:text-[#004d40] transition">
-                <span class="material-icons text-2xl">notifications</span>
-            </button>
-            <form action="{{ route('logout') ?? '#' }}" method="POST">
-                @csrf
-                <button type="submit" class="bg-[#005a4e] hover:bg-[#004d40] text-white px-4 py-1.5 rounded font-bold text-sm tracking-wide transition shadow-sm">
-                    LogOut
-                </button>
-            </form>
-            <div class="flex items-center h-full pl-2">
-                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-14 py-1 object-contain">
-            </div>
-        </header>
-
         <!-- Area Konten -->
         <div class="p-8 space-y-6">
             
@@ -80,35 +64,51 @@
                     <div class="overflow-x-auto rounded">
                         <table class="min-w-full text-left border-collapse border border-white/40">
                             <thead>
-                                <tr class="bg-[#004d40] text-white divide-x divide-white/40">
-                                    <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
-                                    <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
-                                    <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
-                                    <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
-                                    <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
-                                    <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
-                                </tr>
-                            </thead>
+                                <thead>
+                                    <tr class="bg-[#004d40] text-white divide-x divide-white/40">
+                                        <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
+                                        <!-- KOLOM BARU -->
+                                        <th class="p-3 text-sm font-bold tracking-wider">Penulis & ISBN</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
+                                    </tr>
+                                </thead>
                             <tbody class="text-white divide-y divide-white/40">
                                 @forelse($books as $book)
                                     <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                        <td class="p-3 text-sm text-center w-16">
+                                        <td class="p-3 text-sm text-center w-20">
                                             @if($book->cover)
-                                                <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover" class="w-10 h-14 object-cover rounded border border-white/30 mx-auto">
+                                                <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover" class="w-14 h-20 object-cover rounded border border-white/30 mx-auto shadow-md">
                                             @else
-                                                <div class="w-10 h-14 bg-gray-400/50 text-[10px] text-white flex items-center justify-center rounded border border-white/30 mx-auto">
+                                                <div class="w-14 h-20 bg-gray-400/50 text-[10px] text-white flex items-center justify-center rounded border border-white/30 mx-auto shadow-md">
                                                     No Pic
                                                 </div>
                                             @endif
                                         </td>
                                         <td class="p-3 text-sm font-bold text-white/90">{{ $book->judul }}</td>
+                                        <!-- KOLOM BARU: PENULIS & ISBN -->
+                                        <td class="p-3 text-sm text-white/90">
+                                            <div class="font-semibold">{{ $book->penulis }}</div>
+                                            <div class="text-xs text-white/70 mt-0.5">ISBN: {{ $book->isbn }}</div>
+                                        </td>
+
+                                        <!-- KATEGORI -->
                                         <td class="p-3 text-sm text-white/90">
                                             {{ $book->categories->first()->nama ?? ($book->kategori ?? '-') }}
                                         </td>
+
+                                        <!-- RAK -->
                                         <td class="p-3 text-sm font-bold text-white/90">
                                             {{ $book->rak ?? '-' }}
                                         </td>
+
+                                        <!-- STOK -->
                                         <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
+
+                                        <!-- AKSI -->
                                         <td class="p-3 text-sm text-center">
                                             <!-- Mode Normal: Tombol Edit Data & Kelola -->
                                             <div class="edit-mode-action flex items-center justify-center gap-2">
