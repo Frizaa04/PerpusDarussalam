@@ -5,26 +5,6 @@
     
     <!-- Sidebar -->
     @include('layouts.sidebar')
-
-    <main class="flex-1 flex flex-col">
-        <!-- Header Atas -->
-        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
-            <div class="flex items-center gap-4">
-                <button class="text-[#004d40] hover:text-[#003d30] transition p-1">
-                    <span class="material-icons text-2xl">notifications_none</span>
-                </button>
-                
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="bg-[#004d40] text-white px-4 py-1.5 rounded text-sm font-semibold hover:bg-[#003d30] transition">
-                        LogOut
-                    </button>
-                </form>
-
-                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-12 object-contain ml-2">
-            </div>
-        </header>
-
         <!-- Area Isi Konten Laporan Keuangan -->
         <div class="p-8 space-y-6">
             

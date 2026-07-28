@@ -5,15 +5,7 @@
     
     <!-- Pemanggilan Sidebar -->
     @include('layouts.sidebar')
-
-    
     <main class="flex-1 flex flex-col">
-        <!-- Header Atas -->
-        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
-            <div class="flex items-center h-full">
-                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-full py-1 object-contain">
-            </div>
-        </header>
 
         <!-- Area Konten -->
         <div class="p-8 space-y-8">

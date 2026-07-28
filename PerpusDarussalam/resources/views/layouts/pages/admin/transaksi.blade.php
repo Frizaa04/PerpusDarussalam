@@ -7,28 +7,7 @@
     @include('layouts.sidebar')
 
     <main class="flex-1 flex flex-col">
-        <!-- Header Atas -->
-        <header class="bg-white border-b border-gray-200 px-8 flex justify-end items-center shadow-sm h-20">
-            <div class="flex items-center h-full gap-4">
-                <!-- Notifikasi -->
-                <button class="text-[#004d40] hover:text-[#003d30] p-1">
-                    <span class="material-icons text-2xl">notifications_none</span>
-                </button>
-                
-                <!-- Tombol LogOut -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="bg-[#004d40] text-white px-4 py-1.5 rounded text-sm font-semibold hover:bg-[#003d30] transition">
-                        LogOut
-                    </button>
-                </form>
-
-                <!-- Logo Darussalam -->
-                <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-12 object-contain py-1">
-            </div>
-        </header>
-
-        <!-- Isi Data Transaksi -->
+                <!-- Isi Data Transaksi -->
         <div class="p-8 space-y-6">
 
             <!-- Notifikasi Pesan Sukses / Error Validasi -->
@@ -78,6 +57,11 @@
                         <h2 class="text-xl font-bold text-white tracking-wide uppercase">Tabel Daftar Transaksi</h2>
                         
                         <div class="flex items-center gap-3">
+                            <label id="label-check-all" class="flex items-center gap-2 text-white font-bold cursor-pointer select-none hidden ml-2">
+                                <span>Pilih Semua</span>
+                                <input type="checkbox" id="check-all" class="w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
+                            </label>
+                        
                             <!-- 1. Tombol Konfirmasi Hapus (Awalnya Tersembunyi, Muncul saat Mode Hapus) -->
                             <button type="button" id="btn-submit-delete" onclick="submitDeleteForm()" class="bg-red-700 text-white font-bold px-4 py-1.5 rounded hover:bg-red-800 transition text-sm shadow hidden">
                                 Konfirmasi Hapus
@@ -88,11 +72,6 @@
                                 <span class="material-icons text-base">delete</span>
                                 <span id="text-btn-toggle">Hapus Data</span>
                             </button>
-
-                            <label id="label-check-all" class="flex items-center gap-2 text-white font-bold cursor-pointer select-none hidden ml-2">
-                                <span>Pilih Semua</span>
-                                <input type="checkbox" id="check-all" class="w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
-                            </label>
                         </div>
                     </div>
 

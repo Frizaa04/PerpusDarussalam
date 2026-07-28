@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +15,26 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
     </style>
+
+    @include('layouts.header')
 </head>
-<body class="bg-gray-100 antialiased">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
 
     <!-- isi dari Dashboard -->
     @yield('content')
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            // Geser sidebar masuk atau keluar layar
+            sidebar.classList.toggle('-translate-x-full');
+            
+            // Tampilkan atau sembunyikan backdrop gelap
+            backdrop.classList.toggle('hidden');
+        }
+    </script>
 
 </body>
 </html>
