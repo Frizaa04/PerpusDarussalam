@@ -65,7 +65,7 @@ class LaporanController extends Controller
         $params = $this->getCommonParams($request);
         $data = $this->laporanService->pengunjung($params['selectedDate'], $params['mode']);
 
-        return view('layouts.pages.admin.absen', array_merge($data, $params));
+        return view('layouts.pages.admin.laporan_absensi', array_merge($data, $params));
     }
 
     public function peminjaman(Request $request)

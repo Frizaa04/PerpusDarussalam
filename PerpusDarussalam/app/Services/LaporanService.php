@@ -74,13 +74,19 @@ class LaporanService
         if ($mode === 'mingguan') {
             $start = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
             $end   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
-            $visits = Visits::with('user')->whereBetween('visited_at', [$start, $end])->latest('visited_at')->paginate(10);
+
+            $baseQuery = Visits::whereBetween('visited_at', [$start, $end]);
         } else {
-            $visits = Visits::with('user')->whereDate('visited_at', $tanggal)->latest('visited_at')->paginate(10);
+            $baseQuery = Visits::whereDate('visited_at', $tanggal);
         }
 
         return [
-            'visits' => $visits
+            'totalPengunjung' => (clone $baseQuery)->count(),
+            'lakiLaki'        => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('jenis_kelamin', 'L'))->count(),
+            'perempuan'       => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('jenis_kelamin', 'P'))->count(),
+            'siswa'           => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('role', 'siswa'))->count(),
+            'guru'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('role', 'guru'))->count(),
+            'umum'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('role', 'umum'))->count(),
         ];
     }
 
