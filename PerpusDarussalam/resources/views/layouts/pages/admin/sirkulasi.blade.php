@@ -37,13 +37,19 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-white tracking-wide">Sirkulasi Peminjaman & Pengembalian</h2>
                     
-                    <!-- box Peminjaman Telat -->
-                    <form id="lateFilterForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center gap-2 text-white font-medium text-sm">
+                    <!-- Filter Peminjaman Telat (Button dengan Checkbox Terlihat) -->
+                    <form id="lateFilterForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center">
                         @if($search)
                             <input type="hidden" name="search" value="{{ $search }}">
                         @endif
-                        <label for="lateCheckbox" class="cursor-pointer select-none">Peminjaman Telat</label>
-                        <input type="checkbox" id="lateCheckbox" name="late" value="1" onchange="document.getElementById('lateFilterForm').submit()" {{ request('late') ? 'checked' : '' }} class="w-4 h-4 accent-[#004d40] cursor-pointer rounded">
+                        
+                        <label for="lateCheckbox" class="cursor-pointer select-none flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm border {{ request('late') ? 'bg-red-700 text-white border-red-800 shadow-md' : 'bg-[#004d40] hover:bg-[#003d30] text-white border-[#003d30]' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Peminjaman Telat</span>
+                            <input type="checkbox" id="lateCheckbox" name="late" value="1" onchange="document.getElementById('lateFilterForm').submit()" {{ request('late') ? 'checked' : '' }} class="w-4 h-4 accent-red-600 rounded cursor-pointer">
+                        </label>
                     </form>
                 </div>
                 
