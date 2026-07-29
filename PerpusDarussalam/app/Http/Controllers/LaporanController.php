@@ -15,98 +15,77 @@ use App\Imports\AnggotaImport;
 use App\Services\LaporanService;
 use Maatwebsite\Excel\Facades\Excel;
 
-
 class LaporanController extends Controller
 {
-
     public function __construct(
         protected LaporanService $laporanService
-    ){}
+    ) {}
+
+    private function getCommonParams(Request $request)
+    {
+        $selectedDate = $request->date ? Carbon::parse($request->date) : today();
+        $mode = $request->get('mode', 'harian');
+
+        return [
+            'selectedDate'    => $selectedDate,
+            'mode'            => $mode,
+            'dates'           => $this->laporanService->dates($selectedDate),
+            'monthYearLabel'  => $selectedDate->translatedFormat('F Y'),
+            'startOfWeekDate' => $selectedDate->copy()->startOfWeek(Carbon::MONDAY)->format('Y-m-d'),
+            'endOfWeekDate'   => $selectedDate->copy()->endOfWeek(Carbon::SUNDAY)->format('Y-m-d'),
+        ];
+    }
 
     public function index(Request $request)
     {
-        $selectedDate = $request->date
-            ? Carbon::parse($request->date)
-            : today();
-        $data = $this->laporanService
-            ->dashboard($selectedDate);
-        $data['dates'] = $this->laporanService
-            ->dates($selectedDate);
-        $data['selectedDate'] = $selectedDate;
-        return view(
-            'layouts.pages.admin.laporan',
-            $data
-        );
+        $params = $this->getCommonParams($request);
+        $data = $this->laporanService->dashboard($params['selectedDate'], $params['mode']);
+
+        return view('layouts.pages.admin.laporan', array_merge($data, $params));
     }
 
     public function koleksi(Request $request)
     {
-        $selectedDate = $request->date
-            ? Carbon::parse($request->date)
-            : today();
-        $data = $this->laporanService->koleksi();
-        $data['dates'] = $this->laporanService
-            ->dates($selectedDate);
-        $data['selectedDate'] = $selectedDate;
-        return view(
-            'layouts.pages.admin.laporan_koleksi',
-            $data
-        );
+        $params = $this->getCommonParams($request);
+        $data = $this->laporanService->koleksi($params['selectedDate'], $params['mode']);
+
+        return view('layouts.pages.admin.laporan_koleksi', array_merge($data, $params));
     }
 
     public function anggota(Request $request)
     {
-        $selectedDate = $request->date
-            ? Carbon::parse($request->date)
-            : today();
-        $data = $this->laporanService->anggota();
-        $data['dates'] = $this->laporanService
-            ->dates($selectedDate);
-        $data['selectedDate'] = $selectedDate;
-        return view(
-            'layouts.pages.admin.laporan_anggota',
-            $data
-        );
+        $params = $this->getCommonParams($request);
+        $data = $this->laporanService->anggota($params['selectedDate'], $params['mode']);
+
+        return view('layouts.pages.admin.laporan_anggota', array_merge($data, $params));
     }
 
     public function pengunjung(Request $request)
     {
-        $selectedDate = $request->date
-            ? Carbon::parse($request->date)
-            : today();
-        $data = $this->laporanService
-            ->pengunjung($selectedDate);
-        $data['dates'] = $this->laporanService
-            ->dates($selectedDate);
-        $data['selectedDate'] = $selectedDate;
-        return view(
-            'layouts.pages.admin.laporan_pengunjung',
-            $data
-        );
+        $params = $this->getCommonParams($request);
+        $data = $this->laporanService->pengunjung($params['selectedDate'], $params['mode']);
+
+        return view('layouts.pages.admin.absen', array_merge($data, $params));
+    }
+
+    public function peminjaman(Request $request)
+    {
+        $params = $this->getCommonParams($request);
+        $data = $this->laporanService->getPeminjamanData($params['selectedDate'], $params['mode']);
+
+        return view('layouts.pages.admin.laporan_peminjaman', array_merge($data, $params));
     }
 
     public function exportExcel(Request $request)
     {
         $tanggal = $request->query('date', today()->format('Y-m-d'));
-        $namaFile = 'Laporan_Koleksi_' . $tanggal . '.xlsx';
-
-        return Excel::download(new KoleksiExport($tanggal), $namaFile);
+        return Excel::download(new KoleksiExport($tanggal), 'Laporan_Koleksi_' . $tanggal . '.xlsx');
     }
 
     public function exportAnggota()
     {
         return Excel::download(new AnggotaExport, 'Laporan_Anggota_' . date('Y-m-d') . '.xlsx');
     }
-
-    public function peminjaman(Request $request)
-    {
-        // Panggil service untuk mengambil array data
-        $data = $this->laporanService->getPeminjamanData($request->get('date'));
-
-        // Pass array data langsung ke view
-        return view('layouts.pages.admin.laporan_peminjaman', $data);
-    }
-
 
     public function importAnggota(Request $request)
     {
@@ -122,22 +101,9 @@ class LaporanController extends Controller
         }
     }
 
-    public function exportPengunjungExcel(Request $request)
-    {
-        $tanggal = $request->query('date', today()->format('Y-m-d'));
-        $namaFile = 'Laporan_Pengunjung_' . $tanggal . '.xlsx';
-
-        // Jika nanti sudah membuat class PengunjungExport:
-        // return Excel::download(new \App\Exports\PengunjungExport($tanggal), $namaFile);
-
-        return back()->with('info', 'Fitur export pengunjung sedang disiapkan.');
-    }
-
     public function exportPeminjamanExcel(Request $request)
     {
         $tanggal = $request->query('date', today()->format('Y-m-d'));
-        $namaFile = 'Laporan_Peminjaman_' . $tanggal . '.xlsx';
-
-        return Excel::download(new BorrowingExport($tanggal), $namaFile);
+        return Excel::download(new BorrowingExport($tanggal), 'Laporan_Peminjaman_' . $tanggal . '.xlsx');
     }
 }

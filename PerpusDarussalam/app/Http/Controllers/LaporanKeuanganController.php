@@ -10,63 +10,76 @@ class LaporanKeuanganController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Tanggal terpilih (default hari ini)
+        // 1. Tanggal terpilih & Mode Filter (default: 'harian')
         $selectedDate = $request->get('date', Carbon::now()->format('Y-m-d'));
+        $mode         = $request->get('mode', 'harian'); // 'harian' atau 'mingguan'
         $category     = $request->get('category');
         $search       = $request->get('search');
 
-        // 2. Array 7 tanggal horizontal
+        $currentCarbon = Carbon::parse($selectedDate);
+
+        // 2. Tentukan Rentang Minggu Penuh (Senin - Minggu)
+        $startOfWeek = $currentCarbon->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek   = $currentCarbon->copy()->endOfWeek(Carbon::SUNDAY); // Berakhir di hari Minggu
+
+        $startOfWeekDate = $startOfWeek->format('Y-m-d');
+        $endOfWeekDate   = $endOfWeek->format('Y-m-d');
+
+        // Label Bulan & Tahun
+        $monthYearLabel = $startOfWeek->translatedFormat('F Y');
+
+        // 3. Loop Array Tanggal (Senin s/d Minggu = 7 Hari)
         $dates = [];
-        $baseDate = Carbon::parse($selectedDate);
-        for ($i = 6; $i >= 0; $i--) {
-            $dt = $baseDate->copy()->subDays($i);
+        $tempDate = $startOfWeek->copy();
+
+        while ($tempDate->lte($endOfWeek)) {
+            $fullDate = $tempDate->format('Y-m-d');
             $dates[] = [
-                'day'       => $dt->format('d'),
-                'full_date' => $dt->format('Y-m-d'),
-                'is_active' => $dt->format('Y-m-d') === $selectedDate
+                'day'       => $tempDate->format('d'),
+                'full_date' => $fullDate,
+                'is_active' => ($mode === 'harian' && $fullDate === $selectedDate)
             ];
+            $tempDate->addDay();
         }
 
-        // 3. Menghitung JUMLAH ORANG / TRANSAKSI untuk Card Utama
-        // Keterlambatan buku juga mengambil count dari tabel transactions
-        $pembuatanKartuCount = Transaction::where('jenis', 'pembuatan_kartu')
-            ->whereDate('tanggal', $selectedDate)
-            ->count();
+        // 4. Query Dasaran untuk Card Ringkasan berdasarkan Mode
+        $applyDateFilter = function ($query) use ($mode, $selectedDate, $startOfWeekDate, $endOfWeekDate) {
+            if ($mode === 'mingguan') {
+                return $query->whereBetween('tanggal', [$startOfWeekDate, $endOfWeekDate]);
+            }
+            return $query->whereDate('tanggal', $selectedDate);
+        };
 
-        $kehilanganKartuCount = Transaction::where('jenis', 'kehilangan_kartu')
-            ->whereDate('tanggal', $selectedDate)
-            ->count();
+        // Hitung Jumlah Transaksi per Kategori
+        $pembuatanKartuCount   = $applyDateFilter(Transaction::where('jenis', 'pembuatan_kartu'))->count();
+        $kehilanganKartuCount  = $applyDateFilter(Transaction::where('jenis', 'kehilangan_kartu'))->count();
+        $keterlambatanBukuCount = $applyDateFilter(Transaction::where('jenis', 'denda_keterlambatan'))->count();
 
-        $keterlambatanBukuCount = Transaction::where('jenis', 'denda_keterlambatan')
-            ->whereDate('tanggal', $selectedDate)
-            ->count();
-
-        // 4. Data Detail & Total Nominal ketika Card Di-klik
+        // 5. Data Detail & Total Uang ketika Card Di-klik
         $dataList = null;
         $totalCategory = 0;
 
         if ($category) {
-            $query = Transaction::with('user')
-                ->where('jenis', $category)
-                ->whereDate('tanggal', $selectedDate);
+            $query = Transaction::with('user')->where('jenis', $category);
+            $query = $applyDateFilter($query);
 
-            // Filter pencarian nama user
             if ($search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'LIKE', "%{$search}%");
                 });
             }
 
-            // Hitung total nominal untuk kategori terpilih
             $totalCategory = (clone $query)->sum('nominal');
-
-            // Ambil data transaksi beserta paginasi
-            $dataList = $query->orderBy('tanggal', 'desc')->paginate(10);
+            $dataList = $query->orderBy('tanggal', 'desc')->orderBy('id', 'desc')->paginate(10);
         }
 
         return view('layouts.pages.admin.laporan_keuangan', compact(
             'dates',
             'selectedDate',
+            'monthYearLabel',
+            'mode',
+            'startOfWeekDate',
+            'endOfWeekDate',
             'category',
             'search',
             'pembuatanKartuCount',
