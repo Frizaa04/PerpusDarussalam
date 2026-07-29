@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pages.admin.provider.app')
 
 @section('title', 'Laporan Anggota - Madrasah Darussalam')
 
@@ -6,7 +6,7 @@
 <div class="flex min-h-screen bg-[#f4f7f6]">
     
     <!-- Sidebar Navigasi -->
-    @include('layouts.sidebar')
+    @include('layouts.pages.admin.provider.sidebar')
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col">
@@ -68,13 +68,9 @@
                     </form>
                 </div>
 
-                <!-- Kanan: Tombol Import, Kembali, Unduh Excel -->
+                <!-- Kanan: Tombol Kembali, Import Excel, Unduh Excel -->
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="document.getElementById('modalImport').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-2.5 rounded hover:bg-blue-700 transition shadow flex items-center gap-2 text-sm font-bold" title="Import Data Excel">
-                        <span class="material-icons text-xl">file_upload</span>
-                        <span>Import Excel</span>
-                    </button>
-                    
+                    <!-- Tombol Kembali -->
                     <a href="{{ route('laporan.index', ['date' => $selectedDate->format('Y-m-d'), 'mode' => $mode]) }}" class="inline-flex items-center gap-2 bg-[#004d40] text-white px-4 py-2.5 rounded font-bold hover:bg-[#003d30] transition shadow text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -82,6 +78,13 @@
                         Kembali
                     </a>
 
+                    <!-- Tombol Import Excel -->
+                    <button type="button" onclick="document.getElementById('modalImport').classList.remove('hidden')" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Import Data Excel">
+                        <span class="material-icons text-xl">file_upload</span>
+                        <span>Import Excel</span>
+                    </button>
+
+                    <!-- Tombol Unduh Excel -->
                     <a href="{{ route('laporan.anggota.export', ['date' => $selectedDate->format('Y-m-d')]) }}" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Unduh Laporan Excel">
                         <span class="material-icons text-xl">file_download</span>
                         <span>Unduh Excel</span>
@@ -106,7 +109,7 @@
 
                         <div class="flex justify-end gap-2">
                             <button type="button" onclick="document.getElementById('modalImport').classList.add('hidden')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm font-medium">Batal</button>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium">Upload & Import</button>
+                            <button type="submit" class="px-4 py-2 bg-[#004d40] text-white rounded-md hover:bg-[#003d30] text-sm font-medium">Upload & Import</button>
                          </div>
                      </form>
                  </div>

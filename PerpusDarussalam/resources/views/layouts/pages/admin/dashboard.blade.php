@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.pages.admin.provider.app')
 
 @section('content')
 <div class="flex min-h-screen bg-[#f4f7f6]">
     
     <!-- Pemanggilan Sidebar -->
-    @include('layouts.sidebar')
+    @include('layouts.pages.admin.provider.sidebar')
     <main class="flex-1 flex flex-col">
 
         <!-- Area Konten -->
