@@ -82,11 +82,11 @@ class LaporanController extends Controller
         return Excel::download(new KoleksiExport($tanggal), 'Laporan_Koleksi_' . $tanggal . '.xlsx');
     }
 
-    public function exportAnggota()
+// Sesudah (Perbaikan)
+    public function exportAnggotaExcel()
     {
         return Excel::download(new AnggotaExport, 'Laporan_Anggota_' . date('Y-m-d') . '.xlsx');
     }
-
     public function importAnggota(Request $request)
     {
         $request->validate([

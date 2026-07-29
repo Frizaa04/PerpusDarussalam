@@ -16,7 +16,7 @@
         }
     </style>
 
-    @include('layouts.header')
+    @include('layouts.pages.admin.provider.header')
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
 

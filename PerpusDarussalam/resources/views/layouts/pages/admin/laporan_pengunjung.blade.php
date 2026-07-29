@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pages.admin.provider.app')
 
 @section('title', 'Laporan Pengunjung - Madrasah Darussalam')
 
@@ -6,7 +6,7 @@
 <div class="flex min-h-screen bg-[#f4f7f6]">
     
     <!-- Sidebar -->
-    @include('layouts.sidebar')
+    @include('layouts.pages.admin.provider.sidebar')
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col">
