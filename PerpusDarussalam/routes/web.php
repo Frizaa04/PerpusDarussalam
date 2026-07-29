@@ -49,7 +49,10 @@ Route::middleware(['admin'])->group(function () {
 
     // Manajemen Siswa / User
     Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
+    Route::post('/manajemen-siswa/store', [MemberController::class, 'store'])->name('member.store');
     Route::put('/manajemen-siswa/update', [MemberController::class, 'update'])->name('member.update');
+    Route::delete('/manajemen-siswa/destroy-multiple', [MemberController::class, 'destroyMultiple'])->name('member.destroyMultiple');
+    Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
     // Katalog Buku
     Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
@@ -61,6 +64,7 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/book/item/store', [BookItemController::class, 'store'])->name('book.item.store');
     Route::put('/book/item/{id}', [BookItemController::class, 'update'])->name('book.item.update');
     Route::delete('/book/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
+    Route::delete('/book/item/{id}', [BookItemController::class, 'destroy'])->name('book.item.destroy');
 
     // Sirkulasi
     Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');

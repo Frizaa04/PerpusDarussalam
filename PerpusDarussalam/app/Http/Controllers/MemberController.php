@@ -66,4 +66,36 @@ class MemberController extends Controller
 
     return redirect()->route('member.index')->with('success', 'Data user berhasil diperbarui!');
 }
+
+    public function store(Request $request)
+    {
+        // Validasi input termasuk password
+        $request->validate([
+            'nis'           => 'nullable|string|max:255',
+            'nik'           => 'nullable|string|max:255',
+            'nip'           => 'nullable|string|max:255',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|max:255|unique:users,email',
+            'password'      => 'required|string|min:6', // Pastikan password divalidasi
+            'role'          => 'required|in:siswa,guru,umum',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'alamat'        => 'nullable|string|max:500',
+        ]);
+
+        // Simpan data ke database termasuk password yang di-hash
+        User::create([
+            'nis'           => $request->nis,
+            'nik'           => $request->nik,
+            'nip'           => $request->nip,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password'      => bcrypt($request->password), // <-- INI YANG KURANG SEBELUMNYA
+            'role'          => $request->role,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'alamat'        => $request->alamat,
+        ]);
+
+        return redirect()->route('member.index')->with('success', 'User baru berhasil ditambahkan!');
+    }
+
 }
