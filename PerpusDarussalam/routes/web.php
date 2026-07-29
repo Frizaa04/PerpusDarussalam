@@ -83,6 +83,8 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/e-book/store', [EbookController::class, 'store'])->name('ebook.store');
     Route::put('/e-book/update/{id}', [EbookController::class, 'update'])->name('ebook.update');
     Route::delete('/e-book/delete/{id}', [EbookController::class, 'destroy'])->name('ebook.destroy');
+    Route::post('/e-book/bulk-delete', [EbookController::class, 'bulkDestroy'])->name('ebook.destroy.bulk');
+    Route::delete('/e-book/destroy-multiple', [EbookController::class, 'destroyMultiple'])->name('ebook.destroy-multiple');
 
     // Laporan Utama & Detail Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
