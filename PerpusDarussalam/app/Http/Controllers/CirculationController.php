@@ -58,7 +58,7 @@ class CirculationController extends Controller
             return (object)[
                 'id'            => $item->id,
                 'identitas'     => $item->user->nis ?? $item->user->nip ?? $item->user->nik ?? '-',
-                'name'          => $item->user->name ?? 'Tanpa Nama',       
+                'name'          => $item->user->name ?? 'Tanpa Nama',      
                 'book_title'    => $item->bookItem->book->judul ?? 'Buku Terhapus',   
                 'nomor_inv'     => $item->bookItem->nomor_inventaris ?? '-', 
                 'status'        => $status,
@@ -66,10 +66,7 @@ class CirculationController extends Controller
                 'due_date'      => $item->tanggal_jatuh_tempo ? Carbon::parse($item->tanggal_jatuh_tempo)->format('d/m/Y') : '-',
                 'return_date'   => $item->tanggal_kembali ? Carbon::parse($item->tanggal_kembali)->format('d/m/Y') : '-'
             ];
-        });
-
-        // Pertahankan query string pencarian saat berpindah halaman
-        $circulations->appends($request->all());
+        })->withQueryString(); // <- Menggantikan appends() agar lebih bersih dan otomatis
 
         return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search', 'lateOnly'));
     }
