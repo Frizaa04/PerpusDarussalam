@@ -34,7 +34,7 @@ class BookController extends Controller
             });
         }
 
-        $books = $queryBuilder->get();
+        $books = $queryBuilder->paginate(10)->withQueryString();
         $allCategories = Category::all();
 
         return view('layouts.pages.admin.katalog_buku', compact('books', 'search', 'allCategories'));

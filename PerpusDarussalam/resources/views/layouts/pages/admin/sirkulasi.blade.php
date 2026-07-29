@@ -59,6 +59,7 @@
                             <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                 <th class="p-3 text-sm font-bold tracking-wider w-12 text-center">No</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">Nama Peminjam</th> <!-- Kolom Baru -->
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul Buku</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Status</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Tanggal Pinjam</th>
@@ -75,6 +76,7 @@
                                     {{ ($circulations->currentPage() - 1) * $circulations->perPage() + $loop->iteration }}
                                 </td>
                                 <td class="p-3 text-sm font-bold text-white/90">{{ $item->identitas }}</td>
+                                <td class="p-3 text-sm text-white/90">{{ $item->name }}</td> <!-- Data Nama Peminjam Baru -->
                                 <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
                                 <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">
                                     {{ $item->status }}
@@ -108,60 +110,42 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
+                                <td colspan="9" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
                             </tr>
                         @endforelse
-                    </tbody>
+                        </tbody>
                     </table>
                 </div>
 
-                <!-- Navigasi Paginasi Custom Tailwind Hijau -->
-                @if ($circulations->hasPages())
-                    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-                        <!-- Informasi Jumlah Data -->
-                        <div class="text-sm font-semibold">
-                            Menampilkan <span class="font-bold">{{ $circulations->firstItem() }}</span> hingga <span class="font-bold">{{ $circulations->lastItem() }}</span> dari <span class="font-bold">{{ $circulations->total() }}</span> data
-                        </div>
+                <!-- Paginasi Bersih dan Minimalis -->
+                <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold">
+                    
+                    {{-- Tombol Sebelumnya (<) --}}
+                    @if ($circulations->onFirstPage())
+                        <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
+                    @else
+                        <a href="{{ $circulations->previousPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
+                    @endif
 
-                        <!-- Tombol Halaman -->
-                        <div class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                            {{-- Tombol Sebelumnya (Previous) --}}
-                            @if ($circulations->onFirstPage())
-                                <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#004d40] bg-[#004d40]/40 text-white/50 cursor-not-allowed text-sm font-medium">
-                                    &lsaquo;
-                                </span>
-                            @else
-                                <a href="{{ $circulations->previousPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
-                                    &lsaquo;
-                                </a>
-                            @endif
+                    {{-- Nomor Halaman (Selalu Tampil Minimal 1) --}}
+                    @foreach ($circulations->getUrlRange(1, max($circulations->lastPage(), 1)) as $page => $url)
+                        @if ($page == $circulations->currentPage())
+                            {{-- Halaman Aktif (Kotak Putih, Teks Gelap) --}}
+                            <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
+                        @else
+                            {{-- Halaman Lain --}}
+                            <a href="{{ $url }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
+                        @endif
+                    @endforeach
 
-                            {{-- Angka-angka Halaman --}}
-                            @foreach ($circulations->getUrlRange(1, $circulations->lastPage()) as $page => $url)
-                                @if ($page == $circulations->currentPage())
-                                    <span aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 border border-[#004d40] bg-[#004d40] text-white font-bold text-sm">
-                                        {{ $page }}
-                                    </span>
-                                @else
-                                    <a href="{{ $url }}" class="relative inline-flex items-center px-4 py-2 border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
-                                        {{ $page }}
-                                    </a>
-                                @endif
-                            @endforeach
+                    {{-- Tombol Selanjutnya (>) --}}
+                    @if ($circulations->hasMorePages())
+                        <a href="{{ $circulations->nextPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
+                    @else
+                        <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
+                    @endif
 
-                            {{-- Tombol Selanjutnya (Next) --}}
-                            @if ($circulations->hasMorePages())
-                                <a href="{{ $circulations->nextPageUrl() }}" class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#004d40] bg-white text-[#004d40] hover:bg-[#004d40] hover:text-white transition-colors text-sm font-medium">
-                                    &rsaquo;
-                                </a>
-                            @else
-                                <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#004d40] bg-[#004d40]/40 text-white/50 cursor-not-allowed text-sm font-medium">
-                                    &rsaquo;
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                @endif
+                </div>
 
             </div>
         </div>

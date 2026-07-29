@@ -161,12 +161,34 @@
                             </table>
                         </div>
 
-                        <!-- Paginasi -->
+                        <!-- Paginasi Selalu Tampil (Meskipun Hanya 1 Halaman) -->
                         <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold">
-                            <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">1</span>
-                            <a href="#" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">2</a>
-                            <a href="#" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">3</a>
-                            <a href="#" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
+                            
+                            {{-- Tombol Previous (<) --}}
+                            @if ($books->onFirstPage())
+                                <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
+                            @else
+                                <a href="{{ $books->previousPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
+                            @endif
+
+                            {{-- Nomor Halaman --}}
+                            @foreach ($books->getUrlRange(1, max($books->lastPage(), 1)) as $page => $url)
+                                @if ($page == $books->currentPage())
+                                    {{-- Halaman Aktif (Kotak Putih, Teks Gelap) --}}
+                                    <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
+                                @else
+                                    {{-- Halaman Lain --}}
+                                    <a href="{{ $url }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
+                                @endif
+                            @endforeach
+
+                            {{-- Tombol Next (>) --}}
+                            @if ($books->hasMorePages())
+                                <a href="{{ $books->nextPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
+                            @else
+                                <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
+                            @endif
+
                         </div>
 
                     </div>
