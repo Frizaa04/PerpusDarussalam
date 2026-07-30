@@ -10,7 +10,7 @@ class NotificationController extends Controller
     // Fungsi untuk menampilkan semua notifikasi di halaman khusus
     public function index()
     {
-        // Mengambil notifikasi terbaru, bisa juga di-paginate
+        // Mengambil notifikasi terbaru
         $notifications = Notification::with('borrowing.user')
                             ->latest()
                             ->get();
@@ -28,16 +28,28 @@ class NotificationController extends Controller
             'read_at' => now(), // Mencatat waktu kapan dibaca
         ]);
 
+        if (request()->ajax() || request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Notifikasi ditandai sudah dibaca.'
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Notifikasi ditandai sudah dibaca.');
     }
 
-    // Fungsi untuk menandai semua notifikasi sudah dibaca sekaligus (Opsional)
+    // Fungsi untuk menandai semua notifikasi sudah dibaca sekaligus 
     public function markAllAsRead()
     {
-        Notification::where('status', 'unread')->update([
-            'status'  => 'read',
-            'read_at' => now(),
-        ]);
+        \App\Models\Notification::where('status', 'unread')
+            ->update([
+                'status'  => 'read',
+                'read_at' => now(),
+            ]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->back()->with('success', 'Semua notifikasi ditandai sudah dibaca.');
     }

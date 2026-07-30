@@ -13,6 +13,7 @@ use App\Exports\AnggotaExport;
 use App\Exports\BorrowingExport;
 use App\Imports\AnggotaImport;
 use App\Services\LaporanService;
+use App\Exports\AttendanceExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanController extends Controller
@@ -108,5 +109,16 @@ class LaporanController extends Controller
     {
         $tanggal = $request->query('date', today()->format('Y-m-d'));
         return Excel::download(new BorrowingExport($tanggal), 'Laporan_Peminjaman_' . $tanggal . '.xlsx');
+    }
+
+    public function exportAttendanceExcel(Request $request)
+    {
+        // Mengambil parameter tanggal dari URL, default ke hari ini jika kosong
+        $tanggal = $request->query('date', today()->format('Y-m-d'));
+        
+        // Nama file hasil unduhan
+        $namaFile = 'Laporan_Absensi_' . $tanggal . '.xlsx';
+
+        return Excel::download(new AttendanceExport($tanggal), $namaFile);
     }
 }

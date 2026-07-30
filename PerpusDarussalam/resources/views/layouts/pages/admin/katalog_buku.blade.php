@@ -82,7 +82,6 @@
                                         <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                             <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
                                             <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
-                                            <!-- KOLOM BARU -->
                                             <th class="p-3 text-sm font-bold tracking-wider">Penulis & ISBN</th>
                                             <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
                                             <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
