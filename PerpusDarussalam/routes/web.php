@@ -77,6 +77,7 @@ Route::middleware(['admin'])->group(function () {
 
     // API Cek Anggota Otomatis
     Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisNip']);
+    Route::get('/api/check-book/{nomor}', [CirculationController::class, 'getBookByInventory']);
 
     // Halaman Transaksi Keuangan
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaction.index');

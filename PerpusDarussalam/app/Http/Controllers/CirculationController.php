@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Borrowing; 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\BookItem;
 use App\Services\BorrowingService;
 use App\Services\NotificationService;
 
@@ -90,7 +91,7 @@ class CirculationController extends Controller
             return back()
                 ->withErrors([
                     'error' => $e->getMessage()
-                ])
+                ], 'borrowForm') // <-- Berikan nama error bag khusus 'borrowForm'
                 ->withInput();
         }
     }
@@ -112,6 +113,29 @@ class CirculationController extends Controller
         return response()->json([
             'success' => false,
             'name' => 'Anggota tidak ditemukan'
+        ]);
+    }
+
+    public function getBookByInventory($nomorInventaris)
+    {
+        // Mengambil data book_item beserta relasi ke tabel book untuk mendapatkan judulnya
+        $bookItem = BookItem::with('book')
+                    ->where('nomor_inventaris', $nomorInventaris)
+                    ->orWhere('id', $nomorInventaris) // Mengantisipasi jika yang diinput ID-nya
+                    ->first();
+
+        if ($bookItem && $bookItem->book) {
+            return response()->json([
+                'success' => true,
+                'title' => $bookItem->book->judul,
+                'status' => $bookItem->status_pinjam,
+                'kondisi' => $bookItem->kondisi
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'title' => 'Buku tidak ditemukan'
         ]);
     }
 
