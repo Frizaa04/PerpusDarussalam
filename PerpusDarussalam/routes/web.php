@@ -53,6 +53,7 @@ Route::middleware(['admin'])->group(function () {
     Route::put('/manajemen-siswa/update', [MemberController::class, 'update'])->name('member.update');
     Route::delete('/manajemen-siswa/destroy-multiple', [MemberController::class, 'destroyMultiple'])->name('member.destroyMultiple');
     Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
+    Route::post('/manajemen-siswa/cetak-kartu-batch', [MemberController::class, 'printCards'])->name('member.printCards');
 
     // Katalog Buku
     Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
@@ -65,6 +66,8 @@ Route::middleware(['admin'])->group(function () {
     Route::put('/book/item/{id}', [BookItemController::class, 'update'])->name('book.item.update');
     Route::delete('/book/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
     Route::delete('/book/item/{id}', [BookItemController::class, 'destroy'])->name('book.item.destroy');
+    Route::get('/book/{id}/print-all-barcodes', [BookItemController::class, 'printAllBarcodes'])->name('book.print-all-barcodes');
+    Route::get('/book/item/{id}/print-barcode', [BookItemController::class, 'printBarcode'])->name('book.item.print-barcode');
 
     // Sirkulasi
     Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');

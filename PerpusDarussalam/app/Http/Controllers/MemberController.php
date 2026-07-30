@@ -43,7 +43,7 @@ class MemberController extends Controller
         'nik'           => 'nullable|string|max:255',
         'nip'           => 'nullable|string|max:255',
         'name'          => 'required|string|max:255',
-        'email'         => 'required|email|max:255|unique:users,email,' . $request->id, // Mengabaikan email milik user itu sendiri saat validasi unique
+        'email'         => 'required|email|max:255|unique:users,email,' . $request->id, 
         'role'          => 'required|in:siswa,guru,umum',
         'jenis_kelamin' => 'nullable|in:L,P',
         'alamat'        => 'nullable|string|max:500',
@@ -69,33 +69,57 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input termasuk password
+        // Validasi input termasuk foto
         $request->validate([
             'nis'           => 'nullable|string|max:255',
             'nik'           => 'nullable|string|max:255',
             'nip'           => 'nullable|string|max:255',
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255|unique:users,email',
-            'password'      => 'required|string|min:6', // Pastikan password divalidasi
+            'password'      => 'required|string|min:6',
             'role'          => 'required|in:siswa,guru,umum',
             'jenis_kelamin' => 'nullable|in:L,P',
             'alamat'        => 'nullable|string|max:500',
+            'foto'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Tambahkan validasi foto di sini
         ]);
 
-        // Simpan data ke database termasuk password yang di-hash
+        // Proses penyimpanan file foto jika diunggah
+        $pathFoto = null;
+        if ($request->hasFile('foto')) {
+            // Disimpan ke storage/app/public/foto-user
+            $pathFoto = $request->file('foto')->store('foto-user', 'public');
+        }
+
+        // Simpan data ke database termasuk path foto
         User::create([
             'nis'           => $request->nis,
             'nik'           => $request->nik,
             'nip'           => $request->nip,
             'name'          => $request->name,
             'email'         => $request->email,
-            'password'      => bcrypt($request->password), // <-- INI YANG KURANG SEBELUMNYA
+            'password'      => bcrypt($request->password), 
             'role'          => $request->role,
             'jenis_kelamin' => $request->jenis_kelamin,
             'alamat'        => $request->alamat,
+            'foto'          => $pathFoto, // Masukkan path foto ke database
         ]);
 
         return redirect()->route('member.index')->with('success', 'User baru berhasil ditambahkan!');
+    }
+
+    public function printCards(Request $request)
+    {
+        // Ambil ID user yang dicentang dari form
+        $selectedIds = $request->input('selected_users', []);
+
+        if (empty($selectedIds)) {
+            return redirect()->back()->with('error', 'Pilih setidaknya satu user untuk dicetak kartunya.');
+        }
+
+        // Ambil data user dari database berdasarkan ID yang dipilih
+        $users = User::whereIn('id', $selectedIds)->get();
+
+        return view('layouts.pages.admin.print_cards', compact('users'));
     }
 
 }

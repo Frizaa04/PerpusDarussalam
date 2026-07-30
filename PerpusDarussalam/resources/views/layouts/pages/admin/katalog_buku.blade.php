@@ -163,28 +163,32 @@
 
                         <!-- Paginasi Selalu Tampil (Meskipun Hanya 1 Halaman) -->
                         <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold">
-                            
+
                             {{-- Tombol Previous (<) --}}
                             @if ($books->onFirstPage())
                                 <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
                             @else
-                                <a href="{{ $books->previousPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
+                                <a href="{{ $books->previousPageUrl() }}"
+                                    class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
                             @endif
 
                             {{-- Nomor Halaman --}}
                             @foreach ($books->getUrlRange(1, max($books->lastPage(), 1)) as $page => $url)
                                 @if ($page == $books->currentPage())
                                     {{-- Halaman Aktif (Kotak Putih, Teks Gelap) --}}
-                                    <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
+                                    <span
+                                        class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
                                 @else
                                     {{-- Halaman Lain --}}
-                                    <a href="{{ $url }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
+                                    <a href="{{ $url }}"
+                                        class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
                                 @endif
                             @endforeach
 
                             {{-- Tombol Next (>) --}}
                             @if ($books->hasMorePages())
-                                <a href="{{ $books->nextPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
+                                <a href="{{ $books->nextPageUrl() }}"
+                                    class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
                             @else
                                 <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
                             @endif
@@ -213,7 +217,6 @@
             <form action="{{ route('book.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
 
-                <!-- Form Grid 2 Kolom -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Cover</label>
@@ -313,7 +316,6 @@
                 <input type="hidden" id="editBookId" name="id">
                 <input type="hidden" id="editKodeBuku" name="kode_buku">
 
-                <!-- Grid 2 Kolom -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Cover</label>
@@ -444,8 +446,18 @@
                 </div>
             </form>
 
+            <!-- Di dalam file view modal Anda, di atas tabel list item -->
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="text-sm font-bold tracking-wide">Pilih Eksemplar untuk Diedit / Dihapus</h4>
+
+                <!-- Tombol Cetak Semua Barcode Buku Ini -->
+                <a href="#" id="btnPrintAllBarcode" target="_blank"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1 rounded shadow transition hidden">
+                    🖨️ Cetak Semua Barcode Buku Ini
+                </a>
+            </div>
+
             <!-- List / Daftar Item Eksemplar Buku -->
-            <h4 class="text-sm font-bold mb-2 tracking-wide">Pilih Eksemplar untuk Diedit / Dihapus</h4>
             <div class="overflow-x-auto rounded border border-white/30">
                 <table class="min-w-full text-left border-collapse text-xs">
                     <thead>
@@ -564,17 +576,22 @@
             document.getElementById('editModal').classList.add('hidden');
         }
 
-        // Membuka modal utama list item buku
+        // Di dalam fungsi openKelolaModal(bookId, bookTitle):
         function openKelolaModal(bookId, bookTitle) {
             document.getElementById('kelolaBookId').value = bookId;
             document.getElementById('kelolaBookTitle').innerText = "Judul Buku: " + bookTitle;
+
+            // Set URL untuk tombol cetak massal
+            let btnPrintAll = document.getElementById('btnPrintAllBarcode');
+            btnPrintAll.href = `/book/${bookId}/print-all-barcodes`;
+            btnPrintAll.classList.remove('hidden'); // Tampilkan tombolnya
+
             document.getElementById('kelolaModal').classList.remove('hidden');
 
             let tbody = document.getElementById('kelolaItemList');
             tbody.innerHTML =
             `<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>`;
 
-            // Ambil data item berdasarkan ID buku lewat endpoint
             fetch(`/book/${bookId}/items`)
                 .then(response => response.json())
                 .then(data => {
@@ -582,38 +599,38 @@
                     if (data.length === 0) {
                         tbody.innerHTML =
                             `<tr><td colspan="4" class="p-4 text-center text-white/70">Belum ada eksemplar terdaftar untuk buku ini.</td></tr>`;
+                        btnPrintAll.classList.add('hidden'); // Sembunyikan jika kosong
                         return;
                     }
 
-                    // Render list item ke dalam tabel di dalam pop-up
                     data.forEach(item => {
                         let badgeColor = item.status_pinjam === 'tersedia' ? 'bg-emerald-600' : 'bg-amber-600';
                         let kondisiFormatted = item.kondisi.replace('_', ' ');
+                        let printBarcodeUrl = `/book/item/${item.id}/print-barcode`;
 
                         tbody.innerHTML += `
-                        <tr class="hover:bg-white/10 transition-colors">
-                            <td class="p-2.5 font-bold">${item.nomor_inventaris}</td>
-                            <td class="p-2.5 capitalize">${kondisiFormatted}</td>
-                            <td class="p-2.5 uppercase"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} text-white">${item.status_pinjam}</span></td>
-                            <td class="p-2.5 text-center space-x-1">
-                                <!-- Tombol Pilih untuk Edit Item Tertentu -->
-                                <button type="button" 
-                                    onclick="openEditItemModal(${item.id}, '${item.nomor_inventaris}', '${item.kondisi}', '${item.status_pinjam}')" 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow">
-                                    Edit Bagian Ini
-                                </button>
-                                
-                                <!-- Tombol Hapus Item -->
-                                <form action="/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
-                                    <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'}">
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow">
-                                        Hapuss
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    `;
+                <tr class="hover:bg-white/10 transition-colors">
+                    <td class="p-2.5 font-bold">${item.nomor_inventaris}</td>
+                    <td class="p-2.5 capitalize">${kondisiFormatted}</td>
+                    <td class="p-2.5 uppercase"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} text-white">${item.status_pinjam}</span></td>
+                    <td class="p-2.5 text-center space-x-1">
+                        <a href="${printBarcodeUrl}" target="_blank" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow inline-block">
+                            Cetak Barcode
+                        </a>
+                        <button type="button" onclick="openEditItemModal(${item.id}, '${item.nomor_inventaris}', '${item.kondisi}', '${item.status_pinjam}')" 
+                            class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow">
+                            Edit Bagian Ini
+                        </button>
+                        <form action="/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow">
+                                Hapus
+                            </button>
+                        </form>
+                    </td>
+                </tr>`;
                     });
                 })
                 .catch(error => {
@@ -666,7 +683,7 @@
             let deleteActions = document.querySelectorAll('.delete-mode-action');
 
             if (isDeleteModeActive) {
-                // Ubah tombol menjadi mode "Batal" (warna gelap/abu-abu)
+                // Ubah tombol menjadi mode "Batal" 
                 btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnToggle.classList.add('bg-gray-700', 'hover:bg-gray-800');
                 btnText.textContent = "Batal";
