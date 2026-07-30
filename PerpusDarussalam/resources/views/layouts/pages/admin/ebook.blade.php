@@ -41,7 +41,8 @@
                     <div class="max-w-md w-full">
                         <form action="{{ route('ebook.index') }}" method="GET"
                             class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
-                            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari Data E-Book..."
+                            <input type="text" name="search" value="{{ $search ?? '' }}"
+                                placeholder="Cari Data E-Book..."
                                 class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400 text-sm">
                             <button type="submit"
                                 class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
@@ -111,14 +112,16 @@
                                         <th class="p-3 text-xs font-bold uppercase tracking-wider text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="text-gray-900 divide-y divide-white/40">
+                                <tbody class="text-white">
                                     @forelse($ebooks as $ebook)
                                         <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
                                             <td class="p-3 text-sm text-center">
-                                                @if($ebook->cover)
-                                                    <img src="{{ asset('storage/' . $ebook->cover) }}" class="w-10 h-14 object-cover rounded shadow mx-auto">
+                                                @if ($ebook->cover)
+                                                    <img src="{{ asset('storage/' . $ebook->cover) }}"
+                                                        class="w-10 h-14 object-cover rounded shadow mx-auto">
                                                 @else
-                                                    <div class="w-10 h-14 bg-gray-300 border border-white/40 rounded flex items-center justify-center text-[10px] text-gray-700 font-bold mx-auto">
+                                                    <div
+                                                        class="w-10 h-14 bg-gray-300 border border-white/40 rounded flex items-center justify-center text-[10px] text-gray-700 font-bold mx-auto">
                                                         PDF
                                                     </div>
                                                 @endif
@@ -144,10 +147,12 @@
                                                     </button>
                                                 </div>
 
-                                                <div class="delete-mode-action hidden flex items-center justify-center gap-2">
+                                                <div
+                                                    class="delete-mode-action hidden flex items-center justify-center gap-2">
                                                     <input type="checkbox" name="ids[]" value="{{ $ebook->id }}"
                                                         class="ebook-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
-                                                    <span class="text-xs font-semibold text-red-900 italic">Centang untuk hapus</span>
+                                                    <span class="text-xs font-semibold text-red-900 italic">Centang untuk
+                                                        hapus</span>
                                                 </div>
                                             </td>
                                         </tr>
@@ -168,21 +173,25 @@
                                 @if ($ebooks->onFirstPage())
                                     <span class="px-2 py-1 text-white/50 font-bold select-none cursor-default">&lt;</span>
                                 @else
-                                    <a href="{{ $ebooks->previousPageUrl() }}" class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&lt;</a>
+                                    <a href="{{ $ebooks->previousPageUrl() }}"
+                                        class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&lt;</a>
                                 @endif
 
                                 @foreach ($ebooks->getUrlRange(1, $ebooks->lastPage()) as $page => $url)
                                     @if ($page == $ebooks->currentPage())
                                         <!-- Halaman Aktif (Kotak Putih) -->
-                                        <span class="bg-white text-[#004d40] font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow cursor-default">{{ $page }}</span>
+                                        <span
+                                            class="bg-white text-[#004d40] font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow cursor-default">{{ $page }}</span>
                                     @else
                                         <!-- Halaman Tidak Aktif (Teks Biasa, Kotak Putih Hanya Saat Hover) -->
-                                        <a href="{{ $url }}" class="text-white font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm hover:bg-white hover:text-[#004d40] transition duration-200">{{ $page }}</a>
+                                        <a href="{{ $url }}"
+                                            class="text-white font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm hover:bg-white hover:text-[#004d40] transition duration-200">{{ $page }}</a>
                                     @endif
                                 @endforeach
 
                                 @if ($ebooks->hasMorePages())
-                                    <a href="{{ $ebooks->nextPageUrl() }}" class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&gt;</a>
+                                    <a href="{{ $ebooks->nextPageUrl() }}"
+                                        class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&gt;</a>
                                 @else
                                     <span class="px-2 py-1 text-white/50 font-bold select-none cursor-default">&gt;</span>
                                 @endif
@@ -206,62 +215,71 @@
 
             <form action="{{ route('ebook.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
-                <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KODE E-BOOK</label>
-                        <input type="text" name="kode_ebook" value="{{ old('kode_ebook') }}" placeholder="Contoh: EB-1001"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none placeholder-gray-500" required>
+                        <label class="block text-sm font-semibold mb-1">KODE E-BOOK</label>
+                        <input type="text" name="kode_ebook" value="{{ old('kode_ebook') }}"
+                            placeholder="Contoh: EB-1001"
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white placeholder-gray-500"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">JUDUL E-BOOK</label>
-                        <input type="text" name="judul" value="{{ old('judul') }}"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">JUDUL E-BOOK</label>
+                        <input type="text" name="judul" value="{{ old('judul') }}" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KATEGORI</label>
+                        <label class="block text-sm font-semibold mb-1">KATEGORI</label>
                         <select name="categories_id"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                             <option value="">Pilih Kategori</option>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('categories_id') == $cat->id ? 'selected' : '' }}>{{ $cat->nama }}</option>
+                                <option value="{{ $cat->id }}"
+                                    {{ old('categories_id') == $cat->id ? 'selected' : '' }}>{{ $cat->nama }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENULIS</label>
-                        <input type="text" name="penulis" value="{{ old('penulis') }}"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">PENULIS</label>
+                        <input type="text" name="penulis" value="{{ old('penulis') }}" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENERBIT</label>
-                        <input type="text" name="penerbit" value="{{ old('penerbit') }}"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">PENERBIT</label>
+                        <input type="text" name="penerbit" value="{{ old('penerbit') }}" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">TAHUN TERBIT</label>
-                        <input type="number" name="tahun_terbit" value="{{ old('tahun_terbit') }}" placeholder="YYYY"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none placeholder-gray-500" required>
+                        <label class="block text-sm font-semibold mb-1">TAHUN TERBIT</label>
+                        <input type="number" name="tahun_terbit" value="{{ old('tahun_terbit') }}" placeholder="2024"
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white placeholder-gray-500"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">ISBN (OPSIONAL)</label>
-                        <input type="text" name="isbn" value="{{ old('isbn') }}"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none">
+                        <label class="block text-sm font-semibold mb-1">ISBN (OPSIONAL)</label>
+                        <input type="text" name="isbn" value="{{ old('isbn') }}" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">COVER E-BOOK (OPSIONAL)</label>
+                        <label class="block text-sm font-semibold mb-1">COVER E-BOOK (OPSIONAL)</label>
                         <input type="file" name="cover" accept="image/*"
-                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer">
+                            class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                     </div>
                     <div class="col-span-2">
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">FILE PDF E-BOOK</label>
+                        <label class="block text-sm font-semibold mb-1">FILE PDF E-BOOK</label>
                         <input type="file" name="file_pdf" accept=".pdf"
-                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer" required>
+                            class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white"
+                            required>
                     </div>
                 </div>
 
-                <div class="pt-4 flex justify-center">
+                <div class="pt-4 text-center">
                     <button type="submit"
-                        class="bg-white text-[#004d40] px-10 py-2.5 rounded-lg font-bold text-base hover:bg-gray-100 transition shadow-md">
+                        class="bg-white text-[#004d40] hover:bg-emerald-50 px-8 py-2 rounded font-bold transition shadow-md">
                         Konfirmasi
                     </button>
                 </div>
@@ -281,21 +299,24 @@
                 @csrf
                 @method('PUT')
 
-                <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KODE E-BOOK</label>
-                        <input type="text" id="editEbookKode" name="kode_ebook"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">KODE E-BOOK</label>
+                        <input type="text" id="editEbookKode" name="kode_ebook" placeholder="Contoh: EB-1001"
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white placeholder-gray-500"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">JUDUL E-BOOK</label>
-                        <input type="text" id="editEbookJudul" name="judul"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">JUDUL E-BOOK</label>
+                        <input type="text" id="editEbookJudul" name="judul" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KATEGORI</label>
+                        <label class="block text-sm font-semibold mb-1">KATEGORI</label>
                         <select id="editEbookKategori" name="categories_id"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                             <option value="">Pilih Kategori</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
@@ -303,40 +324,43 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENULIS</label>
-                        <input type="text" id="editEbookPenulis" name="penulis"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">PENULIS</label>
+                        <input type="text" id="editEbookPenulis" name="penulis" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENERBIT</label>
-                        <input type="text" id="editEbookPenerbit" name="penerbit"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">PENERBIT</label>
+                        <input type="text" id="editEbookPenerbit" name="penerbit" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">TAHUN TERBIT</label>
-                        <input type="number" id="editEbookTahun" name="tahun_terbit"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                        <label class="block text-sm font-semibold mb-1">TAHUN TERBIT</label>
+                        <input type="number" id="editEbookTahun" name="tahun_terbit" placeholder="2024"
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white placeholder-gray-500"
+                            required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">ISBN (OPSIONAL)</label>
-                        <input type="text" id="editEbookIsbn" name="isbn"
-                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none">
+                        <label class="block text-sm font-semibold mb-1">ISBN (OPSIONAL)</label>
+                        <input type="text" id="editEbookIsbn" name="isbn" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">GANTI COVER (OPSIONAL)</label>
+                        <label class="block text-sm font-semibold mb-1">GANTI COVER (OPSIONAL)</label>
                         <input type="file" name="cover" accept="image/*"
-                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer">
+                            class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                     </div>
                     <div class="col-span-2">
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">GANTI FILE PDF (OPSIONAL)</label>
+                        <label class="block text-sm font-semibold mb-1">GANTI FILE PDF (OPSIONAL)</label>
                         <input type="file" name="file_pdf" accept=".pdf"
-                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer">
+                            class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                     </div>
                 </div>
 
-                <div class="pt-4 flex justify-center">
+                <div class="pt-4 text-center">
                     <button type="submit"
-                        class="bg-white text-[#004d40] px-10 py-2.5 rounded-lg font-bold text-base hover:bg-gray-100 transition shadow-md">
+                        class="bg-white text-[#004d40] hover:bg-emerald-50 px-8 py-2 rounded font-bold transition shadow-md">
                         Konfirmasi
                     </button>
                 </div>
@@ -388,7 +412,8 @@
                 btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnToggle.classList.add('bg-gray-600', 'hover:bg-gray-700');
                 btnText.textContent = "Batal";
-                btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
+                btnIcon.innerHTML =
+                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
 
                 btnConfirm.classList.remove('hidden');
                 selectAllContainer.classList.remove('hidden');
@@ -399,7 +424,8 @@
                 btnToggle.classList.remove('bg-gray-600', 'hover:bg-gray-700');
                 btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnText.textContent = "Hapus E-Book";
-                btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
+                btnIcon.innerHTML =
+                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
 
                 btnConfirm.classList.add('hidden');
                 selectAllContainer.classList.add('hidden');

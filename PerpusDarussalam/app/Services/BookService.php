@@ -30,7 +30,6 @@ class BookService
             );
 
             $book = Book::create([
-
                 'categories_id' => $categoryId,
                 'kode_buku' => $kodeBuku,
                 'judul' => $data['judul'],
@@ -90,7 +89,6 @@ class BookService
             ];
 
             if ($request->hasFile('cover')) {
-
                 if ($book->cover && Storage::disk('public')->exists($book->cover)) {
                     Storage::disk('public')->delete($book->cover);
                 }
@@ -100,29 +98,48 @@ class BookService
                     ->store('covers', 'public');
             }
 
+            // Lakukan update data buku utama
             $book->update($dataToUpdate);
 
+            // Jika stok bertambah, gunakan bulk insert agar cepat dan aman
             if ($newStok > $oldStok) {
-
-                for ($i = $oldStok + 1; $i <= $newStok; $i++) {
-
-                    BookItem::create([
-                        'book_id'          => $book->id,
-                        'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $i),
-                        'kondisi'          => 'baik',
-                        'status_pinjam'    => 'tersedia',
-                    ]);
-
+                $lastItem = BookItem::where('book_id', $book->id)
+                    ->orderBy('id', 'desc')
+                    ->first();
+                
+                $startNumber = 1;
+                if ($lastItem) {
+                    $parts = explode('-INV-', $lastItem->nomor_inventaris);
+                    if (isset($parts[1])) {
+                        $startNumber = (int)$parts[1] + 1;
+                    }
                 }
 
-            } elseif ($newStok < $oldStok) {
+                $jumlahKurang = $newStok - $oldStok;
+                $items = [];
+                $now = now();
 
+                for ($i = 0; $i < $jumlahKurang; $i++) {
+                    $currentNumber = $startNumber + $i;
+                    $items[] = [
+                        'book_id'          => $book->id,
+                        'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $currentNumber),
+                        'kondisi'          => 'baik',
+                        'status_pinjam'    => 'tersedia',
+                        'created_at'       => $now,
+                        'updated_at'       => $now,
+                    ];
+                }
+
+                BookItem::insert($items);
+
+            } elseif ($newStok < $oldStok) {
+                // Jika stok berkurang, hapus item yang statusnya masih tersedia dari yang terbaru
                 $book->bookItems()
                     ->where('status_pinjam', 'tersedia')
                     ->orderBy('id', 'desc')
                     ->take($oldStok - $newStok)
                     ->delete();
-
             }
 
             return $book;
@@ -170,23 +187,33 @@ class BookService
 
     private function createBookItems(Book $book, int $stok)
     {
-        for($i=1;$i<=$stok;$i++){
-
-            BookItem::create([
-
-                'book_id'=>$book->id,
-
-                'nomor_inventaris'=>
-                    $book->kode_buku
-                    .'-INV-'
-                    .sprintf('%03d',$i),
-
-                'kondisi'=>'baik',
-
-                'status_pinjam'=>'tersedia'
-
-            ]);
-
+        $lastItem = BookItem::where('book_id', $book->id)
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        $startNumber = 1;
+        if ($lastItem) {
+            $parts = explode('-INV-', $lastItem->nomor_inventaris);
+            if (isset($parts[1])) {
+                $startNumber = (int)$parts[1] + 1;
+            }
         }
+
+        $items = [];
+        $now = now();
+
+        for ($i = 0; $i < $stok; $i++) {
+            $currentNumber = $startNumber + $i;
+            $items[] = [
+                'book_id' => $book->id,
+                'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $currentNumber),
+                'kondisi' => 'baik',
+                'status_pinjam' => 'tersedia',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        BookItem::insert($items);
     }
 }

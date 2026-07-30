@@ -29,8 +29,11 @@ class BorrowingExport implements FromArray, WithStyles, ShouldAutoSize
         // Header Tabel Peminjaman
         $data[] = ['ID Peminjaman', 'Nama Peminjam', 'Judul Buku', 'Status', 'Tanggal Pinjam'];
 
-        // Data Peminjaman
-        $borrowings = Borrowing::with(['user', 'bookItem.book'])->get();
+        // Ambil data peminjaman DAN FILTER BERDASARKAN TANGGAL yang dipilih
+        $borrowings = Borrowing::with(['user', 'bookItem.book'])
+            ->whereDate('created_at', $this->selectedDate->format('Y-m-d')) // <-- TAMBAHKAN FILTER TANGGAL INI
+            ->get();
+            
         $this->jumlahPeminjaman = $borrowings->count();
 
         foreach ($borrowings as $borrowing) {

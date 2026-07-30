@@ -5,18 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TransactionExport;
 
 class LaporanKeuanganController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Tanggal terpilih & Mode Filter (default: 'harian')
-        $selectedDate = $request->get('date', Carbon::now()->format('Y-m-d'));
-        $mode         = $request->get('mode', 'harian'); // 'harian' atau 'mingguan'
-        $category     = $request->get('category');
-        $search       = $request->get('search');
+        // 1. Tanggal terpilih & Mode Filter (default: objek Carbon hari ini)
+        $selectedDateInput = $request->get('date');
+        $selectedDate      = $selectedDateInput ? Carbon::parse($selectedDateInput) : Carbon::now();
+        $mode              = $request->get('mode', 'harian'); // 'harian' atau 'mingguan'
+        $category          = $request->get('category');
+        $search            = $request->get('search');
 
-        $currentCarbon = Carbon::parse($selectedDate);
+        $currentCarbon = $selectedDate->copy();
 
         // 2. Tentukan Rentang Minggu Penuh (Senin - Minggu)
         $startOfWeek = $currentCarbon->copy()->startOfWeek(Carbon::MONDAY);
@@ -37,7 +40,7 @@ class LaporanKeuanganController extends Controller
             $dates[] = [
                 'day'       => $tempDate->format('d'),
                 'full_date' => $fullDate,
-                'is_active' => ($mode === 'harian' && $fullDate === $selectedDate)
+                'is_active' => ($mode === 'harian' && $fullDate === $selectedDate->format('Y-m-d'))
             ];
             $tempDate->addDay();
         }
@@ -51,11 +54,18 @@ class LaporanKeuanganController extends Controller
         };
 
         // Hitung Jumlah Transaksi per Kategori
-        $pembuatanKartuCount   = $applyDateFilter(Transaction::where('jenis', 'pembuatan_kartu'))->count();
-        $kehilanganKartuCount  = $applyDateFilter(Transaction::where('jenis', 'kehilangan_kartu'))->count();
+        $pembuatanKartuCount    = $applyDateFilter(Transaction::where('jenis', 'pembuatan_kartu'))->count();
+        $kehilanganKartuCount   = $applyDateFilter(Transaction::where('jenis', 'kehilangan_kartu'))->count();
         $keterlambatanBukuCount = $applyDateFilter(Transaction::where('jenis', 'denda_keterlambatan'))->count();
+        
+        // Hitung Total Seluruh Nominal dari Ketiga Kategori Berdasarkan Filter Tanggal/Mode
+        $totalSemua = $applyDateFilter(Transaction::whereIn('jenis', [
+            'pembuatan_kartu', 
+            'kehilangan_kartu', 
+            'denda_keterlambatan'
+        ]))->sum('nominal');
 
-        // 5. Data Detail & Total Uang ketika Card Di-klik
+        // 5. Data Detail & Total Uang 
         $dataList = null;
         $totalCategory = 0;
 
@@ -85,8 +95,15 @@ class LaporanKeuanganController extends Controller
             'pembuatanKartuCount',
             'kehilanganKartuCount',
             'keterlambatanBukuCount',
+            'totalSemua',     
             'totalCategory',
             'dataList'
         ));
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $tanggal = $request->query('date', today()->format('Y-m-d'));
+        return Excel::download(new TransactionExport($tanggal), 'Laporan_Transaksi_' . $tanggal . '.xlsx');
     }
 }
