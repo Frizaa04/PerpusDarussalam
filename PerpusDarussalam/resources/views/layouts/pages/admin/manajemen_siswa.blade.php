@@ -1,10 +1,10 @@
 @extends('layouts.pages.admin.provider.app')
 
 @section('content')
-<div class="flex min-h-screen bg-[#f4f7f6]">
-    
-    <!-- Pemanggilan Sidebar -->
-    @include('layouts.pages.admin.provider.sidebar')
+    <div class="flex min-h-screen bg-[#f4f7f6]">
+
+        <!-- Pemanggilan Sidebar -->
+        @include('layouts.pages.admin.provider.sidebar')
 
         <main class="flex-1 flex flex-col">
             <!-- Isi Data -->
@@ -339,58 +339,69 @@
 
             <h3 class="text-xl font-bold mb-4 tracking-wide">Cetak Kartu Anggota</h3>
 
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
-                <div class="w-full sm:w-72">
-                    <div class="flex items-center border border-white rounded overflow-hidden bg-white">
-                        <input type="text" placeholder="Cari Data Siswa"
-                            class="w-full px-3 py-1.5 text-gray-700 outline-none text-sm placeholder-gray-400">
-                        <button type="button"
-                            class="bg-white text-[#004d40] px-3 py-1.5 flex items-center justify-center border-l border-gray-200">
-                            <span class="material-icons text-lg">search</span>
+            <!-- Form untuk mengirim data user yang dicentang -->
+            <form action="{{ route('member.printCards') }}" method="POST" target="_blank">
+                @csrf
+
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+                    <div class="w-full sm:w-72">
+                        <div class="flex items-center border border-white rounded overflow-hidden bg-white">
+                            <input type="text" placeholder="Cari Data Siswa"
+                                class="w-full px-3 py-1.5 text-gray-700 outline-none text-sm placeholder-gray-400">
+                            <button type="button"
+                                class="bg-white text-[#004d40] px-3 py-1.5 flex items-center justify-center border-l border-gray-200">
+                                <span class="material-icons text-lg">search</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-sm font-semibold">
+                        <!-- Tombol Submit Cetak -->
+                        <button type="submit"
+                            class="flex items-center gap-1.5 hover:text-emerald-200 transition bg-[#003d30] px-3 py-1.5 rounded border border-white/40 shadow">
+                            <span>[ Cetak Kartu Terpilih ]</span>
+                            <span class="material-icons text-sm">print</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 text-sm font-semibold">
-                    <button type="button" class="flex items-center gap-1.5 hover:text-emerald-200 transition">
-                        <span>[ Download PDF ]</span>
-                        <span class="material-icons border border-white p-0.5 rounded text-sm">download</span>
-                    </button>
-                    <button type="button" class="flex items-center gap-1.5 hover:text-emerald-200 transition">
-                        <span>[ Cetak Kartu ]</span>
-                        <span class="material-icons border border-white p-0.5 rounded text-sm">print</span>
-                    </button>
+                <div class="overflow-x-auto rounded border border-white/40 max-h-96">
+                    <table class="min-w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#003d30] border-b border-white/40 divide-x divide-white/40">
+                                <th class="p-2.5 text-sm font-bold text-center w-12">
+                                    <!-- Checkbox Pilih Semua -->
+                                    <input type="checkbox" id="selectAll" class="rounded cursor-pointer"
+                                        onclick="toggleSelectAll(this)">
+                                </th>
+                                <th class="p-2.5 text-sm font-bold">No. Induk</th>
+                                <th class="p-2.5 text-sm font-bold">Nama</th>
+                                <th class="p-2.5 text-sm font-bold">Peran</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/40">
+                            @forelse($students as $student)
+                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                    <td class="p-2.5 text-center">
+                                        <!-- Checkbox per Baris Data -->
+                                        <input type="checkbox" name="selected_users[]" value="{{ $student->id }}"
+                                            class="user-checkbox rounded cursor-pointer">
+                                    </td>
+                                    <td class="p-2.5 text-sm font-medium">
+                                        {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}</td>
+                                    <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
+                                    <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data
+                                        tidak ditemukan.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <div class="overflow-x-auto rounded border border-white/40 max-h-96">
-                <table class="min-w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-[#003d30] border-b border-white/40 divide-x divide-white/40">
-                            <th class="p-2.5 text-sm font-bold">No. Induk</th>
-                            <th class="p-2.5 text-sm font-bold">Nama</th>
-                            <th class="p-2.5 text-sm font-bold">Peran</th>
-                            <th class="p-2.5 text-sm font-bold text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/40">
-                        @forelse($students as $student)
-                            <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                <td class="p-2.5 text-sm font-medium">
-                                    {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}</td>
-                                <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
-                                <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
-                                <td class="p-2.5 text-sm text-center"></td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data tidak
-                                    ditemukan.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -444,7 +455,7 @@
             document.getElementById('cetakModal').classList.add('hidden');
         }
 
-        // --- Tutup Modal jika Klik di Luar Kotak (Backdrop) ---
+        // --- Tutup Modal jika Klik di Luar Kotak ---
         window.onclick = function(event) {
             const addUserModal = document.getElementById('addUserModal');
             const editModal = document.getElementById('editModal');
@@ -459,6 +470,13 @@
             if (event.target === cetakModal) {
                 closeCetakModal();
             }
+        }
+
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = source.checked;
+            });
         }
     </script>
 @endsection

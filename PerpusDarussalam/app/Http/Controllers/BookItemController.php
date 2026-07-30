@@ -77,4 +77,20 @@ class BookItemController extends Controller
 
         return redirect()->back()->with('success', 'Eksemplar buku berhasil dihapus!');
     }
+
+    public function printAllBarcodes($id)
+    {
+        $book = Book::with('bookItems')->findOrFail($id);
+
+        return view('layouts.pages.admin.print_all_barcodes', compact('book'));
+    }
+
+    public function printBarcode($id)
+    {
+        $item = BookItem::with('book')->findOrFail($id);        
+        $book = $item->book;
+        $book->setRelation('bookItems', collect([$item]));
+
+        return view('layouts.pages.admin.print_all_barcodes', compact('book'));
+    }
 }
