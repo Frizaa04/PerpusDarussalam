@@ -85,6 +85,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaction.edit');
     Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaction.update');
     Route::delete('/transaksi/bulk-delete', [TransaksiController::class, 'bulkDestroy'])->name('transaction.destroy.bulk');
+    Route::get('/transaksi/cari-user/{identitas}', [TransaksiController::class, 'cariUser'])->name('transaction.cariUser');
 
     // E-Book
     Route::get('/e-book', [EbookController::class, 'index'])->name('ebook.index');

@@ -135,6 +135,38 @@ class TransaksiController extends Controller
         return redirect()->route('transaction.index')->with('success', 'Data transaksi berhasil diperbarui!');
     }
 
+    public function edit($id)
+    {
+        $transaksi = Transaction::with('user')->findOrFail($id);
+
+        // Kembalikan data dalam bentuk JSON untuk modal pop-up
+        return response()->json([
+            'success' => true,
+            'data'    => $transaksi
+        ]);
+    }
+
+    public function cariUser($identitas)
+    {
+        $user = User::where('id', $identitas)
+                    ->orWhere('email', $identitas)
+                    ->orWhere('nis', $identitas)
+                    ->orWhere('nip', $identitas)
+                    ->orWhere('nik', $identitas)
+                    ->first();
+
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'name'    => $user->name
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'name'    => ''
+        ]);
+    }
     /**
      * Menghapus satu atau beberapa data transaksi secara masal (Bulk Delete).
      */
