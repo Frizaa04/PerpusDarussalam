@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BookItemController;
 
+
 // Halaman Awal (Public)
 Route::get('/', function () {
     return view('welcome');
