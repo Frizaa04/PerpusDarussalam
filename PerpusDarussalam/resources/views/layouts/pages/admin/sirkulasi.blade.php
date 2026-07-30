@@ -59,8 +59,9 @@
                             <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                 <th class="p-3 text-sm font-bold tracking-wider w-12 text-center">No</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
-                                <th class="p-3 text-sm font-bold tracking-wider">Nama Peminjam</th> <!-- Kolom Baru -->
+                                <th class="p-3 text-sm font-bold tracking-wider">Nama Peminjam</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul Buku</th>
+                                <th class="p-3 text-sm font-bold tracking-wider">No. Inventaris</th> <!-- Kolom Baru -->
                                 <th class="p-3 text-sm font-bold tracking-wider">Status</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Tanggal Pinjam</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Tanggal Jatuh Tempo</th> 
@@ -76,8 +77,9 @@
                                     {{ ($circulations->currentPage() - 1) * $circulations->perPage() + $loop->iteration }}
                                 </td>
                                 <td class="p-3 text-sm font-bold text-white/90">{{ $item->identitas }}</td>
-                                <td class="p-3 text-sm text-white/90">{{ $item->name }}</td> <!-- Data Nama Peminjam Baru -->
+                                <td class="p-3 text-sm text-white/90">{{ $item->name }}</td>
                                 <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
+                                <td class="p-3 text-sm font-mono text-white/90">{{ $item->nomor_inv }}</td> <!-- Data No. Inventaris Baru -->
                                 <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">
                                     {{ $item->status }}
                                 </td>
@@ -110,7 +112,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
+                                <td colspan="10" class="p-5 text-center text-sm font-semibold text-white/80">Data sirkulasi tidak ditemukan.</td>
                             </tr>
                         @endforelse
                         </tbody>
@@ -162,14 +164,14 @@
 
         <h3 class="text-xl font-bold mb-4 tracking-wide">Peminjaman Baru</h3>
 
-        <!-- Tampilkan Error Validasi jika ada -->
-        @if ($errors->any())
-            <div class="mb-3 p-2 bg-red-600 text-white rounded text-xs">
-                @foreach ($errors->all() as $error)
+        <!-- Tempat Error Validasi / Exception -->
+        <div id="modalErrorContainer" class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->borrowForm->any() ? '' : 'hidden' }}">
+            @if ($errors->borrowForm->any())
+                @foreach ($errors->borrowForm->all() as $error)
                     <div>{{ $error }}</div>
                 @endforeach
-            </div>
-        @endif
+            @endif
+        </div>
 
         <form action="{{ route('circulation.store') }}" method="POST" class="space-y-3">
             @csrf
@@ -189,7 +191,13 @@
             <!-- Input Scan Buku (Nomor Inventaris) -->
             <div>
                 <label class="block text-sm font-semibold mb-1 text-white">Nomor Inventaris Buku</label>
-                <input type="text" id="inputScanBuku" name="book_item_id" placeholder="Scan Barcode Buku (Cth: FIK-2026-001-INV-001)..." value="{{ old('book_item_id') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none">
+                <input type="text" id="inputScanBuku" name="book_item_id" placeholder="Scan Barcode Buku..." value="{{ old('book_item_id') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none">
+            </div>
+
+            <!-- Input Judul Buku Otomatis Muncul (Baru) -->
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-white">Judul Buku</label>
+                <input type="text" id="inputJudulBuku" placeholder="Otomatis terisi..." readonly class="w-full bg-gray-300 text-gray-700 text-sm font-medium px-3 py-1.5 rounded outline-none cursor-not-allowed">
             </div>
 
             <div>
@@ -209,20 +217,20 @@
 <!-- SCRIPT JS MODAL -->
 <script>
     function openBorrowModal() {
-        document.getElementById('borrowModal').classList.remove('hidden');
-        setTimeout(() => {
-            document.getElementById('inputScanKartu').focus();
-        }, 100);
-    }
-
-    function closeBorrowModal() {
-        document.getElementById('borrowModal').classList.add('hidden');
-    }
-
-    window.onclick = function(event) {
         const modal = document.getElementById('borrowModal');
-        if (event.target === modal) {
-            closeBorrowModal();
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Fokus otomatis ke input pertama saat modal terbuka (opsional tapi disarankan)
+            const inputIdentitas = document.getElementById('inputScanKartu');
+            if (inputIdentitas) inputIdentitas.focus();
+        }
+    }
+
+    // Fungsi untuk menutup modal
+    function closeBorrowModal() {
+        const modal = document.getElementById('borrowModal');
+        if (modal) {
+            modal.classList.add('hidden');
         }
     }
 
@@ -231,6 +239,12 @@
         const inputNama = document.getElementById('inputNama');
         const inputBookItem = document.getElementById('inputScanBuku');
 
+        // --- 1. OTOMATIS BUKA MODAL JIKA ADA ERROR DARI SERVER ---
+        @if ($errors->borrowForm->any())
+            openBorrowModal();
+        @endif
+
+        // --- 2. LISTENER SCAN KARTU ANGGOTA ---
         if (inputIdentitas) {
             inputIdentitas.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
@@ -258,10 +272,32 @@
             });
         }
 
+        // --- 3. LISTENER SCAN BUKU (NOMOR INVENTARIS) ---
         if (inputBookItem) {
             inputBookItem.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault();
+                    e.preventDefault(); // Mencegah form tersubmit otomatis saat menekan Enter pada barcode scanner
+                    let nomorInv = this.value.trim();
+
+                    if (nomorInv.length > 0) {
+                        fetch(`/api/check-book/${nomorInv}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    inputJudulBuku.value = data.title;
+                                    
+                                    // Opsional: Validasi status langsung di sisi client jika buku sedang dipinjam
+                                    if (data.status === 'dipinjam') {
+                                        alert('Peringatan: Buku ini sedang dalam status dipinjam!');
+                                    }
+                                } else {
+                                    inputJudulBuku.value = 'Buku tidak ditemukan';
+                                    inputBookItem.value = '';
+                                    inputBookItem.focus();
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
                 }
             });
         }
