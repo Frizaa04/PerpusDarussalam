@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\visits; 
-use App\Models\Borrowing; 
+use App\Models\Borrowing;
+use App\Models\BookItem;
+use App\Models\User; 
 use Carbon\Carbon;   
 
 class AdminDashboardController extends Controller
@@ -28,6 +30,9 @@ class AdminDashboardController extends Controller
                                   ->whereDate('updated_at', today())
                                   ->count();
 
+        $totalMembers = User::count();
+        $totalBookItems = BookItem::count();
+
         // Ambil data transaksi peminjaman & pengembalian terbaru langsung dari Database
         $recentActivities = Borrowing::with(['user', 'bookItem.book'])
             ->latest('updated_at')
@@ -49,6 +54,8 @@ class AdminDashboardController extends Controller
             'todayVisitors', 
             'todayBorrowings', 
             'todayReturns', 
+            'totalMembers',
+            'totalBookItems',
             'recentActivities'
         ));
     }

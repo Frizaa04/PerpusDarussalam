@@ -133,4 +133,42 @@ class LaporanService
         }
         return $dates;
     }
+
+    public function getChartSirkulasiMingguan(Carbon $tanggal)
+    {
+        $startOfWeek = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
+
+        // Ambil data kunjungan dikelompokkan per tanggal dalam minggu tersebut
+        $visitsData = Visits::selectRaw('DATE(visited_at) as date, COUNT(*) as count')
+            ->whereBetween('visited_at', [$startOfWeek, $endOfWeek])
+            ->groupBy('date')
+            ->pluck('count', 'date');
+
+        // Ambil data peminjaman dikelompokkan per tanggal dalam minggu tersebut
+        $borrowingsData = Borrowing::selectRaw('DATE(tanggal_pinjam) as date, COUNT(*) as count')
+            ->whereBetween('tanggal_pinjam', [$startOfWeek, $endOfWeek])
+            ->groupBy('date')
+            ->pluck('count', 'date');
+
+        $labels = [];
+        $pengunjungValues = [];
+        $peminjamanValues = [];
+
+        // Loop dari Senin sampai Minggu
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startOfWeek->copy()->addDays($i);
+            $dateStr = $date->format('Y-m-d');
+
+            $labels[] = $date->translatedFormat('D, d M'); // Contoh: Sen, 01 Jan
+            $pengunjungValues[] = $visitsData[$dateStr] ?? 0;
+            $peminjamanValues[] = $borrowingsData[$dateStr] ?? 0;
+        }
+
+        return [
+            'chartLabels'     => $labels,
+            'chartPengunjung' => $pengunjungValues,
+            'chartPeminjaman' => $peminjamanValues,
+        ];
+    }
 }

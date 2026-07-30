@@ -117,7 +117,7 @@ Route::middleware(['admin'])->group(function () {
     // Route Notifikasi
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
     Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
-    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.readAll');
+    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 
     // Logout Admin Legacy
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
