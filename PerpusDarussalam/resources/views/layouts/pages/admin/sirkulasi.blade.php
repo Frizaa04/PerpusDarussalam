@@ -59,11 +59,7 @@
                             <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                 <th class="p-3 text-sm font-bold tracking-wider w-12 text-center">No</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
-<<<<<<< Updated upstream
                                 <th class="p-3 text-sm font-bold tracking-wider">Nama Peminjam</th>
-=======
-                                <th class="p-3 text-sm font-bold tracking-wider">Nama Peminjam</th> 
->>>>>>> Stashed changes
                                 <th class="p-3 text-sm font-bold tracking-wider">Judul Buku</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">No. Inventaris</th> <!-- Kolom Baru -->
                                 <th class="p-3 text-sm font-bold tracking-wider">Status</th>
@@ -81,11 +77,7 @@
                                     {{ ($circulations->currentPage() - 1) * $circulations->perPage() + $loop->iteration }}
                                 </td>
                                 <td class="p-3 text-sm font-bold text-white/90">{{ $item->identitas }}</td>
-<<<<<<< Updated upstream
                                 <td class="p-3 text-sm text-white/90">{{ $item->name }}</td>
-=======
-                                <td class="p-3 text-sm text-white/90">{{ $item->name }}</td> 
->>>>>>> Stashed changes
                                 <td class="p-3 text-sm text-white/90">{{ $item->book_title }}</td>
                                 <td class="p-3 text-sm font-mono text-white/90">{{ $item->nomor_inv }}</td> <!-- Data No. Inventaris Baru -->
                                 <td class="p-3 text-sm font-bold {{ $item->status == 'Telat' ? 'text-red-600' : 'text-white/90' }}">

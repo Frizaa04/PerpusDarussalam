@@ -12,6 +12,30 @@
             <!-- Body Area -->
             <div class="p-8 space-y-6">
 
+                <!-- NOTIFIKASI SUCCESS / ERROR -->
+                @if (session('success'))
+                    <div class="bg-emerald-600 text-white p-4 rounded-lg shadow font-bold text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="bg-red-600 text-white p-4 rounded-lg shadow font-bold text-sm">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="bg-red-500 text-white p-4 rounded-lg shadow text-sm">
+                        <p class="font-bold mb-1">Gagal Menyimpan Data:</p>
+                        <ul class="list-disc list-inside space-y-0.5 text-xs">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Pencarian & Tombol E-Book Baru -->
                 <div class="flex items-center gap-4 mb-6">
                     <div class="max-w-md w-full">
@@ -33,19 +57,18 @@
                     </button>
                 </div>
 
-                <!-- Form Pembungkus Penghapusan Massal untuk Tabel Bawah -->
+                <!-- Form Pembungkus Penghapusan Massal -->
                 <form id="deleteForm" action="{{ route('ebook.destroy-multiple') }}" method="POST">
                     @csrf
                     @method('DELETE')
 
-                    <!-- Tabel Daftar E-Book (Tabel Bawah yang Dipertahankan & Dilengkapi Tombol Hapus) -->
+                    <!-- Tabel Daftar E-Book -->
                     <div class="bg-[#b0bec5] rounded-lg shadow-md overflow-hidden p-6">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-white text-xl font-bold tracking-wide">Tabel Daftar E-Book</h2>
 
-                            <!-- Bagian Tombol Aksi (Pilih Semua, Konfirmasi, & Toggle Mode Hapus) -->
+                            <!-- Bagian Tombol Aksi -->
                             <div class="flex items-center gap-2">
-                                <!-- Checkbox Pilih Semua (Awalnya Tersembunyi) -->
                                 <div id="selectAllContainer"
                                     class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
                                     <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"
@@ -54,13 +77,11 @@
                                         class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
                                 </div>
 
-                                <!-- Tombol Konfirmasi Hapus (Awalnya Tersembunyi) -->
                                 <button type="submit" id="btnConfirmDelete"
                                     class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
                                     Konfirmasi Hapus
                                 </button>
 
-                                <!-- Tombol Toggle Mode Hapus -->
                                 <button type="button" id="btnToggleDelete" onclick="toggleDeleteMode()"
                                     class="bg-[#004d40] hover:bg-[#003d30] text-white font-bold px-3 py-1.5 rounded text-sm transition shadow flex items-center gap-1.5 select-none">
                                     <svg id="btnIcon" xmlns="http://www.w3.org/2000/svg"
@@ -74,65 +95,100 @@
                             </div>
                         </div>
 
+                        <!-- Grid Tabel -->
                         <div class="overflow-x-auto rounded">
-                            <table class="w-full text-left border-collapse">
+                            <table class="min-w-full text-left border-collapse border border-white/40">
                                 <thead>
-                                    <tr class="bg-[#004d40] text-white text-sm uppercase">
-                                        <th class="p-3">Cover</th>
-                                        <th class="p-3">Judul E-Book</th>
-                                        <th class="p-3">Kategori</th>
-                                        <th class="p-3">Tahun</th>
-                                        <th class="p-3 text-center">Aksi</th>
+                                    <tr class="bg-[#004d40] text-white divide-x divide-white/40">
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider text-center">Cover</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">Kode E-Book</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">Judul E-Book</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">Kategori</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">Penulis</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">Penerbit</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">Tahun Terbit</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider">ISBN</th>
+                                        <th class="p-3 text-xs font-bold uppercase tracking-wider text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-300 bg-[#b0bec5] text-gray-800 text-sm font-medium">
+                                <tbody class="text-gray-900 divide-y divide-white/40">
                                     @forelse($ebooks as $ebook)
-                                        <tr class="hover:bg-gray-400/20 transition">
-                                            <td class="p-3">
-                                                <div
-                                                    class="w-12 h-16 bg-gray-300 border border-gray-400 rounded flex items-center justify-center text-xs text-gray-600 font-bold">
-                                                    PDF
-                                                </div>
+                                        <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                            <td class="p-3 text-sm text-center">
+                                                @if($ebook->cover)
+                                                    <img src="{{ asset('storage/' . $ebook->cover) }}" class="w-10 h-14 object-cover rounded shadow mx-auto">
+                                                @else
+                                                    <div class="w-10 h-14 bg-gray-300 border border-white/40 rounded flex items-center justify-center text-[10px] text-gray-700 font-bold mx-auto">
+                                                        PDF
+                                                    </div>
+                                                @endif
                                             </td>
-                                            <td class="p-3 font-semibold text-gray-900">{{ $ebook->judul }}</td>
-                                            <td class="p-3">{{ $ebook->category->nama ?? ($ebook->kategori ?? '-') }}
-                                            </td>
-                                            <td class="p-3">{{ $ebook->tahun_terbit }}</td>
-
-                                            <td class="p-3 text-center">
-                                                <!-- Mode Normal: Tombol Edit & Baca PDF -->
+                                            <td class="p-3 text-sm font-mono font-bold">{{ $ebook->kode_ebook }}</td>
+                                            <td class="p-3 text-sm font-bold">{{ $ebook->judul }}</td>
+                                            <td class="p-3 text-sm font-medium">{{ $ebook->category->nama ?? '-' }}</td>
+                                            <td class="p-3 text-sm font-medium">{{ $ebook->penulis }}</td>
+                                            <td class="p-3 text-sm font-medium">{{ $ebook->penerbit }}</td>
+                                            <td class="p-3 text-sm font-medium">{{ $ebook->tahun_terbit }}</td>
+                                            <td class="p-3 text-sm font-mono">{{ $ebook->isbn ?? '-' }}</td>
+                                            <td class="p-3 text-sm text-center">
                                                 <div class="edit-mode-action flex items-center justify-center gap-2">
                                                     <button type="button"
-                                                        onclick="openEditEbookModal('{{ $ebook->id }}', '{{ $ebook->judul }}', '{{ $ebook->categories_id }}', '{{ $ebook->tahun_terbit }}')"
-                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#003d30] transition shadow-sm">
+                                                        onclick="openEditEbookModal('{{ $ebook->id }}', '{{ $ebook->kode_ebook }}', '{{ addslashes($ebook->judul) }}', '{{ $ebook->categories_id }}', '{{ addslashes($ebook->penulis) }}', '{{ addslashes($ebook->penerbit) }}', '{{ $ebook->tahun_terbit }}', '{{ $ebook->isbn }}')"
+                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                         Edit Data
                                                     </button>
                                                     <button type="button"
                                                         onclick="window.open('{{ asset('storage/' . $ebook->file_pdf) }}', '_blank')"
-                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-[#003d30] transition shadow-sm">
+                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                         Baca PDF
                                                     </button>
                                                 </div>
 
-                                                <!-- Mode Hapus: Checkbox Hapus Massal -->
-                                                <div
-                                                    class="delete-mode-action hidden flex items-center justify-center gap-2">
+                                                <div class="delete-mode-action hidden flex items-center justify-center gap-2">
                                                     <input type="checkbox" name="ids[]" value="{{ $ebook->id }}"
                                                         class="ebook-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
-                                                    <span class="text-xs font-semibold text-red-900 italic">Centang untuk
-                                                        hapus</span>
+                                                    <span class="text-xs font-semibold text-red-900 italic">Centang untuk hapus</span>
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="p-5 text-center text-sm font-semibold text-gray-800">
-                                                Belum ada data e-book.</td>
+                                            <td colspan="9" class="p-5 text-center text-sm font-semibold text-gray-800">
+                                                Belum ada data e-book.
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Paginasi -->
+                        @if ($ebooks->total() > 0)
+                            <div class="mt-6 flex items-center justify-center gap-2">
+                                @if ($ebooks->onFirstPage())
+                                    <span class="px-2 py-1 text-white/50 font-bold select-none cursor-default">&lt;</span>
+                                @else
+                                    <a href="{{ $ebooks->previousPageUrl() }}" class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&lt;</a>
+                                @endif
+
+                                @foreach ($ebooks->getUrlRange(1, $ebooks->lastPage()) as $page => $url)
+                                    @if ($page == $ebooks->currentPage())
+                                        <!-- Halaman Aktif (Kotak Putih) -->
+                                        <span class="bg-white text-[#004d40] font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow cursor-default">{{ $page }}</span>
+                                    @else
+                                        <!-- Halaman Tidak Aktif (Teks Biasa, Kotak Putih Hanya Saat Hover) -->
+                                        <a href="{{ $url }}" class="text-white font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm hover:bg-white hover:text-[#004d40] transition duration-200">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+
+                                @if ($ebooks->hasMorePages())
+                                    <a href="{{ $ebooks->nextPageUrl() }}" class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&gt;</a>
+                                @else
+                                    <span class="px-2 py-1 text-white/50 font-bold select-none cursor-default">&gt;</span>
+                                @endif
+                            </div>
+                        @endif
+
                     </div>
                 </form>
 
@@ -142,44 +198,70 @@
 
     <!-- ================= MODAL TAMBAH E-BOOK ================= -->
     <div id="addEbookModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-[#004d40] rounded-xl w-full max-w-xl p-6 shadow-2xl relative text-white">
+        <div class="bg-[#004d40] rounded-xl w-full max-w-3xl p-8 shadow-2xl relative text-white">
             <button onclick="closeAddEbookModal()"
-                class="absolute top-4 right-4 text-white hover:text-gray-200 text-xl font-bold">&times;</button>
+                class="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl font-bold">&times;</button>
 
-            <h3 class="text-xl font-bold mb-6">Tambah E-Book Baru</h3>
+            <h3 class="text-2xl font-bold mb-6">Tambah E-Book Baru</h3>
 
-            <form action="{{ route('ebook.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('ebook.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-x-6 gap-y-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Judul E-Book</label>
-                        <input type="text" name="judul"
-                            class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KODE E-BOOK</label>
+                        <input type="text" name="kode_ebook" value="{{ old('kode_ebook') }}" placeholder="Contoh: EB-1001"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none placeholder-gray-500" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Kategori</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">JUDUL E-BOOK</label>
+                        <input type="text" name="judul" value="{{ old('judul') }}"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KATEGORI</label>
                         <select name="categories_id"
-                            class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
                             <option value="">Pilih Kategori</option>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
+                                <option value="{{ $cat->id }}" {{ old('categories_id') == $cat->id ? 'selected' : '' }}>{{ $cat->nama }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Tahun Terbit</label>
-                        <input type="number" name="tahun"
-                            class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENULIS</label>
+                        <input type="text" name="penulis" value="{{ old('penulis') }}"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">File PDF E-Book</label>
-                        <input type="file" name="file_pdf" accept=".pdf" class="w-full text-xs text-white">
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENERBIT</label>
+                        <input type="text" name="penerbit" value="{{ old('penerbit') }}"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">TAHUN TERBIT</label>
+                        <input type="number" name="tahun_terbit" value="{{ old('tahun_terbit') }}" placeholder="YYYY"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none placeholder-gray-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">ISBN (OPSIONAL)</label>
+                        <input type="text" name="isbn" value="{{ old('isbn') }}"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">COVER E-BOOK (OPSIONAL)</label>
+                        <input type="file" name="cover" accept="image/*"
+                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">FILE PDF E-BOOK</label>
+                        <input type="file" name="file_pdf" accept=".pdf"
+                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer" required>
                     </div>
                 </div>
 
-                <div class="mt-8 flex justify-center">
+                <div class="pt-4 flex justify-center">
                     <button type="submit"
-                        class="bg-white text-[#004d40] px-8 py-2 rounded font-bold text-sm hover:bg-gray-100 transition shadow">
+                        class="bg-white text-[#004d40] px-10 py-2.5 rounded-lg font-bold text-base hover:bg-gray-100 transition shadow-md">
                         Konfirmasi
                     </button>
                 </div>
@@ -189,26 +271,31 @@
 
     <!-- ================= MODAL EDIT E-BOOK ================= -->
     <div id="editEbookModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-[#004d40] rounded-xl w-full max-w-xl p-6 shadow-2xl relative text-white">
+        <div class="bg-[#004d40] rounded-xl w-full max-w-3xl p-8 shadow-2xl relative text-white">
             <button onclick="closeEditEbookModal()"
-                class="absolute top-4 right-4 text-white hover:text-gray-200 text-xl font-bold">&times;</button>
+                class="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl font-bold">&times;</button>
 
-            <h3 class="text-xl font-bold mb-6">Edit Data E-Book</h3>
+            <h3 class="text-2xl font-bold mb-6">Edit Data E-Book</h3>
 
-            <form id="formEditEbook" action="" method="POST" enctype="multipart/form-data">
+            <form id="formEditEbook" action="" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 @method('PUT')
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-x-6 gap-y-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Judul E-Book</label>
-                        <input type="text" id="editEbookJudul" name="judul"
-                            class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KODE E-BOOK</label>
+                        <input type="text" id="editEbookKode" name="kode_ebook"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Kategori</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">JUDUL E-BOOK</label>
+                        <input type="text" id="editEbookJudul" name="judul"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">KATEGORI</label>
                         <select id="editEbookKategori" name="categories_id"
-                            class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
                             <option value="">Pilih Kategori</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
@@ -216,20 +303,40 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Tahun Terbit</label>
-                        <input type="number" id="editEbookTahun" name="tahun"
-                            class="w-full px-3 py-2 bg-gray-300 text-gray-800 rounded text-sm focus:outline-none" required>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENULIS</label>
+                        <input type="text" id="editEbookPenulis" name="penulis"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider mb-1">Ganti File PDF
-                            (Opsional)</label>
-                        <input type="file" name="file_pdf" accept=".pdf" class="w-full text-xs text-white">
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">PENERBIT</label>
+                        <input type="text" id="editEbookPenerbit" name="penerbit"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">TAHUN TERBIT</label>
+                        <input type="number" id="editEbookTahun" name="tahun_terbit"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">ISBN (OPSIONAL)</label>
+                        <input type="text" id="editEbookIsbn" name="isbn"
+                            class="w-full px-4 py-2.5 bg-[#cfd8dc] text-gray-800 rounded-lg text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">GANTI COVER (OPSIONAL)</label>
+                        <input type="file" name="cover" accept="image/*"
+                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-2">GANTI FILE PDF (OPSIONAL)</label>
+                        <input type="file" name="file_pdf" accept=".pdf"
+                            class="w-full bg-[#cfd8dc] text-gray-700 rounded-lg text-xs focus:outline-none file:mr-3 file:py-2 file:px-3 file:rounded-l-lg file:border-0 file:text-xs file:font-bold file:bg-[#37474f] file:text-white cursor-pointer">
                     </div>
                 </div>
 
-                <div class="mt-8 flex justify-center">
+                <div class="pt-4 flex justify-center">
                     <button type="submit"
-                        class="bg-white text-[#004d40] px-8 py-2 rounded font-bold text-sm hover:bg-gray-100 transition shadow">
+                        class="bg-white text-[#004d40] px-10 py-2.5 rounded-lg font-bold text-base hover:bg-gray-100 transition shadow-md">
                         Konfirmasi
                     </button>
                 </div>
@@ -238,24 +345,25 @@
     </div>
 
     <script>
-        // Fungsi untuk membuka modal Tambah E-Book
         function openAddEbookModal() {
             document.getElementById('addEbookModal').classList.remove('hidden');
         }
 
-        // Fungsi untuk menutup modal Tambah E-Book
         function closeAddEbookModal() {
             document.getElementById('addEbookModal').classList.add('hidden');
         }
 
-        function openEditEbookModal(id, judul, categoriesId, tahun) {
+        function openEditEbookModal(id, kodeEbook, judul, categoriesId, penulis, penerbit, tahunTerbit, isbn) {
+            document.getElementById('editEbookKode').value = kodeEbook;
             document.getElementById('editEbookJudul').value = judul;
             document.getElementById('editEbookKategori').value = categoriesId;
-            document.getElementById('editEbookTahun').value = tahun;
+            document.getElementById('editEbookPenulis').value = penulis;
+            document.getElementById('editEbookPenerbit').value = penerbit;
+            document.getElementById('editEbookTahun').value = tahunTerbit;
+            document.getElementById('editEbookIsbn').value = (isbn !== 'null' && isbn !== 'undefined') ? isbn : '';
 
-            // Mengatur action route update dinamis berdasarkan ID
-            document.getElementById('formEditEbook').action = '/e-book/' + id;
-
+            // Disesuaikan agar cocok dengan Route::put('/e-book/update/{id}')
+            document.getElementById('formEditEbook').action = '/e-book/update/' + id;
             document.getElementById('editEbookModal').classList.remove('hidden');
         }
 
@@ -263,72 +371,64 @@
             document.getElementById('editEbookModal').classList.add('hidden');
         }
 
-        function bacaPdf(url) {
-            window.open(url, '_blank');
-        }
-
         let isDeleteModeActive = false;
 
-    function toggleDeleteMode() {
-        isDeleteModeActive = !isDeleteModeActive;
+        function toggleDeleteMode() {
+            isDeleteModeActive = !isDeleteModeActive;
 
-        let btnToggle = document.getElementById('btnToggleDelete');
-        let btnConfirm = document.getElementById('btnConfirmDelete');
-        let selectAllContainer = document.getElementById('selectAllContainer');
-        let btnText = document.getElementById('btnText');
-        let btnIcon = document.getElementById('btnIcon');
-        let editActions = document.querySelectorAll('.edit-mode-action');
-        let deleteActions = document.querySelectorAll('.delete-mode-action');
+            let btnToggle = document.getElementById('btnToggleDelete');
+            let btnConfirm = document.getElementById('btnConfirmDelete');
+            let selectAllContainer = document.getElementById('selectAllContainer');
+            let btnText = document.getElementById('btnText');
+            let btnIcon = document.getElementById('btnIcon');
+            let editActions = document.querySelectorAll('.edit-mode-action');
+            let deleteActions = document.querySelectorAll('.delete-mode-action');
 
-        if (isDeleteModeActive) {
-            btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
-            btnToggle.classList.add('bg-gray-600', 'hover:bg-gray-700');
-            btnText.textContent = "Batal";
-            
-            // Ubah ikon tombol jadi silang
-            btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
+            if (isDeleteModeActive) {
+                btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
+                btnToggle.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                btnText.textContent = "Batal";
+                btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
 
-            btnConfirm.classList.remove('hidden');
-            selectAllContainer.classList.remove('hidden');
+                btnConfirm.classList.remove('hidden');
+                selectAllContainer.classList.remove('hidden');
 
-            editActions.forEach(el => el.classList.add('hidden'));
-            deleteActions.forEach(el => el.classList.remove('hidden'));
-        } else {
-            btnToggle.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-            btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
-            btnText.textContent = "Hapus E-Book";
-            
-            // Kembalikan ikon tempat sampah
-            btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
+                editActions.forEach(el => el.classList.add('hidden'));
+                deleteActions.forEach(el => el.classList.remove('hidden'));
+            } else {
+                btnToggle.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
+                btnText.textContent = "Hapus E-Book";
+                btnIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
 
-            btnConfirm.classList.add('hidden');
-            selectAllContainer.classList.add('hidden');
+                btnConfirm.classList.add('hidden');
+                selectAllContainer.classList.add('hidden');
 
-            editActions.forEach(el => el.classList.remove('hidden'));
-            deleteActions.forEach(el => el.classList.add('hidden'));
+                editActions.forEach(el => el.classList.remove('hidden'));
+                deleteActions.forEach(el => el.classList.add('hidden'));
 
-            document.getElementById('selectAllCheckbox').checked = false;
-            document.querySelectorAll('.ebook-checkbox').forEach(cb => cb.checked = false);
-        }
-    }
-
-    function toggleSelectAll(source) {
-        let checkboxes = document.querySelectorAll('.ebook-checkbox');
-        checkboxes.forEach(cb => {
-            cb.checked = source.checked;
-        });
-    }
-
-    document.getElementById('deleteForm').addEventListener('submit', function(e) {
-        let checkedBoxes = document.querySelectorAll('.ebook-checkbox:checked');
-        if (checkedBoxes.length === 0) {
-            alert('Pilih minimal satu e-book yang ingin dihapus!');
-            e.preventDefault();
-        } else {
-            if (!confirm('Yakin ingin menghapus e-book yang dipilih?')) {
-                e.preventDefault();
+                document.getElementById('selectAllCheckbox').checked = false;
+                document.querySelectorAll('.ebook-checkbox').forEach(cb => cb.checked = false);
             }
         }
-    });
+
+        function toggleSelectAll(source) {
+            let checkboxes = document.querySelectorAll('.ebook-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+            });
+        }
+
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            let checkedBoxes = document.querySelectorAll('.ebook-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                alert('Pilih minimal satu e-book yang ingin dihapus!');
+                e.preventDefault();
+            } else {
+                if (!confirm('Yakin ingin menghapus e-book yang dipilih?')) {
+                    e.preventDefault();
+                }
+            }
+        });
     </script>
 @endsection
