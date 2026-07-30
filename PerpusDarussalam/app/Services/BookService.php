@@ -59,75 +59,75 @@ class BookService
     }
 
     public function updateBook(Book $book, Request $request)
-{
-    return DB::transaction(function () use ($book, $request) {
+    {
+        return DB::transaction(function () use ($book, $request) {
 
-        $categoryId = $request->categories_id;
+            $categoryId = $request->categories_id;
 
-        if (!is_numeric($categoryId)) {
-            $category = Category::firstOrCreate([
-                'nama' => $categoryId ?? 'Umum'
-            ]);
-
-            $categoryId = $category->id;
-        }
-
-        $oldStok = $book->stok;
-        $newStok = (int) $request->stok;
-
-        $dataToUpdate = [
-            'kode_buku'         => $request->kode_buku,
-            'categories_id'     => $categoryId,
-            'judul'             => $request->judul,
-            'penulis'           => $request->penulis,
-            'penerbit'          => $request->penerbit,
-            'isbn'              => $request->isbn,
-            'tanggal_pembelian' => date('Y-m-d', strtotime($request->tanggal_pembelian)),
-            'tahun_terbit'      => $request->tahun_terbit,
-            'stok'              => $newStok,
-            'deskripsi'         => $request->deskripsi ?? null,
-            'rak'               => $request->rak ?? null,
-        ];
-
-        if ($request->hasFile('cover')) {
-
-            if ($book->cover && Storage::disk('public')->exists($book->cover)) {
-                Storage::disk('public')->delete($book->cover);
-            }
-
-            $dataToUpdate['cover'] = $request
-                ->file('cover')
-                ->store('covers', 'public');
-        }
-
-        $book->update($dataToUpdate);
-
-        if ($newStok > $oldStok) {
-
-            for ($i = $oldStok + 1; $i <= $newStok; $i++) {
-
-                BookItem::create([
-                    'book_id'          => $book->id,
-                    'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $i),
-                    'kondisi'          => 'baik',
-                    'status_pinjam'    => 'tersedia',
+            if (!is_numeric($categoryId)) {
+                $category = Category::firstOrCreate([
+                    'nama' => $categoryId ?? 'Umum'
                 ]);
 
+                $categoryId = $category->id;
             }
 
-        } elseif ($newStok < $oldStok) {
+            $oldStok = $book->stok;
+            $newStok = (int) $request->stok;
 
-            $book->bookItems()
-                ->where('status_pinjam', 'tersedia')
-                ->orderBy('id', 'desc')
-                ->take($oldStok - $newStok)
-                ->delete();
+            $dataToUpdate = [
+                'kode_buku'         => $request->kode_buku,
+                'categories_id'     => $categoryId,
+                'judul'             => $request->judul,
+                'penulis'           => $request->penulis,
+                'penerbit'          => $request->penerbit,
+                'isbn'              => $request->isbn,
+                'tanggal_pembelian' => date('Y-m-d', strtotime($request->tanggal_pembelian)),
+                'tahun_terbit'      => $request->tahun_terbit,
+                'stok'              => $newStok,
+                'deskripsi'         => $request->deskripsi ?? null,
+                'rak'               => $request->rak ?? null,
+            ];
 
-        }
+            if ($request->hasFile('cover')) {
 
-        return $book;
-    });
-}
+                if ($book->cover && Storage::disk('public')->exists($book->cover)) {
+                    Storage::disk('public')->delete($book->cover);
+                }
+
+                $dataToUpdate['cover'] = $request
+                    ->file('cover')
+                    ->store('covers', 'public');
+            }
+
+            $book->update($dataToUpdate);
+
+            if ($newStok > $oldStok) {
+
+                for ($i = $oldStok + 1; $i <= $newStok; $i++) {
+
+                    BookItem::create([
+                        'book_id'          => $book->id,
+                        'nomor_inventaris' => $book->kode_buku . '-INV-' . sprintf('%03d', $i),
+                        'kondisi'          => 'baik',
+                        'status_pinjam'    => 'tersedia',
+                    ]);
+
+                }
+
+            } elseif ($newStok < $oldStok) {
+
+                $book->bookItems()
+                    ->where('status_pinjam', 'tersedia')
+                    ->orderBy('id', 'desc')
+                    ->take($oldStok - $newStok)
+                    ->delete();
+
+            }
+
+            return $book;
+        });
+    }
 
     public function deleteBook(Book $book)
     {

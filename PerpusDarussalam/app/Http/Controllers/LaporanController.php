@@ -39,8 +39,11 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         $params = $this->getCommonParams($request);
-        $data = $this->laporanService->dashboard($params['selectedDate'], $params['mode']);
-
+    
+        // Ambil data dashboard & data chart mingguan
+        $dataDashboard = $this->laporanService->dashboard($params['selectedDate'], $params['mode']);
+        $dataChart     = $this->laporanService->getChartSirkulasiMingguan($params['selectedDate']);
+        $data = array_merge($dataDashboard, $dataChart);
         return view('layouts.pages.admin.laporan', array_merge($data, $params));
     }
 
