@@ -119,10 +119,10 @@
                                             </td>
                                             <td class="p-3 text-sm font-medium text-center">
                                                 <div class="flex items-center justify-center gap-3">
-                                                    <a href="{{ route('transaction.edit', $transaction->id) }}"
+                                                    <button type="button" onclick="openEditModal({{ $transaction->id }})"
                                                         class="edit-mode-action bg-[#004d40] text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-[#003d30] transition border border-white/20">
                                                         Edit Data
-                                                    </a>
+                                                    </button>
                                                     <!-- Checkbox per Baris (Tersembunyi Awal) -->
                                                     <input type="checkbox" name="ids[]" value="{{ $transaction->id }}"
                                                         class="item-checkbox delete-mode-action w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer hidden">
@@ -147,23 +147,27 @@
                                 @if ($transactions->onFirstPage())
                                     <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
                                 @else
-                                    <a href="{{ $transactions->previousPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
+                                    <a href="{{ $transactions->previousPageUrl() }}"
+                                        class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
                                 @endif
 
                                 {{-- Nomor Halaman --}}
                                 @foreach ($transactions->getUrlRange(1, max($transactions->lastPage(), 1)) as $page => $url)
                                     @if ($page == $transactions->currentPage())
                                         {{-- Halaman Aktif (Kotak Putih, Teks Gelap) --}}
-                                        <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
+                                        <span
+                                            class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
                                     @else
                                         {{-- Halaman Lain --}}
-                                        <a href="{{ $url }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
+                                        <a href="{{ $url }}"
+                                            class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
                                     @endif
                                 @endforeach
 
                                 {{-- Tombol Next (>) --}}
                                 @if ($transactions->hasMorePages())
-                                    <a href="{{ $transactions->nextPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
+                                    <a href="{{ $transactions->nextPageUrl() }}"
+                                        class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
                                 @else
                                     <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
                                 @endif
@@ -200,9 +204,10 @@
                     <!-- Kolom Kiri 1: No Identitas -->
                     <div>
                         <label class="block text-sm font-medium mb-1">No Identitas</label>
-                        <input type="text" name="no_identitas" value="{{ old('no_identitas') }}" placeholder="..."
+                        <input type="text" id="input-no-identitas" name="no_identitas" placeholder="..."
                             class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
                     </div>
+
 
                     <!-- Kolom Kanan 1: Nominal -->
                     <div>
@@ -214,8 +219,8 @@
                     <!-- Kolom Kiri 2: Nama (Opsional) -->
                     <div>
                         <label class="block text-sm font-medium mb-1">Nama</label>
-                        <input type="text" name="name" value="{{ old('name') }}" placeholder="..."
-                            class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                        <input type="text" id="input-nama-user" name="name" placeholder="..." readonly
+                            class="w-full bg-[#90a4ae] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium cursor-not-allowed">
                     </div>
 
                     <!-- Kolom Kanan 2: Keterangan -->
@@ -259,6 +264,74 @@
 
         </div>
     </div>
+
+    <!-- ================= MODAL POP-UP EDIT TRANSAKSI ================= -->
+    <div id="modal-edit-transaction"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
+        <div class="bg-[#004d40] text-white rounded-lg p-6 w-full max-w-2xl shadow-2xl relative border border-emerald-600">
+
+            <!-- Header Modal & Tombol Close (X) -->
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-2xl font-bold tracking-wide">Edit Transaksi</h3>
+                <button type="button" onclick="closeEditModal()"
+                    class="text-white hover:text-gray-300 font-bold text-2xl leading-none">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Form Edit Transaksi (Action akan diubah otomatis via JavaScript) -->
+            <form id="form-edit-transaction" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-left">
+
+                    <!-- Kolom Kanan 1: Nominal -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Nominal</label>
+                        <input type="number" id="edit-nominal" name="nominal" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    </div>
+
+                    <!-- Kolom Kanan 2: Keterangan -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Keterangan</label>
+                        <input type="text" id="edit-keterangan" name="keterangan" placeholder="..."
+                            class="w-full bg-[#b0bec5] text-gray-800 placeholder-gray-500 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    </div>
+
+                    <!-- Kolom Kiri 3: Jenis Transaksi -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Jenis Transaksi</label>
+                        <select id="edit-jenis" name="jenis"
+                            class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white cursor-pointer">
+                            <option value="" disabled>...</option>
+                            <option value="pembuatan_kartu">Pembuatan Kartu</option>
+                            <option value="kehilangan_kartu">Kehilangan Kartu</option>
+                            <option value="denda_keterlambatan">Denda Keterlambatan</option>
+                        </select>
+                    </div>
+
+                    <!-- Kolom Kanan 3: Tanggal Transaksi -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Tanggal Transaksi</label>
+                        <input type="date" id="edit-tanggal" name="tanggal"
+                            class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white">
+                    </div>
+                </div>
+
+                <!-- Tombol Konfirmasi Modal -->
+                <div class="mt-8 flex justify-center">
+                    <button type="submit"
+                        class="bg-white text-[#004d40] font-bold px-8 py-2 rounded shadow hover:bg-gray-100 transition">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
 
     <!-- Script Modal & Toggle Delete Mode -->
     <script>
@@ -309,6 +382,32 @@
             }
         }
 
+        // Fungsi untuk membuka modal edit dan mengambil data transaksi
+        function openEditModal(id) {
+        fetch(`/transaksi/${id}/edit`)
+            .then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    let data = res.data;
+                    
+                    document.getElementById('form-edit-transaction').action = `/transaksi/${id}`;
+                    
+                    // Masukkan data hanya untuk input yang tersisa
+                    document.getElementById('edit-nominal').value = data.nominal || '';
+                    document.getElementById('edit-keterangan').value = data.keterangan || '';
+                    document.getElementById('edit-jenis').value = data.jenis || '';
+                    document.getElementById('edit-tanggal').value = data.tanggal || '';
+                    
+                    document.getElementById('modal-edit-transaction').classList.remove('hidden');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function closeEditModal() {
+        document.getElementById('modal-edit-transaction').classList.add('hidden');
+    }
+
         function submitDeleteForm() {
             const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
             const form = document.getElementById('form-delete-bulk');
@@ -338,6 +437,35 @@
                     document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = this.checked);
                 });
             }
+        });
+
+        const inputNoIdentitas = document.getElementById('input-no-identitas');
+        const inputNamaUser = document.getElementById('input-nama-user');
+
+        // Event listener saat user mengetik di kolom No Identitas
+        let timeout = null;
+        inputNoIdentitas.addEventListener('keyup', function() {
+            clearTimeout(timeout);
+            let identitas = this.value.trim();
+
+            if (identitas === '') {
+                inputNamaUser.value = '';
+                return;
+            }
+
+            // Delay sedikit (debounce) agar tidak terlalu sering menembak server saat mengetik
+            timeout = setTimeout(() => {
+                fetch(`/transaksi/cari-user/${encodeURIComponent(identitas)}`)
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.success) {
+                            inputNamaUser.value = res.name;
+                        } else {
+                            inputNamaUser.value = 'Tidak ditemukan';
+                        }
+                    })
+                    .catch(err => console.error('Error:', err));
+            }, 300);
         });
     </script>
 @endsection
