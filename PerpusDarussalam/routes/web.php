@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BookItemController;
 use App\Http\Controllers\AreaAnggotaUserController;
+use App\Http\Controllers\AdminAnnouncementController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -59,6 +60,7 @@ Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
 Route::middleware(['admin'])->group(function () {
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::post('/admin/announcement', [AdminAnnouncementController::class, 'store'])->name('admin.announcement.store');
 
     // Manajemen Siswa / User
     Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');

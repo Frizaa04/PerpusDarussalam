@@ -13,27 +13,53 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // Menghitung pengunjung hari ini
-        $todayVisitors = visits::where('created_at', '>=', today()->startOfDay())
-                               ->where('created_at', '<=', today()->endOfDay())
-                               ->count();
+        // Statistik Ringkasan Hari Ini
+        $todayVisitors = Visits::where('created_at', '>=', today()->startOfDay())
+                            ->where('created_at', '<=', today()->endOfDay())
+                            ->count();
         
-        // Menghitung peminjaman buku hari ini
         $todayBorrowings = Borrowing::query()
                                     ->where('status', 'dipinjam')
                                     ->whereDate('created_at', today())
                                     ->count();
                                     
-        // Menghitung pengembalian buku hari ini
         $todayReturns = Borrowing::query()
-                                  ->where('status', 'dikembalikan')
-                                  ->whereDate('updated_at', today())
-                                  ->count();
+                                ->where('status', 'dikembalikan')
+                                ->whereDate('updated_at', today())
+                                ->count();
 
         $totalMembers = User::count();
         $totalBookItems = BookItem::count();
 
-        // Ambil data transaksi peminjaman & pengembalian terbaru langsung dari Database
+        $now = Carbon::now();
+        $startOfWeek = $now->copy()->startOfWeek(Carbon::MONDAY);
+        
+        // Batasi sampai hari ini saja agar hari esok/masa depan tidak tampil 0 di grafik
+        $endOfData = $now->copy(); 
+
+        $borrowingsData = Borrowing::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->whereBetween('created_at', [$startOfWeek, $now->copy()->endOfDay()])
+            ->groupBy('date')
+            ->pluck('count', 'date');
+
+        $labels = [];
+        $chartPeminjaman = [];
+
+        // Hitung selisih hari dari Senin sampai hari ini (maksimal 7 hari)
+        $daysCount = $startOfWeek->diffInDays($now) + 1;
+        if ($daysCount > 7) $daysCount = 7;
+
+        for ($i = 0; $i < $daysCount; $i++) {
+            $date = $startOfWeek->copy()->addDays($i);
+            $dateStr = $date->format('Y-m-d');
+
+            $labels[] = $date->translatedFormat('D, d M');
+            $chartPeminjaman[] = (int) ($borrowingsData[$dateStr] ?? 0);
+        }
+
+        $chartLabels = $labels;
+
+        // Aktivitas Terbaru
         $recentActivities = Borrowing::with(['user', 'bookItem.book'])
             ->latest('updated_at')
             ->take(5)
@@ -56,7 +82,9 @@ class AdminDashboardController extends Controller
             'todayReturns', 
             'totalMembers',
             'totalBookItems',
-            'recentActivities'
+            'recentActivities',
+            'chartPeminjaman',
+            'chartLabels'
         ));
     }
 }
