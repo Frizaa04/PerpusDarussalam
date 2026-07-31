@@ -40,8 +40,8 @@
         </a>
 
         <!-- E-BOOK -->
-        <a href="{{ route('ebook.index') }}" 
-           class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all {{ request()->routeIs('ebook.*') ? 'bg-[#003d30] border-l-4 border-white' : 'hover:bg-white/10 opacity-90 hover:opacity-100' }}">
+        <a href="{{ route('admin.ebook.index') }}" 
+           class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all {{ request()->routeIs('admin.ebook.*') ? 'bg-[#003d30] border-l-4 border-white' : 'hover:bg-white/10 opacity-90 hover:opacity-100' }}">
             <span class="material-icons text-xl mr-4 min-w-[24px]">bookmark</span>
             <span class="whitespace-nowrap uppercase">E-BOOK</span>
         </a>

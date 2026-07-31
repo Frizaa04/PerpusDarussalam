@@ -17,6 +17,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BookItemController;
 use App\Http\Controllers\AreaAnggotaUserController;
 use App\Http\Controllers\AdminAnnouncementController;
+use App\Http\Controllers\UserEbookController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -25,7 +26,8 @@ Route::get('/', function () {
 
 // AUTHENTICATION USER (Pemustaka)
 Route::middleware('guest')->group(function () {
-    Route::get('/user/login', [UserAuthController::class, 'showLoginForm'])->name('user.login');
+    // Diberi name('login') agar middleware auth otomatis mengarah ke sini saat user belum login
+    Route::get('/user/login', [UserAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/user/login', [UserAuthController::class, 'login'])->name('user.login.post');
 });
 
@@ -42,7 +44,11 @@ Route::middleware(['auth:web'])->group(function () {
     // 2. Area Anggota User
     Route::get('/area-anggota', [AreaAnggotaUserController::class, 'index'])->name('user.area_anggota');
 
-    // 3. Logout User
+    // 3. E-Book User
+    Route::get('/user/e-book', [UserEbookController::class, 'index'])->name('user.ebook.index');
+    Route::get('/user/e-book/read/{id}', [UserEbookController::class, 'read'])->name('user.ebook.read');
+
+    // 4. Logout User
     Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
 });
@@ -103,12 +109,12 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/transaksi/cari-user/{identitas}', [TransaksiController::class, 'cariUser'])->name('transaction.cariUser');
 
     // E-Book
-    Route::get('/e-book', [EbookController::class, 'index'])->name('ebook.index');
-    Route::post('/e-book/store', [EbookController::class, 'store'])->name('ebook.store');
-    Route::put('/e-book/update/{id}', [EbookController::class, 'update'])->name('ebook.update');
-    Route::delete('/e-book/delete/{id}', [EbookController::class, 'destroy'])->name('ebook.destroy');
-    Route::post('/e-book/bulk-delete', [EbookController::class, 'bulkDestroy'])->name('ebook.destroy.bulk');
-    Route::delete('/e-book/destroy-multiple', [EbookController::class, 'destroyMultiple'])->name('ebook.destroy-multiple');
+    Route::get('/e-book', [EbookController::class, 'index'])->name('admin.ebook.index');
+    Route::post('/e-book/store', [EbookController::class, 'store'])->name('admin.ebook.store');
+    Route::put('/e-book/update/{id}', [EbookController::class, 'update'])->name('admin.ebook.update');
+    Route::delete('/e-book/delete/{id}', [EbookController::class, 'destroy'])->name('admin.ebook.destroy');
+    Route::post('/e-book/bulk-delete', [EbookController::class, 'bulkDestroy'])->name('admin.ebook.destroy.bulk');
+    Route::delete('/e-book/destroy-multiple', [EbookController::class, 'destroyMultiple'])->name('admin.ebook.destroy-multiple');
 
     // Laporan Utama & Detail Laporan
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');

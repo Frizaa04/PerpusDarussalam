@@ -175,14 +175,15 @@
                         <input type="file" name="foto"
                             class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                     </div>
+                    <!-- Dropdown Peran -->
                     <div>
                         <label class="block text-sm font-semibold mb-1">Peran</label>
-                        <select name="role" required
+                        <select name="role" id="peranAdd" required
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Peran...</option>
-                            <option value="siswa">Siswa</option>
-                            <option value="guru">Guru</option>
-                            <option value="umum">Umum</option>
+                            <option value="Siswa">Siswa</option>
+                            <option value="Guru">Guru</option>
+                            <option value="Umum">Umum</option>
                         </select>
                     </div>
 
@@ -198,8 +199,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold mb-1">No. Induk (NIS / NIK / NIP)</label>
-                        <input type="text" name="nis" placeholder="Opsional..."
+                        <label id="labelNomorAdd" class="block text-sm font-semibold mb-1">No. Induk (NIS / NIK /
+                            NIP)</label>
+                        <input type="text" name="nomor_induk" id="inputNomorAdd" placeholder="..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
                     <div>
@@ -234,7 +236,7 @@
         </div>
     </div>
 
-    <!-- POP-UP MODAL EDIT DATA USER (Disesuaikan dengan field lengkap) -->
+    <!-- POP-UP MODAL EDIT DATA USER -->
     <div id="editModal"
         class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
         <div
@@ -257,28 +259,21 @@
                 <input type="hidden" id="modalId" name="id">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-emerald-100">NIS</label>
-                        <input type="text" id="modalNis" name="nis"
-                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-emerald-100">NIK</label>
-                        <input type="text" id="modalNik" name="nik"
-                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-emerald-100">NIP</label>
-                        <input type="text" id="modalNip" name="nip"
-                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
-                    </div>
+                    <!-- Input Nama Lengkap (Ditambahkan agar tidak error di JS) -->
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-emerald-100">Nama Lengkap</label>
                         <input type="text" id="modalName" name="name" required
-                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
+                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm"
+                            placeholder="Masukkan Nama...">
+                    </div>
+
+                    <!-- Label Dinamis untuk Nomor Induk di Modal Edit -->
+                    <div>
+                        <label id="modalLabelNomor" class="block text-xs font-semibold mb-1 text-emerald-100">No. Induk
+                            (NIS / NIP / NIK)</label>
+                        <input type="text" id="modalInputNomor" name="nomor_induk"
+                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm"
+                            placeholder="Masukkan Nomor...">
                     </div>
                 </div>
 
@@ -288,6 +283,7 @@
                         <input type="email" id="modalEmail" name="email" required
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                     </div>
+                    <!-- Dropdown Peran Edit -->
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-emerald-100">Peran (Role)</label>
                         <select id="modalRole" name="role"
@@ -407,6 +403,52 @@
 
     <!-- SCRIPT UNTUK CONTROL MODAL -->
     <script>
+        // --- Fungsi Bantuan untuk Mengubah Label & Placeholder Nomor Induk ---
+        function updateNomorField(roleValue, labelElementId, inputElement) {
+            const labelNomor = document.getElementById(labelElementId);
+            if (!labelNomor || !inputElement) return;
+
+            let peran = roleValue ? roleValue.toLowerCase() : '';
+
+            if (peran === 'siswa') {
+                labelNomor.innerText = 'NIS (Nomor Induk Siswa)';
+                inputElement.placeholder = 'Masukkan NIS...';
+            } else if (peran === 'guru') {
+                labelNomor.innerText = 'NIP (Nomor Induk Pegawai)';
+                inputElement.placeholder = 'Masukkan NIP...';
+            } else if (peran === 'umum') {
+                labelNomor.innerText = 'NIK (Nomor Induk Kependudukan)';
+                inputElement.placeholder = 'Masukkan NIK...';
+            } else {
+                labelNomor.innerText = 'No. Induk (NIS / NIK / NIP)';
+                inputElement.placeholder = '...';
+            }
+        }
+
+        // --- Event Listener Saat Dropdown Peran Berubah (Untuk Form Tambah) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const addRoleSelect = document.getElementById('peranAdd');
+            const addNomorInput = document.getElementById('inputNomorAdd');
+
+            if (addRoleSelect && addNomorInput) {
+                addRoleSelect.addEventListener('change', function() {
+                    updateNomorField(this.value, 'labelNomorAdd', addNomorInput);
+                });
+            }
+
+            // Event listener untuk modal edit jika role diganti secara manual saat mengedit data
+            const modalRole = document.getElementById('modalRole');
+            const modalInputNomor = document.getElementById(
+                'modalInputNomor'); // Pastikan input tunggal untuk edit atau sesuaikan
+
+            if (modalRole && modalInputNomor) {
+                modalRole.addEventListener('change', function() {
+                    updateNomorField(this.value, 'modalLabelNomor', modalInputNomor);
+                });
+            }
+        });
+
+
         // --- Fungsi Modal Tambah User Baru ---
         function openAddUserModal() {
             document.getElementById('addUserModal').classList.remove('hidden');
@@ -419,9 +461,6 @@
         // --- Fungsi Modal Edit User ---
         function openEditModal(id, nis, nik, nip, name, email, role, jenis_kelamin, alamat) {
             document.getElementById('modalId').value = id;
-            document.getElementById('modalNis').value = nis !== 'null' ? nis : '';
-            document.getElementById('modalNik').value = nik !== 'null' ? nik : '';
-            document.getElementById('modalNip').value = nip !== 'null' ? nip : '';
             document.getElementById('modalName').value = name !== 'null' ? name : '';
             document.getElementById('modalEmail').value = email !== 'null' ? email : '';
             document.getElementById('modalAlamat').value = alamat !== 'null' ? alamat : '';
@@ -435,15 +474,31 @@
                 }
             }
 
+            // Mengatur Nilai & Label Nomor Induk secara Dinamis Berdasarkan Role
+            let activeRole = role ? role.toLowerCase() : '';
+            const modalInputNomor = document.getElementById('modalInputNomor');
+
+            if (modalInputNomor) {
+                if (activeRole === 'siswa') {
+                    modalInputNomor.value = nis !== 'null' ? nis : '';
+                } else if (activeRole === 'guru') {
+                    modalInputNomor.value = nip !== 'null' ? nip : '';
+                } else if (activeRole === 'umum') {
+                    modalInputNomor.value = nik !== 'null' ? nik : '';
+                } else {
+                    modalInputNomor.value = '';
+                }
+
+                // Perbarui label dan placeholder sesuai peran
+                updateNomorField(role, 'modalLabelNomor', modalInputNomor);
+            }
+
             // Mengatur Dropdown Jenis Kelamin
             const jkSelect = document.getElementById('modalJenisKelamin');
             jkSelect.value = jenis_kelamin !== 'null' ? jenis_kelamin : '';
 
+            // Tampilkan Modal Edit
             document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
         }
 
         // --- Fungsi Modal Cetak ---

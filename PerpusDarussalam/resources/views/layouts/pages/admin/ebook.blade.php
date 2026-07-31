@@ -39,7 +39,7 @@
                 <!-- Pencarian & Tombol E-Book Baru -->
                 <div class="flex items-center gap-4 mb-6">
                     <div class="max-w-md w-full">
-                        <form action="{{ route('ebook.index') }}" method="GET"
+                        <form action="{{ route('admin.ebook.index') }}" method="GET"
                             class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
                             <input type="text" name="search" value="{{ $search ?? '' }}"
                                 placeholder="Cari Data E-Book..."
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Form Pembungkus Penghapusan Massal -->
-                <form id="deleteForm" action="{{ route('ebook.destroy-multiple') }}" method="POST">
+                <form id="deleteForm" action="{{ route('admin.ebook.destroy-multiple') }}" method="POST">
                     @csrf
                     @method('DELETE')
 
@@ -213,7 +213,7 @@
 
             <h3 class="text-2xl font-bold mb-6">Tambah E-Book Baru</h3>
 
-            <form action="{{ route('ebook.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form action="{{ route('admin.ebook.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
                     <div>
