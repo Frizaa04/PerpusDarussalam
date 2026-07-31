@@ -37,7 +37,7 @@
     <div class="max-w-5xl mx-auto flex justify-between items-center px-8 py-3 text-sm font-semibold tracking-wide">
         <a href="{{ route('user.home') }}" class="hover:text-emerald-200 transition">Beranda</a>
         <a href="{{ route('user.area_anggota') }}" class="hover:text-emerald-200 transition">Area Anggota</a>
-        <a href="#" class="hover:text-emerald-200 transition">E-Book</a>
+        <a href="{{ route('user.ebook.index') }}" class="hover:text-emerald-200 transition">E-Book</a>
         <a href="#" class="hover:text-emerald-200 transition">Tentang Kami</a>
     </div>
 </nav>
