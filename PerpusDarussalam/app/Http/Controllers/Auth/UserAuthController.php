@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class UserAuthController extends Controller
 {
     public function showLoginForm()
     {
-        // Jalur disesuaikan dengan folder layouts/pages/users/login_users.blade.php
         return view('layouts.pages.users.login_users');
     }
 
@@ -24,18 +24,21 @@ class UserAuthController extends Controller
         $loginInput = $request->input('username');
         $password = $request->input('password');
 
-        // Deteksi apakah input berupa email atau field kredensial lainnya (nis / nik / username)
-        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        // Cari user yang cocok berdasarkan email, nis, nik, atau username
+        $user = User::where('email', $loginInput)
+                    ->orWhere('nis', $loginInput)
+                    ->orWhere('nik', $loginInput)
+                    ->orWhere('username', $loginInput)
+                    ->first();
 
-        $credentials = [
-            $fieldType => $loginInput,
-            'password'  => $password,
-        ];
-
-        if (Auth::guard('web')->attempt($credentials)) {
+        // Jika user ditemukan dan pencocokan password berhasil
+        if ($user && Auth::guard('web')->attempt(['email' => $user->email, 'password' => $password])) {
             $request->session()->regenerate();
+            
+            // Hapus jejak redirect bekas session admin
+            $request->session()->forget('url.intended');
 
-            return redirect()->intended(route('user.home'));
+            return redirect()->route('user.home');
         }
 
         return back()->withErrors([
