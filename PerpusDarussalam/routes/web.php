@@ -15,7 +15,7 @@ use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\BookItemController;
-
+use App\Http\Controllers\AreaAnggotaUserController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -28,10 +28,20 @@ Route::middleware('guest')->group(function () {
     Route::post('/user/login', [UserAuthController::class, 'login'])->name('user.login.post');
 });
 
-// BERANDA & LOGOUT USER (Hanya Bisa Diakses Setelah Login)
-Route::middleware('auth')->group(function () {
-    Route::get('/home', [UserController::class, 'index'])->name('user.home');
+// ROUTE USER / PEMUSTAKA (Hanya Bisa Diakses Setelah Login)
+Route::middleware(['auth:web'])->group(function () {
+    
+    // 1. Beranda User
+    Route::get('/home', function () {
+        return view('layouts.pages.users.home');
+    })->name('user.home');
+
+    // 2. Area Anggota User
+    Route::get('/area-anggota', [AreaAnggotaUserController::class, 'index'])->name('user.area_anggota');
+
+    // 3. Logout User
     Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
+
 });
 
 // AUTHENTICATION ADMIN
