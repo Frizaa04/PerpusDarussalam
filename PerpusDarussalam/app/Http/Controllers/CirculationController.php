@@ -17,7 +17,7 @@ class CirculationController extends Controller
         $notificationService->generateLateNotifications();
 
         $search = $request->query('search');
-        $lateOnly = $request->query('late');
+        $status = $request->query('status'); // Menerima input dari dropdown filter status
 
         $queryBuilder = Borrowing::with(['user', 'bookItem.book']);
 
@@ -26,9 +26,9 @@ class CirculationController extends Controller
             $queryBuilder->where(function($q) use ($search) {
                 $q->whereHas('user', function($userQuery) use ($search) {
                     $userQuery->where('name', 'LIKE', "%{$search}%")
-                              ->orWhere('nis', 'LIKE', "%{$search}%")
-                              ->orWhere('nip', 'LIKE', "%{$search}%")
-                              ->orWhere('nik', 'LIKE', "%{$search}%");
+                            ->orWhere('nis', 'LIKE', "%{$search}%")
+                            ->orWhere('nip', 'LIKE', "%{$search}%")
+                            ->orWhere('nik', 'LIKE', "%{$search}%");
                 })
                 ->orWhereHas('bookItem.book', function($bookQuery) use ($search) {
                     $bookQuery->where('judul', 'LIKE', "%{$search}%");
@@ -39,37 +39,47 @@ class CirculationController extends Controller
             });
         }
 
-        // Filter hanya menampilkan peminjaman yang telat
-        if ($lateOnly) {
-            $queryBuilder->where('status', 'dipinjam')
-                         ->where('tanggal_jatuh_tempo', '<', now());
+        // Filter Dropdown Status
+        if ($status) {
+            if ($status == 'dipinjam') {
+                // Peminjaman aktif yang belum lewat jatuh tempo
+                $queryBuilder->where('status', 'dipinjam')
+                            ->where('tanggal_jatuh_tempo', '>=', now());
+            } elseif ($status == 'telat') {
+                // Peminjaman aktif yang sudah lewat jatuh tempo
+                $queryBuilder->where('status', 'dipinjam')
+                            ->where('tanggal_jatuh_tempo', '<', now());
+            } elseif ($status == 'selesai') {
+                // Peminjaman yang sudah dikembalikan / selesai
+                $queryBuilder->whereIn('status', ['selesai', 'dikembalikan']);
+            }
         }
 
-        // --- UBAH DARI ->get() MENJADI ->paginate(10) DENGAN through() ---
+        // Paginasi dengan mapping data
         $circulations = $queryBuilder->latest()->paginate(10)->through(function ($item) {
-            $status = $item->status ?? 'Peminjaman';
             if ($item->status === 'dipinjam' && Carbon::parse($item->tanggal_jatuh_tempo)->isPast()) {
-                $status = 'Telat';
-            } elseif ($item->status === 'dikembalikan') {
-                $status = 'Selesai';
+                $statusText = 'Telat';
+            } elseif ($item->status === 'dikembalikan' || $item->status === 'selesai') {
+                $statusText = 'Selesai';
             } else {
-                $status = 'Peminjaman';
+                $statusText = 'Peminjaman';
             }
 
             return (object)[
-                'id'            => $item->id,
-                'identitas'     => $item->user->nis ?? $item->user->nip ?? $item->user->nik ?? '-',
-                'name'          => $item->user->name ?? 'Tanpa Nama',      
-                'book_title'    => $item->bookItem->book->judul ?? 'Buku Terhapus',   
-                'nomor_inv'     => $item->bookItem->nomor_inventaris ?? '-', 
-                'status'        => $status,
-                'borrow_date'   => $item->tanggal_pinjam ? Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') : '-',
-                'due_date'      => $item->tanggal_jatuh_tempo ? Carbon::parse($item->tanggal_jatuh_tempo)->format('d/m/Y') : '-',
-                'return_date'   => $item->tanggal_kembali ? Carbon::parse($item->tanggal_kembali)->format('d/m/Y') : '-'
+                'id'          => $item->id,
+                'identitas'   => $item->user->nis ?? $item->user->nip ?? $item->user->nik ?? '-',
+                'name'        => $item->user->name ?? 'Tanpa Nama',      
+                'book_title'  => $item->bookItem->book->judul ?? 'Buku Terhapus',   
+                'nomor_inv'   => $item->bookItem->nomor_inventaris ?? '-', 
+                'status'      => $statusText,
+                'borrow_date' => $item->tanggal_pinjam ? Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') : '-',
+                'due_date'    => $item->tanggal_jatuh_tempo ? Carbon::parse($item->tanggal_jatuh_tempo)->format('d/m/Y') : '-',
+                'return_date' => $item->tanggal_kembali ? Carbon::parse($item->tanggal_kembali)->format('d/m/Y') : '-'
             ];
-        })->withQueryString(); // <- Menggantikan appends() agar lebih bersih dan otomatis
+        })->withQueryString();
 
-        return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search', 'lateOnly'));
+        // 'lateOnly' diganti menjadi 'status' agar sesuai variabel yang dikirim ke view
+        return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search', 'status'));
     }
 
     public function store(Request $request, BorrowingService $service)

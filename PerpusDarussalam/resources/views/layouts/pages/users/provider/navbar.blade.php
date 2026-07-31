@@ -9,12 +9,27 @@
     </div>
 
     <!-- Form Pencarian -->
-    <form action="#" method="GET" class="flex items-center border border-gray-400 rounded overflow-hidden">
-        <input type="text" name="search" placeholder="Search" class="px-4 py-1.5 text-sm outline-none text-gray-700 w-52 md:w-64 placeholder-gray-500">
-        <button type="submit" class="bg-[#003d30] text-white px-3 py-1.5 flex items-center justify-center hover:bg-[#002b22] transition">
-            <span class="material-icons text-base">search</span>
+<div class="flex items-center gap-3">
+    <!-- Form Search Asli -->
+    <form action="#" method="GET" class="flex items-center">
+        <input type="text" placeholder="Search" class="px-3 py-1.5 border border-gray-300 rounded-l-md focus:outline-none text-sm text-gray-700">
+        <button type="submit" class="bg-[#003d30] text-white px-3 py-2 rounded-r-md hover:bg-[#004d40] transition flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
         </button>
     </form>
+
+    <!-- Tombol LogOut di Samping Kanan Search -->
+    @auth('web')
+        <form action="{{ route('user.logout') }}" method="POST" class="inline">
+            @csrf
+            <button type="submit" class="bg-[#004d40] hover:bg-[#003d30] text-white font-semibold text-sm px-4 py-1.5 rounded-md transition duration-200 shadow flex items-center gap-1">
+                LogOut
+            </button>
+        </form>
+    @endauth
+</div>
 </header>
 
 <!-- Navigation Bar Menu -->

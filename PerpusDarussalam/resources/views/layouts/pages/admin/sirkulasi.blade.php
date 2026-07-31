@@ -37,19 +37,19 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-white tracking-wide">Sirkulasi Peminjaman & Pengembalian</h2>
                     
-                    <!-- Filter Peminjaman Telat (Button dengan Checkbox Terlihat) -->
-                    <form id="lateFilterForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center">
+                    <!-- Filter Status Dropdown -->
+                    <form id="statusFilterForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center gap-2">
                         @if($search)
                             <input type="hidden" name="search" value="{{ $search }}">
                         @endif
                         
-                        <label for="lateCheckbox" class="cursor-pointer select-none flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm border {{ request('late') ? 'bg-red-700 text-white border-red-800 shadow-md' : 'bg-[#004d40] hover:bg-[#003d30] text-white border-[#003d30]' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Peminjaman Telat</span>
-                            <input type="checkbox" id="lateCheckbox" name="late" value="1" onchange="document.getElementById('lateFilterForm').submit()" {{ request('late') ? 'checked' : '' }} class="w-4 h-4 accent-red-600 rounded cursor-pointer">
-                        </label>
+                        <label for="statusSelect" class="text-xs font-semibold text-white">Filter Status:</label>
+                        <select id="statusSelect" name="status" onchange="document.getElementById('statusFilterForm').submit()" class="bg-[#004d40] hover:bg-[#003d30] text-white text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#003d30] outline-none cursor-pointer shadow-sm transition-all duration-200">
+                            <option value="" {{ request('status') == '' ? 'selected' : '' }}>Semua Status</option>
+                            <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Sedang Dipinjam</option>
+                            <option value="telat" {{ request('status') == 'telat' ? 'selected' : '' }}>Peminjaman Telat</option>
+                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Peminjaman Selesai</option>
+                        </select>
                     </form>
                 </div>
                 

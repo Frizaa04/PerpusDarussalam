@@ -25,11 +25,11 @@ class UserAuthController extends Controller
         $password = $request->input('password');
 
         // Cari user yang cocok berdasarkan email, nis, nik, atau username
+        // Cari user yang cocok berdasarkan email, nis, atau nik
         $user = User::where('email', $loginInput)
-                    ->orWhere('nis', $loginInput)
-                    ->orWhere('nik', $loginInput)
-                    ->orWhere('username', $loginInput)
-                    ->first();
+            ->orWhere('nis', $loginInput)
+            ->orWhere('nik', $loginInput)
+            ->first();
 
         // Jika user ditemukan dan pencocokan password berhasil
         if ($user && Auth::guard('web')->attempt(['email' => $user->email, 'password' => $password])) {
