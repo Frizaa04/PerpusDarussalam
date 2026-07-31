@@ -41,3 +41,22 @@
         <a href="#" class="hover:text-emerald-200 transition">Tentang Kami</a>
     </div>
 </nav>
+
+@php
+    $activeAnnouncement = \App\Models\Announcement::where('is_active', true)->latest()->first();
+@endphp
+
+@if($activeAnnouncement)
+    <!-- Bar Teks Berjalan / Marquee -->
+    <div class="bg-amber-100 border-b border-amber-200 text-amber-900 px-4 py-2 text-xs font-medium overflow-hidden relative shadow-inner flex items-center">
+        <div class="bg-amber-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider mr-3 shrink-0 flex items-center gap-1 shadow-sm">
+            <svg class="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/></svg>
+            Pengumuman
+        </div>
+        
+        <!-- Elemen Marquee HTML Murni -->
+        <marquee behavior="scroll" direction="left" scrollamount="5" class="w-full tracking-wide font-semibold text-amber-950">
+            {{ $activeAnnouncement->content }}
+        </marquee>
+    </div>
+@endif
