@@ -28,6 +28,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/user/login', [UserAuthController::class, 'login'])->name('user.login.post');
 });
 
+Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
+
 // ROUTE USER / PEMUSTAKA (Hanya Bisa Diakses Setelah Login)
 Route::middleware(['auth:web'])->group(function () {
     

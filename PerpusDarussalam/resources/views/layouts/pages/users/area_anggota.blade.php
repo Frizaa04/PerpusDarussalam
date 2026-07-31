@@ -13,14 +13,34 @@
         <!-- Card Profile / Profil Anggota -->
         <div class="bg-[#b2c8c6] rounded-2xl p-6 md:p-8 shadow-xl flex items-center gap-6 md:gap-8">
             <!-- Avatar Placeholder / Foto -->
+<!-- Avatar Placeholder / Foto -->
             <div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-300 flex-shrink-0 border-2 border-white/50 overflow-hidden">
-                @if(isset($user->foto) && $user->foto)
-                    <img src="{{ asset('storage/' . $user->foto) }}" alt="Foto Profile" class="w-full h-full object-cover">
-                @elseif(isset($user->avatar) && $user->avatar)
-                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="Foto Profile" class="w-full h-full object-cover">
+                @php
+                    $fotoPath = $user->foto ?? $user->avatar ?? $user->photo ?? null;
+                    
+                    // Cek file ada, tidak kosong, dan BUKAN PDF / dokumen
+                    $isValidPhoto = !empty($fotoPath) && !\Illuminate\Support\Str::endsWith(strtolower($fotoPath), ['.pdf', '.doc', '.docx']);
+                @endphp
+
+                @if ($isValidPhoto)
+                    @php
+                        $url = \Illuminate\Support\Str::startsWith($fotoPath, 'storage/') 
+                            ? asset($fotoPath) 
+                            : asset('storage/' . $fotoPath);
+                    @endphp
+                    
+                    <img src="{{ $url }}" 
+                        alt="Foto Profile" 
+                        class="w-full h-full object-cover" 
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                    
+                    <div class="w-full h-full bg-gray-400 hidden items-center justify-center text-xl font-bold text-white">
+                        {{ strtoupper(substr($user->name ?? $user->nama ?? 'U', 0, 2)) }}
+                    </div>
                 @else
-                    <div class="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500">
-                        <span class="material-icons text-5xl">person</span>
+                    <!-- Jika nilai di DB adalah NULL, default.pdf, atau file non-gambar -->
+                    <div class="w-full h-full bg-gray-400 flex items-center justify-center text-xl font-bold text-white">
+                        {{ strtoupper(substr($user->name ?? $user->nama ?? 'U', 0, 2)) }}
                     </div>
                 @endif
             </div>

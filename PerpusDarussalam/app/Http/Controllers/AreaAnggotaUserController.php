@@ -14,8 +14,13 @@ class AreaAnggotaUserController extends Controller
         // 1. Ambil data user yang sedang login
         $user = Auth::user();
 
-        // 2. Ambil riwayat peminjaman user beserta detail bukunya dari bookItem
-        $peminjamans = Borrowing::with('bookItem.book') // Mengambil item buku beserta master data bukunya
+        // 2. Proteksi jika user belum login, redirect ke route user.login
+        if (!$user) {
+            return redirect()->route('user.login'); // <-- Diubah di sini!
+        }
+
+        // 3. Ambil riwayat peminjaman beserta relasi buku
+        $peminjamans = Borrowing::with('bookItem.book')
             ->where('user_id', $user->id)
             ->latest()
             ->get();
