@@ -15,7 +15,8 @@
                 $unreadCount = \App\Models\Notification::where('status', 'unread')->count();
             @endphp
             @if ($unreadCount > 0)
-                <span class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                <!-- TAMBAHKAN id="notification-badge" DI SINI -->
+                <span id="notification-badge" class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                     <span
                         class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
@@ -357,6 +358,15 @@
                     if (notifItemModal) {
                         notifItemModal.classList.remove('bg-emerald-50/20', 'border-l-4', 'border-l-[#005a4e]');
                     }
+
+                    // --- TAMBAHKAN KODE INI UNTUK MENGHILANGKAN TITIK MERAH DI LONCENG ---
+                    const notificationBadge = document.getElementById(
+                    'notification-badge'); // Sesuaikan ID elemen titik merah di ikon lonceng Anda
+                    if (notificationBadge) {
+                        notificationBadge.style.display = 'none';
+                        // Atau bisa pakai: notificationBadge.remove();
+                    }
+                    // -----------------------------------------------------------------
                 }
             })
             .catch(error => console.error('Error:', error));

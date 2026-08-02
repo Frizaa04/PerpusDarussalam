@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Cetak Semua Barcode - {{ $book->title }}</title>
+    <!-- Panggil library JsBarcode via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,19 +49,12 @@
             text-overflow: ellipsis;
         }
 
-        .barcode-container img {
+        /* Styling untuk elemen SVG barcode */
+        .barcode-container svg {
             width: 100%;
             height: 14mm;
-            object-fit: contain;
             display: block;
-        }
-
-        .barcode-code {
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #000;
-            margin-top: 3px;
+            margin: 0 auto;
         }
 
         .no-print {
@@ -75,6 +70,7 @@
             border-radius: 6px;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 999;
         }
 
         @media print {
@@ -94,19 +90,39 @@
     <button onclick="window.print()" class="no-print">🖨️ Cetak Semua Barcode</button>
 
     <div class="container">
-        @foreach ($book->bookItems ?? [] as $item)
+        @foreach ($book->bookItems ?? [] as $index => $item)
             <div class="barcode-card">
                 <div class="library-name">Perpustakaan Madrasah</div>
                 <div class="book-title" title="{{ $book->judul }}">{{ $book->judul }}</div>
 
                 <div class="barcode-container">
-                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $item->nomor_inventaris }}&code=Code128&dpi=300&imagetype=jpg"
-                        alt="Barcode">
+                    <!-- Menggunakan tag SVG dengan ID unik agar digambar otomatis oleh JsBarcode -->
+                    <svg id="barcode-{{ $index }}"></svg>
                 </div>
-
             </div>
         @endforeach
     </div>
+
+    <!-- Script untuk men-generate barcode secara otomatis ke semua elemen SVG -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            @foreach ($book->bookItems ?? [] as $index => $item)
+                try {
+                    JsBarcode("#barcode-{{ $index }}", "{{ $item->nomor_inventaris }}", {
+                        format: "CODE128",
+                        lineColor: "#000",
+                        width: 1.5,
+                        height: 40,
+                        displayValue: true, // Menampilkan teks nomor inventaris di bawah barcode
+                        fontSize: 12,
+                        margin: 0
+                    });
+                } catch (e) {
+                    console.error("Gagal generate barcode untuk: {{ $item->nomor_inventaris }}");
+                }
+            @endforeach
+        });
+    </script>
 
 </body>
 
