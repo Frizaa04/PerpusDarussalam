@@ -119,16 +119,16 @@
                                         <td class="p-3 text-sm text-center">
                                             <button type="button"
                                                 onclick="openEditModal(
-                                                    '{{ $student->id }}', 
-                                                    '{{ $student->nis }}', 
-                                                    '{{ $student->nik }}', 
-                                                    '{{ $student->nip }}', 
-                                                    '{{ $student->name }}', 
-                                                    '{{ $student->email }}', 
-                                                    '{{ $student->role }}', 
-                                                    '{{ $student->jenis_kelamin }}', 
-                                                    '{{ $student->alamat }}'
-                                                )"
+            '{{ $student->id }}', 
+            '{{ $student->nis ?? '' }}', 
+            '{{ $student->nik ?? '' }}', 
+            '{{ $student->nip ?? '' }}', 
+            '{{ $student->name }}', 
+            '{{ $student->email }}', 
+            '{{ $student->role }}', 
+            '{{ $student->jenis_kelamin }}', 
+            '{{ $student->alamat }}'
+        )"
                                                 class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
                                                 Edit Data
                                             </button>
@@ -165,6 +165,16 @@
                 &#10005;
             </button>
 
+            @if ($errors->any())
+                <div class="bg-red-500 text-white p-3 rounded mb-4 text-xs">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>- {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="{{ route('member.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
 
@@ -181,9 +191,9 @@
                         <select name="role" id="peranAdd" required
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Peran...</option>
-                            <option value="Siswa">Siswa</option>
-                            <option value="Guru">Guru</option>
-                            <option value="Umum">Umum</option>
+                            <option value="siswa">Siswa</option>
+                            <option value="guru">Guru</option>
+                            <option value="umum">Umum</option>
                         </select>
                     </div>
 
@@ -403,135 +413,161 @@
 
     <!-- SCRIPT UNTUK CONTROL MODAL -->
     <script>
-        // --- Fungsi Bantuan untuk Mengubah Label & Placeholder Nomor Induk ---
-        function updateNomorField(roleValue, labelElementId, inputElement) {
-            const labelNomor = document.getElementById(labelElementId);
-            if (!labelNomor || !inputElement) return;
+    // --- Fungsi Bantuan untuk Mengubah Label & Placeholder Nomor Induk ---
+    function updateNomorField(roleValue, labelElementId, inputElement) {
+        const labelNomor = document.getElementById(labelElementId);
+        if (!labelNomor || !inputElement) return;
 
-            let peran = roleValue ? roleValue.toLowerCase() : '';
+        let peran = roleValue ? roleValue.toLowerCase() : '';
 
-            if (peran === 'siswa') {
-                labelNomor.innerText = 'NIS (Nomor Induk Siswa)';
-                inputElement.placeholder = 'Masukkan NIS...';
-            } else if (peran === 'guru') {
-                labelNomor.innerText = 'NIP (Nomor Induk Pegawai)';
-                inputElement.placeholder = 'Masukkan NIP...';
-            } else if (peran === 'umum') {
-                labelNomor.innerText = 'NIK (Nomor Induk Kependudukan)';
-                inputElement.placeholder = 'Masukkan NIK...';
-            } else {
-                labelNomor.innerText = 'No. Induk (NIS / NIK / NIP)';
-                inputElement.placeholder = '...';
-            }
+        if (peran === 'siswa') {
+            labelNomor.innerText = 'NIS (Nomor Induk Siswa)';
+            inputElement.placeholder = 'Masukkan NIS...';
+        } else if (peran === 'guru') {
+            labelNomor.innerText = 'NIP (Nomor Induk Pegawai)';
+            inputElement.placeholder = 'Masukkan NIP...';
+        } else if (peran === 'umum') {
+            labelNomor.innerText = 'NIK (Nomor Induk Kependudukan)';
+            inputElement.placeholder = 'Masukkan NIK...';
+        } else {
+            labelNomor.innerText = 'No. Induk (NIS / NIK / NIP)';
+            inputElement.placeholder = '...';
         }
+    }
 
+    // Variabel global sementara untuk menyimpan data asli user yang sedang diedit
+    let currentEditData = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
         // --- Event Listener Saat Dropdown Peran Berubah (Untuk Form Tambah) ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const addRoleSelect = document.getElementById('peranAdd');
-            const addNomorInput = document.getElementById('inputNomorAdd');
+        const addRoleSelect = document.getElementById('peranAdd');
+        const addNomorInput = document.getElementById('inputNomorAdd');
 
-            if (addRoleSelect && addNomorInput) {
-                addRoleSelect.addEventListener('change', function() {
-                    updateNomorField(this.value, 'labelNomorAdd', addNomorInput);
-                });
-            }
-
-            // Event listener untuk modal edit jika role diganti secara manual saat mengedit data
-            const modalRole = document.getElementById('modalRole');
-            const modalInputNomor = document.getElementById(
-                'modalInputNomor'); // Pastikan input tunggal untuk edit atau sesuaikan
-
-            if (modalRole && modalInputNomor) {
-                modalRole.addEventListener('change', function() {
-                    updateNomorField(this.value, 'modalLabelNomor', modalInputNomor);
-                });
-            }
-        });
-
-
-        // --- Fungsi Modal Tambah User Baru ---
-        function openAddUserModal() {
-            document.getElementById('addUserModal').classList.remove('hidden');
+        if (addRoleSelect && addNomorInput) {
+            addRoleSelect.addEventListener('change', function() {
+                updateNomorField(this.value, 'labelNomorAdd', addNomorInput);
+            });
         }
 
-        function closeAddUserModal() {
-            document.getElementById('addUserModal').classList.add('hidden');
-        }
+        // --- Event Listener Saat Dropdown Peran Berubah (Untuk Form Edit) ---
+        const modalRole = document.getElementById('modalRole');
+        const modalInputNomor = document.getElementById('modalInputNomor');
 
-        // --- Fungsi Modal Edit User ---
-        function openEditModal(id, nis, nik, nip, name, email, role, jenis_kelamin, alamat) {
-            document.getElementById('modalId').value = id;
-            document.getElementById('modalName').value = name !== 'null' ? name : '';
-            document.getElementById('modalEmail').value = email !== 'null' ? email : '';
-            document.getElementById('modalAlamat').value = alamat !== 'null' ? alamat : '';
+        if (modalRole && modalInputNomor) {
+            modalRole.addEventListener('change', function() {
+                let selectedRole = this.value.toLowerCase();
 
-            // Mengatur Dropdown Role
-            const roleSelect = document.getElementById('modalRole');
-            for (let i = 0; i < roleSelect.options.length; i++) {
-                if (roleSelect.options[i].value.toLowerCase() === role.toLowerCase()) {
-                    roleSelect.selectedIndex = i;
-                    break;
-                }
-            }
+                // Perbarui label dan placeholder
+                updateNomorField(selectedRole, 'modalLabelNomor', modalInputNomor);
 
-            // Mengatur Nilai & Label Nomor Induk secara Dinamis Berdasarkan Role
-            let activeRole = role ? role.toLowerCase() : '';
-            const modalInputNomor = document.getElementById('modalInputNomor');
-
-            if (modalInputNomor) {
-                if (activeRole === 'siswa') {
-                    modalInputNomor.value = nis !== 'null' ? nis : '';
-                } else if (activeRole === 'guru') {
-                    modalInputNomor.value = nip !== 'null' ? nip : '';
-                } else if (activeRole === 'umum') {
-                    modalInputNomor.value = nik !== 'null' ? nik : '';
+                // Kembalikan nilai jika kembali ke role aslinya, atau kosongkan jika role baru
+                if (selectedRole === 'siswa') {
+                    modalInputNomor.value = currentEditData.nis || '';
+                } else if (selectedRole === 'guru') {
+                    modalInputNomor.value = currentEditData.nip || '';
+                } else if (selectedRole === 'umum') {
+                    modalInputNomor.value = currentEditData.nik || '';
                 } else {
                     modalInputNomor.value = '';
                 }
-
-                // Perbarui label dan placeholder sesuai peran
-                updateNomorField(role, 'modalLabelNomor', modalInputNomor);
-            }
-
-            // Mengatur Dropdown Jenis Kelamin
-            const jkSelect = document.getElementById('modalJenisKelamin');
-            jkSelect.value = jenis_kelamin !== 'null' ? jenis_kelamin : '';
-
-            // Tampilkan Modal Edit
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        // --- Fungsi Modal Cetak ---
-        function openCetakModal() {
-            document.getElementById('cetakModal').classList.remove('hidden');
-        }
-
-        function closeCetakModal() {
-            document.getElementById('cetakModal').classList.add('hidden');
-        }
-
-        // --- Tutup Modal jika Klik di Luar Kotak ---
-        window.onclick = function(event) {
-            const addUserModal = document.getElementById('addUserModal');
-            const editModal = document.getElementById('editModal');
-            const cetakModal = document.getElementById('cetakModal');
-
-            if (event.target === addUserModal) {
-                closeAddUserModal();
-            }
-            if (event.target === editModal) {
-                closeEditModal();
-            }
-            if (event.target === cetakModal) {
-                closeCetakModal();
-            }
-        }
-
-        function toggleSelectAll(source) {
-            const checkboxes = document.querySelectorAll('.user-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = source.checked;
             });
         }
-    </script>
+    });
+
+    // --- Fungsi Modal Tambah User Baru ---
+    function openAddUserModal() {
+        document.getElementById('addUserModal').classList.remove('hidden');
+    }
+
+    function closeAddUserModal() {
+        document.getElementById('addUserModal').classList.add('hidden');
+    }
+
+    // --- Fungsi Modal Edit User ---
+    function openEditModal(id, nis, nik, nip, name, email, role, jenis_kelamin, alamat) {
+        // 1. Simpan data mentah ke objek global
+        currentEditData = {
+            nis: (nis && nis !== 'null' && nis !== 'undefined') ? nis : '',
+            nik: (nik && nik !== 'null' && nik !== 'undefined') ? nik : '',
+            nip: (nip && nip !== 'null' && nip !== 'undefined') ? nip : ''
+        };
+
+        // 2. Isi field dasar
+        document.getElementById('modalId').value = id;
+        document.getElementById('modalName').value = (name && name !== 'null') ? name : '';
+        document.getElementById('modalEmail').value = (email && email !== 'null') ? email : '';
+        document.getElementById('modalAlamat').value = (alamat && alamat !== 'null') ? alamat : '';
+
+        // 3. Atur Dropdown Role
+        const roleSelect = document.getElementById('modalRole');
+        let activeRole = role ? role.toLowerCase().trim() : '';
+        if (roleSelect) {
+            roleSelect.value = activeRole;
+        }
+
+        // 4. Masukkan nomor induk yang sesuai ke input form edit
+        const modalInputNomor = document.getElementById('modalInputNomor');
+        const modalLabelNomor = document.getElementById('modalLabelNomor');
+
+        if (modalInputNomor) {
+            updateNomorField(activeRole, 'modalLabelNomor', modalInputNomor);
+
+            if (activeRole === 'siswa') {
+                modalInputNomor.value = currentEditData.nis;
+            } else if (activeRole === 'guru') {
+                modalInputNomor.value = currentEditData.nip;
+            } else if (activeRole === 'umum') {
+                modalInputNomor.value = currentEditData.nik;
+            } else {
+                modalInputNomor.value = '';
+            }
+        }
+
+        // 5. Atur Dropdown Jenis Kelamin
+        const jkSelect = document.getElementById('modalJenisKelamin');
+        if (jkSelect) {
+            jkSelect.value = (jenis_kelamin && jenis_kelamin !== 'null') ? jenis_kelamin : '';
+        }
+
+        // 6. Tampilkan Modal Edit
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
+
+    // --- Fungsi Modal Cetak ---
+    function openCetakModal() {
+        document.getElementById('cetakModal').classList.remove('hidden');
+    }
+
+    function closeCetakModal() {
+        document.getElementById('cetakModal').classList.add('hidden');
+    }
+
+    // --- Tutup Modal jika Klik di Luar Kotak ---
+    window.onclick = function(event) {
+        const addUserModal = document.getElementById('addUserModal');
+        const editModal = document.getElementById('editModal');
+        const cetakModal = document.getElementById('cetakModal');
+
+        if (event.target === addUserModal) {
+            closeAddUserModal();
+        }
+        if (event.target === editModal) {
+            closeEditModal();
+        }
+        if (event.target === cetakModal) {
+            closeCetakModal();
+        }
+    }
+
+    function toggleSelectAll(source) {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = source.checked;
+        });
+    }
+</script>
 @endsection

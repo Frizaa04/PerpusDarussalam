@@ -8,7 +8,7 @@ use App\Models\User;
 class MemberController extends Controller
 {
     public function index(Request $request)
-{
+    {
     $search = $request->query('search');
     $roleFilter = $request->query('role'); // Menangkap filter peran (siswa, guru, umum)
 
@@ -34,74 +34,98 @@ class MemberController extends Controller
         return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search'));
     }
 
+
     public function update(Request $request)
-{
-    // Validasi input sesuai dengan data lengkap di form edit
-    $request->validate([
-        'id'            => 'required|exists:users,id',
-        'nis'           => 'nullable|string|max:255',
-        'nik'           => 'nullable|string|max:255',
-        'nip'           => 'nullable|string|max:255',
-        'name'          => 'required|string|max:255',
-        'email'         => 'required|email|max:255|unique:users,email,' . $request->id, 
-        'role'          => 'required|in:siswa,guru,umum',
-        'jenis_kelamin' => 'nullable|in:L,P',
-        'alamat'        => 'nullable|string|max:500',
-    ]);
+    {
+        $request->validate([
+            'id'            => 'required|exists:users,id',
+            'nomor_induk'   => 'nullable|string|max:255',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|max:255|unique:users,email,' . $request->id, 
+            'role'          => 'required|in:siswa,guru,umum',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'alamat'        => 'nullable|string|max:500',
+        ]);
 
-    // Cari user berdasarkan ID
-    $user = User::findOrFail($request->id);
-    
-    // Simpan perubahan ke database
-    $user->update([
-        'nis'           => $request->nis,
-        'nik'           => $request->nik,
-        'nip'           => $request->nip,
-        'name'          => $request->name,
-        'email'         => $request->email,
-        'role'          => $request->role,
-        'jenis_kelamin' => $request->jenis_kelamin,
-        'alamat'        => $request->alamat,
-    ]);
+        $user = User::findOrFail($request->id);
 
-    return redirect()->route('member.index')->with('success', 'Data user berhasil diperbarui!');
-}
+        $role = strtolower($request->role);
+        
+        // 1. Kosongkan ketiganya terlebih dahulu untuk mencegah bentrok data lama
+        $nis = null;
+        $nip = null;
+        $nik = null;
+
+        // 2. Isi hanya pada variabel yang sesuai dengan role yang dipilih saat ini
+        if ($role === 'siswa') {
+            $nis = $request->nomor_induk;
+        } elseif ($role === 'guru') {
+            $nip = $request->nomor_induk;
+        } elseif ($role === 'umum') {
+            $nik = $request->nomor_induk;
+        }
+
+        // 3. Simpan ke database
+        $user->update([
+            'nis'           => $nis,
+            'nik'           => $nik,
+            'nip'           => $nip,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'role'          => $request->role,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'alamat'        => $request->alamat,
+        ]);
+
+        return redirect()->route('member.index')->with('success', 'Data user berhasil diperbarui!');
+    }
 
     public function store(Request $request)
     {
-        // Validasi input termasuk foto
+        // 1. Validasi input (menggunakan 'nomor_induk' sesuai form modal Anda)
         $request->validate([
-            'nis'           => 'nullable|string|max:255',
-            'nik'           => 'nullable|string|max:255',
-            'nip'           => 'nullable|string|max:255',
+            'nomor_induk'   => 'nullable|string|max:255',
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255|unique:users,email',
             'password'      => 'required|string|min:6',
             'role'          => 'required|in:siswa,guru,umum',
             'jenis_kelamin' => 'nullable|in:L,P',
             'alamat'        => 'nullable|string|max:500',
-            'foto'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Tambahkan validasi foto di sini
+            'foto'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Proses penyimpanan file foto jika diunggah
+        // 2. Proses penyimpanan file foto jika diunggah
         $pathFoto = null;
         if ($request->hasFile('foto')) {
-            // Disimpan ke storage/app/public/foto-user
             $pathFoto = $request->file('foto')->store('foto-user', 'public');
         }
 
-        // Simpan data ke database termasuk path foto
+        // 3. Tentukan kolom nomor induk berdasarkan role yang dipilih
+        $role = strtolower($request->role);
+        $nis = null;
+        $nip = null;
+        $nik = null;
+
+        if ($role === 'siswa') {
+            $nis = $request->nomor_induk;
+        } elseif ($role === 'guru') {
+            $nip = $request->nomor_induk;
+        } elseif ($role === 'umum') {
+            $nik = $request->nomor_induk;
+        }
+
+        // 4. Simpan data ke database
         User::create([
-            'nis'           => $request->nis,
-            'nik'           => $request->nik,
-            'nip'           => $request->nip,
+            'nis'           => $nis,
+            'nik'           => $nik,
+            'nip'           => $nip,
             'name'          => $request->name,
             'email'         => $request->email,
             'password'      => bcrypt($request->password), 
             'role'          => $request->role,
             'jenis_kelamin' => $request->jenis_kelamin,
             'alamat'        => $request->alamat,
-            'foto'          => $pathFoto, // Masukkan path foto ke database
+            'foto'          => $pathFoto,
         ]);
 
         return redirect()->route('member.index')->with('success', 'User baru berhasil ditambahkan!');

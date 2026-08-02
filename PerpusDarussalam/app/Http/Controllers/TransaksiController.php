@@ -22,6 +22,7 @@ class TransaksiController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('jenis', 'like', "%{$search}%")
                   ->orWhere('keterangan', 'like', "%{$search}%")
+                  // HAPUS BARIS INI: ->orWhere('name', 'like', "%{$search}%")
                   ->orWhereHas('user', function ($u) use ($search) {
                       $u->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
@@ -29,15 +30,12 @@ class TransaksiController extends Controller
                         ->orWhere('nis', 'like', "%{$search}%")
                         ->orWhere('nip', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%");
-                        // Hilangkan tanda komentar (//) di bawah ini jika menggunakan kolom nis/nip pada tabel users:
-                        // ->orWhere('nis', 'like', "%{$search}%")
-                        // ->orWhere('nip', 'like', "%{$search}%");
                   });
             });
         }
 
         // Urutkan berdasarkan tanggal terbaru & gunakan paginasi (10 data per halaman)
-        $transactions = $query->orderBy('tanggal', 'desc')->paginate(10);
+        $transactions = $query->orderBy('id', 'desc')->paginate(10);
 
         // Pertahankan parameter search saat ganti halaman paginasi
         $transactions->appends($request->all());
@@ -60,27 +58,30 @@ class TransaksiController extends Controller
         ]);
 
         $userId = null;
+        $namaUser = 'Non-Anggota'; // Default jika tidak ditemukan
 
         // Jika No Identitas diisi, cari user yang cocok di database
         if ($request->filled('no_identitas')) {
             $identitas = trim($request->no_identitas);
 
-            $user = User::where('id', $identitas)
-                        ->orWhere('email', $identitas)
-                        ->orWhere('nis', $identitas)
-                        ->orWhere('nip', $identitas)
-                        ->orWhere('nik', $identitas)
-                        ->orWhere('id', $identitas)
-                        ->first();
+            $user = User::where(function($query) use ($identitas) {
+                $query->where('id', $identitas)
+                      ->orWhere('email', $identitas)
+                      ->orWhere('nis', $identitas)
+                      ->orWhere('nip', $identitas)
+                      ->orWhere('nik', $identitas);
+            })->first();
 
             if ($user) {
                 $userId = $user->id;
+                $namaUser = $user->name; // Ambil nama asli dari tabel user
             }
         }
 
         // Simpan Data Transaksi
         Transaction::create([
             'user_id'    => $userId,
+            'name'       => $namaUser,
             'jenis'      => $request->jenis,
             'nominal'    => $request->nominal,
             'tanggal'    => $request->tanggal,
@@ -107,25 +108,29 @@ class TransaksiController extends Controller
         ]);
 
         $userId = null;
+        $namaUser = 'Non-Anggota'; // Default jika tidak ditemukan
 
         if ($request->filled('no_identitas')) {
             $identitas = trim($request->no_identitas);
 
-            $user = User::where('id', $identitas)
-                        ->orWhere('email', $identitas)
-                        ->orWhere('nis', $identitas)
-                        ->orWhere('nip', $identitas)
-                        ->orWhere('nik', $identitas)
-                        ->first();
+            $user = User::where(function($query) use ($identitas) {
+                $query->where('id', $identitas)
+                      ->orWhere('email', $identitas)
+                      ->orWhere('nis', $identitas)
+                      ->orWhere('nip', $identitas)
+                      ->orWhere('nik', $identitas);
+            })->first();
 
             if ($user) {
                 $userId = $user->id;
+                $namaUser = $user->name; // Ambil nama asli dari tabel user
             }
         }
 
         // Update Data Transaksi
         $transaction->update([
             'user_id'    => $userId,
+            'name'       => $namaUser,
             'jenis'      => $request->jenis,
             'nominal'    => $request->nominal,
             'tanggal'    => $request->tanggal,
@@ -148,12 +153,13 @@ class TransaksiController extends Controller
 
     public function cariUser($identitas)
     {
-        $user = User::where('id', $identitas)
-                    ->orWhere('email', $identitas)
-                    ->orWhere('nis', $identitas)
-                    ->orWhere('nip', $identitas)
-                    ->orWhere('nik', $identitas)
-                    ->first();
+        $user = User::where(function($query) use ($identitas) {
+            $query->where('id', $identitas)
+                  ->orWhere('email', $identitas)
+                  ->orWhere('nis', $identitas)
+                  ->orWhere('nip', $identitas)
+                  ->orWhere('nik', $identitas);
+        })->first();
 
         if ($user) {
             return response()->json([
@@ -167,6 +173,7 @@ class TransaksiController extends Controller
             'name'    => ''
         ]);
     }
+
     /**
      * Menghapus satu atau beberapa data transaksi secara masal (Bulk Delete).
      */

@@ -38,7 +38,7 @@
                     </form>
                 @else
                     <!-- Jika Belum Login (Mengarahkan ke route user.login) -->
-                    <a href="{{ route('user.login') }}" 
+                    <a href="{{ route('login') }}" 
                     class="inline-block px-5 py-1.5 bg-[#00695c] text-white hover:bg-[#004d40] rounded-sm font-semibold transition shadow-sm">
                         Log In Pemustaka
                     </a>
