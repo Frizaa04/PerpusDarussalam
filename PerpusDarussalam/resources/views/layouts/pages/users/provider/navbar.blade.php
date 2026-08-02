@@ -11,14 +11,7 @@
     <!-- Form Pencarian -->
 <div class="flex items-center gap-3">
     <!-- Form Search Asli -->
-    <form action="#" method="GET" class="flex items-center">
-        <input type="text" placeholder="Search" class="px-3 py-1.5 border border-gray-300 rounded-l-md focus:outline-none text-sm text-gray-700">
-        <button type="submit" class="bg-[#003d30] text-white px-3 py-2 rounded-r-md hover:bg-[#004d40] transition flex items-center justify-center">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-        </button>
-    </form>
+
 
     <!-- Tombol LogOut di Samping Kanan Search -->
     @auth('web')
@@ -38,7 +31,7 @@
         <a href="{{ route('user.home') }}" class="hover:text-emerald-200 transition">Beranda</a>
         <a href="{{ route('user.area_anggota') }}" class="hover:text-emerald-200 transition">Area Anggota</a>
         <a href="{{ route('user.ebook.index') }}" class="hover:text-emerald-200 transition">E-Book</a>
-        <a href="#" class="hover:text-emerald-200 transition">Tentang Kami</a>
+        <a href="{{ route('user.about') }}" class="hover:text-emerald-200 transition">Tentang Kami</a>
     </div>
 </nav>
 
