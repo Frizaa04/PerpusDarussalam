@@ -147,69 +147,165 @@
                 <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 text-white flex flex-col justify-between">
                     <div>
                         <h2 class="text-lg font-bold text-white mb-1 tracking-wide">Kelola Teks Berjalan (Marquee)</h2>
-                        <p class="text-xs text-white/80 mb-4">Input informasi penting yang akan tampil bergerak di beranda user.</p>
+                        <p class="text-xs text-white/80 mb-4">Buat pengumuman baru atau pilih dari riwayat teks yang pernah dibuat.</p>
                     </div>
 
-                    <form action="{{ route('admin.announcement.store') }}" method="POST" class="space-y-3">
+                    <!-- Form Input Pengumuman Baru -->
+                    <form action="{{ route('admin.announcement.store') }}" method="POST" class="space-y-3 mb-6">
                         @csrf
                         <div>
-                            <textarea name="content" rows="3" placeholder="Contoh: Perpustakaan tutup lebih awal hari Jumat pukul 11.30..." class="w-full p-2.5 text-xs text-gray-800 rounded-lg border border-white/15 focus:outline-none focus:ring-2 focus:ring-[#004d40]">{{ \App\Models\Announcement::where('is_active', true)->latest()->value('content') }}</textarea>
+                            <textarea name="content" rows="2" placeholder="Tulis pengumuman baru di sini..." class="w-full p-2.5 text-xs text-gray-800 rounded-lg border border-white/15 focus:outline-none focus:ring-2 focus:ring-[#004d40]" required></textarea>
                         </div>
                         <button type="submit" class="bg-[#003d30] hover:bg-[#004d40] text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow">
-                            Perbarui Teks Berjalan
+                            Simpan & Aktifkan Pengumuman Baru
                         </button>
                     </form>
+
+                    <!-- Daftar Riwayat Pengumuman -->
+                    <div class="border-t border-white/20 pt-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider mb-2 text-white/90">Riwayat Pilihan Pengumuman</h3>
+                        <div class="max-h-40 overflow-y-auto space-y-2 pr-1">
+                            @php
+                                $announcements = \App\Models\Announcement::latest()->get();
+                            @endphp
+
+                            @forelse($announcements as $item)
+                                <div class="bg-white/10 p-2.5 rounded-lg border border-white/15 flex items-center justify-between gap-3 text-xs">
+                                    <div class="truncate flex items-center gap-2">
+                                        @if($item->is_active)
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Sedang Aktif"></span>
+                                        @else
+                                            <span class="w-2 h-2 rounded-full bg-gray-400 shrink-0" title="Arsip"></span>
+                                        @endif
+                                        <span class="truncate {{ $item->is_active ? 'font-bold text-white' : 'text-white/80' }}">{{ $item->content }}</span>
+                                    </div>
+
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        @if(!$item->is_active)
+                                            <form action="{{ route('admin.announcement.activate', $item->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[10px] font-semibold transition">
+                                                    Gunakan
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-[10px] bg-emerald-800 text-emerald-100 px-2 py-0.5 rounded font-medium">Aktif</span>
+                                        @endif
+
+                                        <!-- Tombol Hapus -->
+                                        <form action="{{ route('admin.announcement.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pengumuman ini secara permanen?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-[10px] font-semibold transition">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-[11px] text-white/70 italic">Belum ada riwayat pengumuman.</p>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- BOX TABEL AKTIVITAS TERBARU (Sesuai kode asli Anda yang disempurnakan tampilannya) -->
-            <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-white tracking-wide">Aktivitas Terbaru</h2>
-                    <span class="text-xs bg-[#004d40] text-white px-3 py-1 rounded-full font-semibold">Real-time log</span>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+
+                <!-- 1. TABEL AKTIVITAS TERBARU (Real-time log) -->
+                <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-white tracking-wide">Aktivitas Terbaru</h2>
+                            <span class="text-xs bg-[#004d40] text-white px-3 py-1 rounded-full font-semibold">Real-time log</span>
+                        </div>
+                        
+                        <div class="overflow-x-auto rounded-lg">
+                            <table class="min-w-full text-left border-collapse border border-white/30">
+                                <thead>
+                                    <tr class="bg-[#004d40] text-white divide-x divide-white/30">
+                                        <th class="p-3 text-xs font-bold tracking-wider">Tanggal & Waktu</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Tindakan</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Detail Buku</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">User</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-white divide-y divide-white/30">
+                                    @forelse($recentActivities ?? [] as $activity)
+                                        <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
+                                            <td class="p-3 text-xs font-bold text-white/90">
+                                                {{ $activity['tanggal'] }} <span class="text-emerald-200 font-normal">({{ $activity['waktu'] }})</span>
+                                            </td>
+                                            <td class="p-3 text-xs text-white/90">{{ $activity['tindakan'] }}</td>
+                                            <td class="p-3 text-xs text-white/90">{{ $activity['detail_buku'] }}</td>
+                                            <td class="p-3 text-xs font-bold text-white/90">{{ $activity['user'] }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="p-4 text-center text-xs text-white/80 italic">Belum ada aktivitas terbaru.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Render Navigasi Paginasi Pintar -->
+                    <div class="mt-4">
+                        {{ $recentActivities->links('vendor.pagination.custom') }}
+                    </div>
                 </div>
-                
-                <div class="overflow-x-auto rounded-lg">
-                    <table class="min-w-full text-left border-collapse border border-white/30">
-                        <thead>
-                            <tr class="bg-[#004d40] text-white divide-x divide-white/30">
-                                <th class="p-3 text-xs font-bold tracking-wider">Waktu</th>
-                                <th class="p-3 text-xs font-bold tracking-wider">Tindakan</th>
-                                <th class="p-3 text-xs font-bold tracking-wider">Detail Buku</th>
-                                <th class="p-3 text-xs font-bold tracking-wider">User</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-white divide-y divide-white/30">
-                            @forelse($recentActivities ?? [] as $activity)
-                                <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
-                                    <td class="p-3 text-xs font-bold text-white/90">{{ $activity['waktu'] }}</td>
-                                    <td class="p-3 text-xs text-white/90">{{ $activity['tindakan'] }}</td>
-                                    <td class="p-3 text-xs text-white/90">{{ $activity['detail_buku'] }}</td>
-                                    <td class="p-3 text-xs font-bold text-white/90">{{ $activity['user'] }}</td>
-                                </tr>
-                            @empty
-                                <!-- Data Dummy untuk preview jika controller belum mengirim data -->
-                                <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
-                                    <td class="p-3 text-xs font-bold text-white/90">10:42 AM</td>
-                                    <td class="p-3 text-xs text-white/90">Peminjaman Buku</td>
-                                    <td class="p-3 text-xs text-white/90">Laskar Pelangi (INV-001)</td>
-                                    <td class="p-3 text-xs font-bold text-white/90">Ahmad (NIS: 1029)</td>
-                                </tr>
-                                <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
-                                    <td class="p-3 text-xs font-bold text-white/90">09.15 AM</td>
-                                    <td class="p-3 text-xs text-white/90">Pengembalian Buku</td>
-                                    <td class="p-3 text-xs text-white/90">Bumi Manusia (INV-045)</td>
-                                    <td class="p-3 text-xs font-bold text-white/90">Siti (NIS: 1055)</td>
-                                </tr>
-                                <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
-                                    <td class="p-3 text-xs font-bold text-white/90">08:30 AM</td>
-                                    <td class="p-3 text-xs text-white/90">Peminjaman Buku</td>
-                                    <td class="p-3 text-xs text-white/90">Fisika Dasar (INV-089)</td>
-                                    <td class="p-3 text-xs font-bold text-white/90">Budi (NIS: 1102)</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+
+                <!-- 2. TABEL RINGKASAN TRANSAKSI (Data Dummy Pendamping) -->
+                <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-lg font-bold text-white tracking-wide">Transaksi Keuangan</h2>
+                            <span class="text-xs bg-[#003d30] text-white px-3 py-1 rounded-full font-semibold">
+                                Total: Rp {{ number_format($totalNominalTransaksi ?? 0, 0, ',', '.') }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-white/80 mb-4">Daftar transaksi denda & administrasi perpustakaan.</p>
+                        
+                        <div class="overflow-x-auto rounded-lg">
+                            <table class="min-w-full text-left border-collapse border border-white/30">
+                                <thead>
+                                    <tr class="bg-[#003d30] text-white divide-x divide-white/30">
+                                        <th class="p-3 text-xs font-bold tracking-wider">Jenis Transaksi</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Peminjam / User</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Nominal</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Tanggal</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-white divide-y divide-white/30">
+                                    @forelse($recentTransactions ?? [] as $trx)
+                                        <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
+                                            <td class="p-3 text-xs font-bold text-white/90">
+                                                {{ ucwords(str_replace('_', ' ', $trx->jenis)) }}
+                                            </td>
+                                            <td class="p-3 text-xs text-white/90">
+                                                {{ $trx->user->name ?? 'Umum / Tanpa Akun' }}
+                                            </td>
+                                            <td class="p-3 text-xs font-semibold text-emerald-200">
+                                                Rp {{ number_format($trx->nominal, 0, ',', '.') }}
+                                            </td>
+                                            <td class="p-3 text-xs text-white/90">
+                                                {{ \Carbon\Carbon::parse($trx->tanggal)->format('d M Y') }}
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="p-4 text-center text-xs text-white/80 italic">Belum ada data transaksi keuangan.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        {{ $recentTransactions->links('vendor.pagination.custom') }}
+                    </div>
                 </div>
             </div>
         </div>

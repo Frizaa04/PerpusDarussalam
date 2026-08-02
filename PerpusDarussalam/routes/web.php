@@ -67,6 +67,8 @@ Route::middleware(['admin'])->group(function () {
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::post('/admin/announcement', [AdminAnnouncementController::class, 'store'])->name('admin.announcement.store');
+    Route::patch('/admin/announcement/{id}/activate', [AdminAnnouncementController::class, 'activate'])->name('admin.announcement.activate');
+    Route::delete('/admin/announcement/{id}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
 
     // Manajemen Siswa / User
     Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
