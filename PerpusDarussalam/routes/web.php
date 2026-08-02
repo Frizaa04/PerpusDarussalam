@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\BookController;
@@ -18,6 +18,7 @@ use App\Http\Controllers\BookItemController;
 use App\Http\Controllers\AreaAnggotaUserController;
 use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\UserEbookController;
+use App\Http\Controllers\AboutUserController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -33,13 +34,10 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
-// ROUTE USER / PEMUSTAKA (Hanya Bisa Diakses Setelah Login)
 Route::middleware(['auth:web'])->group(function () {
     
-    // 1. Beranda User
-    Route::get('/home', function () {
-        return view('layouts.pages.users.home');
-    })->name('user.home');
+    // 1. Beranda User (Ganti closure function menjadi memanggil UserController)
+    Route::get('/home', [UserController::class, 'index'])->name('user.home');
 
     // 2. Area Anggota User
     Route::get('/area-anggota', [AreaAnggotaUserController::class, 'index'])->name('user.area_anggota');
@@ -48,7 +46,10 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/user/e-book', [UserEbookController::class, 'index'])->name('user.ebook.index');
     Route::get('/user/e-book/read/{id}', [UserEbookController::class, 'read'])->name('user.ebook.read');
 
-    // 4. Logout User
+    // 4. TAMBAHKAN ROUTE TENTANG KAMI DI SINI
+    Route::get('/tentang-kami', [AboutUserController::class, 'index'])->name('user.about');
+
+    // 5. Logout User
     Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
 });

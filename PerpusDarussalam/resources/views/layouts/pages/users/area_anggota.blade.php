@@ -13,7 +13,6 @@
         <!-- Card Profile / Profil Anggota -->
         <div class="bg-[#b2c8c6] rounded-2xl p-6 md:p-8 shadow-xl flex items-center gap-6 md:gap-8">
             <!-- Avatar Placeholder / Foto -->
-<!-- Avatar Placeholder / Foto -->
             <div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-300 flex-shrink-0 border-2 border-white/50 overflow-hidden">
                 @php
                     $fotoPath = $user->foto ?? $user->avatar ?? $user->photo ?? null;
@@ -81,7 +80,7 @@
                     <tbody class="text-center divide-y divide-emerald-800/30">
                         @forelse($peminjamans as $pinjam)
                             <tr class="hover:bg-[#003d30]/10 transition text-emerald-950 font-medium border-b border-emerald-800/30">
-                                <!-- Judul Buku (diambil dari relasi bookItem -> book) -->
+                                <!-- Judul Buku -->
                                 <td class="py-2.5 px-4 text-left border-r border-emerald-800/30">
                                     {{ $pinjam->bookItem->book->title ?? $pinjam->bookItem->book->judul ?? $pinjam->bookItem->code ?? '-' }}
                                 </td>
@@ -91,7 +90,7 @@
                                     {{ $pinjam->tanggal_pinjam ? \Carbon\Carbon::parse($pinjam->tanggal_pinjam)->format('d/m/Y') : '-' }}
                                 </td>
 
-                                <!-- Batas Pengembalian / Tanggal Jatuh Tempo -->
+                                <!-- Batas Pengembalian -->
                                 <td class="py-2.5 px-4 border-r border-emerald-800/30">
                                     {{ $pinjam->tanggal_jatuh_tempo ? \Carbon\Carbon::parse($pinjam->tanggal_jatuh_tempo)->format('d/m/Y') : '-' }}
                                 </td>
@@ -111,7 +110,7 @@
                                     @endif
                                 </td>
 
-                                <!-- Tanggal Kembali Realisasi -->
+                                <!-- Tanggal Kembali -->
                                 <td class="py-2.5 px-4">
                                     {{ $pinjam->tanggal_kembali ? \Carbon\Carbon::parse($pinjam->tanggal_kembali)->format('d/m/Y') : '-' }}
                                 </td>
@@ -127,6 +126,19 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Tombol Paginasi (Menggunakan Style Tailwind Tema Berwarna Gelap) -->
+            @if ($peminjamans->hasPages())
+                <div class="mt-4 flex justify-between items-center text-xs font-semibold text-[#003d30]">
+                    <div>
+                        Menampilkan {{ $peminjamans->firstItem() }} - {{ $peminjamans->lastItem() }} dari {{ $peminjamans->total() }} data
+                    </div>
+                    <div>
+                        {{ $peminjamans->links() }}
+                    </div>
+                </div>
+            @endif
+
         </div>
 
     </div>

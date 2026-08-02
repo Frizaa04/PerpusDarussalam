@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers; // Sesuaikan jika menggunakan subfolder (\User)
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Borrowing; // Gunakan Model Borrowing
+use App\Models\Borrowing;
 
 class AreaAnggotaUserController extends Controller
 {
@@ -16,14 +16,14 @@ class AreaAnggotaUserController extends Controller
 
         // 2. Proteksi jika user belum login, redirect ke route user.login
         if (!$user) {
-            return redirect()->route('user.login'); // <-- Diubah di sini!
+            return redirect()->route('user.login');
         }
 
-        // 3. Ambil riwayat peminjaman beserta relasi buku
+        // 3. Ambil riwayat peminjaman dengan PAGINASI (10 data per halaman)
         $peminjamans = Borrowing::with('bookItem.book')
             ->where('user_id', $user->id)
             ->latest()
-            ->get();
+            ->paginate(10); // <-- Diubah di sini!
 
         return view('layouts.pages.users.area_anggota', compact('user', 'peminjamans'));
     }
