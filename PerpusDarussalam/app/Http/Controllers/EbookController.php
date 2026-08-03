@@ -28,13 +28,14 @@ class EbookController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        // Menggunakan validateWithBag dengan error bag 'ebookStoreForm'
+        $request->validateWithBag('ebookStoreForm', [
             'kode_ebook' => 'required|string|unique:ebooks,kode_ebook|max:255',
             'judul' => 'required|string|max:255',
             'categories_id' => 'required|exists:categories,id', 
             'penulis' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
-            'tahun_terbit' => 'required',
+            'tahun_terbit' => 'required|digits:4',
             'isbn' => 'nullable|string|max:255',
             'cover' => 'nullable|file|mimes:jpg,jpeg,png|max:5000',
             'file_pdf' => 'required|file|mimes:pdf|max:20000',
@@ -66,7 +67,8 @@ class EbookController extends Controller
     {
         $ebook = Ebook::findOrFail($id);
 
-        $request->validate([
+        // Menggunakan validateWithBag dengan error bag 'ebookUpdateForm'
+        $request->validateWithBag('ebookUpdateForm', [
             'kode_ebook' => 'required|string|max:255|unique:ebooks,kode_ebook,' . $id,
             'judul' => 'required|string|max:255',
             'categories_id' => 'required|exists:categories,id',
@@ -123,8 +125,9 @@ class EbookController extends Controller
             if ($ebook->cover && Storage::disk('public')->exists($ebook->cover)) {
                 Storage::disk('public')->delete($ebook->cover);
             }
-            if ($ebook->file_pdf && Storage::disk('public')->exists($ebook->file_pdf)) {
-                Storage::disk('public')->delete($ebook->file_pdf);
+            $ebooks_pdf_path = $ebook->file_pdf;
+            if ($ebooks_pdf_path && Storage::disk('public')->exists($ebooks_pdf_path)) {
+                Storage::disk('public')->delete($ebooks_pdf_path);
             }
             $ebook->delete();
         }

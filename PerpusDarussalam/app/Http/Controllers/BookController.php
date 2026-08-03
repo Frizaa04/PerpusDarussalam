@@ -42,13 +42,19 @@ class BookController extends Controller
 
     public function store(Request $request, BookService $bookService)
     {
-        $request->validate([
-            'judul'     => 'required|string|max:255',
-            'kategori'  => 'nullable|string',
-            'stok'      => 'required|numeric|min:1',
-            'deskripsi' => 'nullable|string',
-            'rak'       => 'nullable|string',
-            'cover'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        // Ganti validasi biasa dengan validateWithBag khusus 'bookStoreForm'
+        $request->validateWithBag('bookStoreForm', [
+            'categories_id'     => 'required|exists:categories,id',
+            'judul'             => 'required|string|max:255',
+            'penulis'           => 'required|string|max:255',
+            'penerbit'          => 'required|string|max:255',
+            'tahun_terbit'      => 'required|digits:4',
+            'isbn'              => 'required|string|max:255',
+            'tanggal_pembelian' => 'required|date',
+            'stok'              => 'required|integer|min:0',
+            'cover'             => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'deskripsi'         => 'required|string',
+            'rak'               => 'required|string|max:255',
         ]);
 
         $bookService->createBook($request->all());
@@ -61,8 +67,10 @@ class BookController extends Controller
     public function update(Request $request, BookService $bookService)
     {
         $book = Book::findOrFail($request->id);
-        $request->validate([
-            'kode_buku'         => 'required|string|max:255|unique:books,kode_buku,' . $book->id,
+        
+        // Ganti validasi biasa dengan validateWithBag khusus 'bookUpdateForm'
+        $request->validateWithBag('bookUpdateForm', [
+            'categories_id'     => 'required|exists:categories,id', // Jangan lupa pastikan kategori juga ikut divalidasi saat update jika ada
             'judul'             => 'required|string|max:255',
             'penulis'           => 'required|string|max:255',
             'penerbit'          => 'required|string|max:255',
@@ -74,7 +82,9 @@ class BookController extends Controller
             'stok'              => 'required|integer|min:0',
             'cover'             => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+
         $bookService->updateBook($book, $request);
+        
         return redirect()
             ->route('book.index')
             ->with('success', 'Data buku dan inventaris berhasil diperbarui!');
