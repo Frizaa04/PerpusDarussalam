@@ -82,8 +82,8 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi input (menggunakan 'nomor_induk' sesuai form modal Anda)
-        $request->validate([
+        // 1. Ganti validasi biasa menjadi validateWithBag khusus 'addUserForm'
+        $validated = $request->validateWithBag('addUserForm', [
             'nomor_induk'   => 'nullable|string|max:255',
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255|unique:users,email',
@@ -127,6 +127,14 @@ class MemberController extends Controller
             'alamat'        => $request->alamat,
             'foto'          => $pathFoto,
         ]);
+
+        // 5. Cek jika request berasal dari AJAX (Fetch/Axios)
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User baru berhasil ditambahkan!'
+            ]);
+        }
 
         return redirect()->route('member.index')->with('success', 'User baru berhasil ditambahkan!');
     }

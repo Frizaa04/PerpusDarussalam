@@ -213,7 +213,18 @@
 
             <h3 class="text-2xl font-bold mb-6">Tambah E-Book Baru</h3>
 
-            <form action="{{ route('admin.ebook.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <!-- Kotak Pesan Error untuk Tambah E-Book -->
+            <div
+                class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->ebookStoreForm->any() ? '' : 'hidden' }}">
+                @if ($errors->ebookStoreForm->any())
+                    @foreach ($errors->ebookStoreForm->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                @endif
+            </div>
+
+            <form action="{{ route('admin.ebook.store') }}" method="POST" enctype="multipart/form-data"
+                class="space-y-4">
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -295,6 +306,16 @@
 
             <h3 class="text-2xl font-bold mb-6">Edit Data E-Book</h3>
 
+            <!-- Kotak Pesan Error untuk Edit E-Book -->
+            <div
+                class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->ebookUpdateForm->any() ? '' : 'hidden' }}">
+                @if ($errors->ebookUpdateForm->any())
+                    @foreach ($errors->ebookUpdateForm->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                @endif
+            </div>
+
             <form id="formEditEbook" action="" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 @method('PUT')
@@ -369,6 +390,13 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- OTOMATIS BUKA MODAL TAMBAH EBOOK JIKA ADA ERROR DARI SERVER ---
+            @if ($errors->ebookStoreForm->any())
+                openAddEbookModal();
+            @endif
+        });
+
         function openAddEbookModal() {
             document.getElementById('addEbookModal').classList.remove('hidden');
         }

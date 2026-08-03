@@ -9,17 +9,6 @@
     <main class="flex-1 flex flex-col">
 
         <div class="p-8 space-y-6">
-            
-            <!-- Filter Tanggal/Hari (Kotak Tanggal Atas) -->
-            <div class="inline-flex bg-[#004d40] rounded text-white overflow-hidden shadow-sm">
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold border-r border-white/20 transition">13</a>
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold border-r border-white/20 transition">14</a>
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold border-r border-white/20 transition">15</a>
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold border-r border-white/20 transition">16</a>
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold border-r border-white/20 transition">17</a>
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold border-r border-white/20 transition">18</a>
-                <a href="#" class="px-4 py-2 hover:bg-[#003d30] font-bold transition">19</a>
-            </div>
 
             <!-- Input untuk Barcode Scanner -->
             <form action="{{ route('absen.store') }}" method="POST" class="mb-4">
