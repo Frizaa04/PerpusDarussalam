@@ -35,25 +35,21 @@ class AdminDashboardController extends Controller
         $totalBookItems = BookItem::count();
 
         $now = Carbon::now();
-        $startOfWeek = $now->copy()->startOfWeek(Carbon::MONDAY);
-        
-        // Batasi sampai hari ini saja agar hari esok/masa depan tidak tampil 0 di grafik
-        $endOfData = $now->copy(); 
+
+        // Ambil rentang 6 hari ke belakang sampai hari ini (total tepat 7 hari / 1 minggu penuh)
+        $startDate = $now->copy()->subDays(6); 
 
         $borrowingsData = Borrowing::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->whereBetween('created_at', [$startOfWeek, $now->copy()->endOfDay()])
+            ->whereBetween('created_at', [$startDate->copy()->startOfDay(), $now->copy()->endOfDay()])
             ->groupBy('date')
             ->pluck('count', 'date');
 
         $labels = [];
         $chartPeminjaman = [];
 
-        // Hitung selisih hari dari Senin sampai hari ini (maksimal 7 hari)
-        $daysCount = $startOfWeek->diffInDays($now) + 1;
-        if ($daysCount > 7) $daysCount = 7;
-
-        for ($i = 0; $i < $daysCount; $i++) {
-            $date = $startOfWeek->copy()->addDays($i);
+        // Looping tepat 7 hari ke belakang hingga hari ini
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startDate->copy()->addDays($i);
             $dateStr = $date->format('Y-m-d');
 
             $labels[] = $date->translatedFormat('D, d M');

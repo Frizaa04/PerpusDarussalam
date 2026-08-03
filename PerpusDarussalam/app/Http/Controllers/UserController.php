@@ -24,7 +24,7 @@ class UserController extends Controller
             })->latest()->get();
         } else {
             // Tampilkan tepat 6 BUKU TERBARU agar pas memenuhi 1 baris
-            $books = $queryBuilder->latest()->take(6)->get();
+            $books = $queryBuilder->latest()->get();
         }
 
         return view('layouts.pages.users.home', compact('books'));
