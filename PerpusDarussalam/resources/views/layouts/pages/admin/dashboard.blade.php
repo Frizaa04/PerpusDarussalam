@@ -24,12 +24,14 @@
                 <div class="bg-[#b0bec5] text-white p-5 rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] border border-white/20">
                     <h3 class="text-xs font-bold text-white/90 tracking-wider">Peminjaman Buku</h3>
                     <p class="text-3xl font-extrabold mt-2">{{ $todayBorrowings ?? 45 }}</p>
+                    <span class="text-xs text-white/80 font-semibold mt-1 inline-block">Yang Terpinjam Hari Ini</span>
                 </div>
 
                 <!-- Card 3 -->
                 <div class="bg-[#b0bec5] text-white p-5 rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] border border-white/20">
                     <h3 class="text-xs font-bold text-white/90 tracking-wider">Pengembalian Buku</h3>
                     <p class="text-3xl font-extrabold mt-2">{{ $todayReturns ?? 32 }}</p>
+                    <span class="text-xs text-white/80 font-semibold mt-1 inline-block">Pengembalian Buku Hari Ini</span>
                 </div>
 
                 <!-- Card 4  -->
@@ -54,7 +56,7 @@
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h2 class="text-lg font-bold text-white tracking-wide">Statistik Peminjaman Mingguan</h2>
-                            <p class="text-xs text-white/80 mt-0.5">Tren harian (Senin - hari ini) pada minggu aktif.</p>
+                            <p class="text-xs text-white/80 mt-0.5">Tren harian (7 hari terakhir).</p>
                         </div>
                         
                         <!-- Kotak Info Total Minggu Ini -->
@@ -82,35 +84,39 @@
                         </div>
 
                         <!-- Container SVG Grafik -->
-                        <div class="relative h-44 w-full py-2">
+                        <div class="relative h-44 w-full py-2 px-4">
                             <!-- Garis Panduan Sumbu Y -->
-                            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+                            <div class="absolute inset-x-4 inset-y-2 flex flex-col justify-between pointer-events-none opacity-20">
                                 <div class="border-b border-white w-full"></div>
                                 <div class="border-b border-white w-full"></div>
                                 <div class="border-b border-white w-full"></div>
                             </div>
 
                             @php
-                                $getY = fn($val) => 130 - ($val / $maxVal) * 100;
+                                // Sesuaikan skala tinggi SVG (viewBox 0 sampai 140) agar titik 0 tepat berada di garis paling bawah (Y=140)
+                                $getY = fn($val) => 140 - ($val / $maxVal) * 120;
                                 
                                 $pointsPeminjaman = [];
                                 $totalPoints = count($peminjaman);
-                                // Mencegah pembagian dengan zero jika titik hanya 1
-                                $stepX = $totalPoints > 1 ? 500 / ($totalPoints - 1) : 0; 
+                                
+                                $svgWidth = 500;
+                                $paddingX = 30;
+                                $usableWidth = $svgWidth - ($paddingX * 2);
+                                
+                                $stepX = $totalPoints > 1 ? $usableWidth / ($totalPoints - 1) : 0; 
                                 
                                 foreach($peminjaman as $index => $val) {
-                                    // Beri offset sedikit agar titik pertama & terakhir tidak menempel di dinding kiri/kanan SVG
-                                    $x = $totalPoints > 1 ? $index * $stepX : 250;
+                                    $x = $totalPoints > 1 ? $paddingX + ($index * $stepX) : $svgWidth / 2;
                                     $y = $getY($val);
                                     $pointsPeminjaman[] = "$x,$y";
                                 }
                                 
-                                $pathPeminjaman = count($pointsPeminjaman) > 1 ? "M " . implode(" L ", $pointsPeminjaman) : "M 0,130";
-                                $pathAreaPeminjaman = $pathPeminjaman . " L 500,150 L 0,150 Z";
+                                $pathPeminjaman = count($pointsPeminjaman) > 1 ? "M " . implode(" L ", $pointsPeminjaman) : "M 0,140";
+                                $pathAreaPeminjaman = $pathPeminjaman . " L " . $svgWidth . ",140 L 0,140 Z";
                             @endphp
 
                             <!-- SVG Grafik Line Chart -->
-                            <svg viewBox="0 0 500 150" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+                            <svg viewBox="0 0 500 140" preserveAspectRatio="none" class="w-full h-full overflow-visible">
                                 <defs>
                                     <linearGradient id="gradPeminjaman" x1="0%" y1="0%" x2="0%" y2="100%">
                                         <stop offset="0%" stop-color="#004d40" stop-opacity="0.5" />
@@ -126,7 +132,7 @@
 
                                 <!-- Titik-titik Indikator Peminjaman -->
                                 @foreach($peminjaman as $index => $val)
-                                    @php $cx = $totalPoints > 1 ? $index * $stepX : 250; @endphp
+                                    @php $cx = $totalPoints > 1 ? $paddingX + ($index * $stepX) : $svgWidth / 2; @endphp
                                     <circle cx="{{ $cx }}" cy="{{ $getY($val) }}" r="4.5" fill="#ffffff" stroke="#004d40" stroke-width="2.5" />
                                 @endforeach
                             </svg>
@@ -134,10 +140,10 @@
                     </div>
 
                     <!-- Footer Sumbu X (Label Hari) -->
-                    <div class="flex justify-between text-[11px] text-white/80 pt-3 pl-7 border-t border-white/20 font-medium">
+                    <div class="flex justify-between text-[11px] text-white/80 pt-3 pl-7 pr-3 border-t border-white/20 font-medium">
                         @if(!empty($chartLabels))
                             @foreach($chartLabels as $label)
-                                <span>{{ $label }}</span>
+                                <span class="text-center flex-1">{{ $label }}</span>
                             @endforeach
                         @endif
                     </div>
@@ -146,7 +152,7 @@
                 <!-- Kolom Kanan: Ringkasan Cepat / Status (1 Span) -->
                 <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 text-white flex flex-col justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-white mb-1 tracking-wide">Kelola Teks Berjalan (Marquee)</h2>
+                        <h2 class="text-lg font-bold text-white mb-1 tracking-wide">Kelola Teks Berjalan</h2>
                         <p class="text-xs text-white/80 mb-4">Buat pengumuman baru atau pilih dari riwayat teks yang pernah dibuat.</p>
                     </div>
 
@@ -157,7 +163,7 @@
                             <textarea name="content" rows="2" placeholder="Tulis pengumuman baru di sini..." class="w-full p-2.5 text-xs text-gray-800 rounded-lg border border-white/15 focus:outline-none focus:ring-2 focus:ring-[#004d40]" required></textarea>
                         </div>
                         <button type="submit" class="bg-[#003d30] hover:bg-[#004d40] text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow">
-                            Simpan & Aktifkan Pengumuman Baru
+                            Simpan & Aktifkan
                         </button>
                     </form>
 
@@ -217,7 +223,7 @@
                 <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-bold text-white tracking-wide">Aktivitas Terbaru</h2>
+                            <h2 class="text-lg font-bold text-white tracking-wide">Aktivitas Peminjaman terbaru</h2>
                             <span class="text-xs bg-[#004d40] text-white px-3 py-1 rounded-full font-semibold">Real-time log</span>
                         </div>
                         
@@ -308,6 +314,88 @@
                     </div>
                 </div>
             </div>
+
+            <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 text-white flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-white mb-1 tracking-wide">Kelola Banner Slider</h2>
+                    <p class="text-xs text-white/80 mb-4">Upload gambar baru atau aktifkan/arsip banner yang tampil di beranda user.</p>
+                </div>
+
+                <!-- Form Upload Gambar Banner Baru -->
+                <form action="{{ route('admin.banner.store') }}" method="POST" enctype="multipart/form-data" class="space-y-3 mb-6">
+                    @csrf
+                    <div>
+                        <label class="block text-[11px] font-semibold text-white/90 mb-1">Pilih Gambar Banner (JPG/PNG)</label>
+                        <input type="file" name="image" accept="image/*" class="w-full text-xs text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#003d30] file:text-white hover:file:bg-[#004d40] cursor-pointer bg-white/10 rounded-lg border border-white/15 p-1" required>
+                    </div>
+                    <button type="submit" class="bg-[#003d30] hover:bg-[#004d40] text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow">
+                        Upload & Simpan Banner
+                    </button>
+                </form>
+
+                <!-- Daftar Riwayat Banner -->
+                <div class="border-t border-white/20 pt-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider mb-2 text-white/90">Riwayat Pilihan Banner</h3>
+                    <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1">
+                        @php
+                            $banners = \App\Models\Banner::latest()->get();
+                        @endphp
+
+                        @forelse($banners as $banner)
+                            <div class="bg-white/10 p-2.5 rounded-lg border border-white/15 flex items-center justify-between gap-3 text-xs">
+                                <!-- Preview Gambar & Status -->
+                                <div class="flex items-center gap-3 truncate">
+                                    <img src="{{ asset('storage/' . $banner->image_path) }}" alt="Banner Preview" class="w-12 h-8 object-cover rounded shadow-sm border border-white/20 shrink-0">
+                                    <div class="truncate">
+                                        <div class="flex items-center gap-2">
+                                            @if($banner->is_active)
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Sedang Aktif di User"></span>
+                                                <span class="font-bold text-white text-[11px]">Aktif Ditampilkan</span>
+                                            @else
+                                                <span class="w-2 h-2 rounded-full bg-gray-400 shrink-0" title="Arsip"></span>
+                                                <span class="text-white/70 text-[11px]">Arsip</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tombol Aksi (Gunakan / Arsip & Hapus) -->
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    @if(!$banner->is_active)
+                                        <form action="{{ route('admin.banner.activate', $banner->id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-[10px] font-semibold transition">
+                                                Gunakan
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('admin.banner.deactivate', $banner->id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded text-[10px] font-semibold transition" title="Sembunyikan dari beranda">
+                                                Nonaktifkan
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    <!-- Tombol Hapus -->
+                                    <form action="{{ route('admin.banner.destroy', $banner->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus banner ini secara permanen?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-[10px] font-semibold transition">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-[11px] text-white/70 italic">Belum ada riwayat banner.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 </div>

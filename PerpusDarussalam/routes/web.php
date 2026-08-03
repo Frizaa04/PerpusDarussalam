@@ -19,6 +19,7 @@ use App\Http\Controllers\AreaAnggotaUserController;
 use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\UserEbookController;
 use App\Http\Controllers\AboutUserController;
+use App\Http\Controllers\BannerController;
 
 // Halaman Awal (Public)
 Route::get('/', function () {
@@ -70,6 +71,11 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/admin/announcement', [AdminAnnouncementController::class, 'store'])->name('admin.announcement.store');
     Route::patch('/admin/announcement/{id}/activate', [AdminAnnouncementController::class, 'activate'])->name('admin.announcement.activate');
     Route::delete('/admin/announcement/{id}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
+
+    Route::post('/banner', [BannerController::class, 'store'])->name('admin.banner.store');
+    Route::patch('/banner/{id}/activate', [BannerController::class, 'activate'])->name('admin.banner.activate');
+    Route::patch('/banner/{id}/deactivate', [BannerController::class, 'deactivate'])->name('admin.banner.deactivate');
+    Route::delete('/banner/{id}', [BannerController::class, 'destroy'])->name('admin.banner.destroy');
 
     // Manajemen Siswa / User
     Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
