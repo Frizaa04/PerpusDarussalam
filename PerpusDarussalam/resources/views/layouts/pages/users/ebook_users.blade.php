@@ -1,11 +1,11 @@
 @extends('layouts.pages.users.provider.app')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
+<div class="bg-[#004d40] min-h-screen text-white pb-16 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         <!-- HERO / HEADER HALAMAN & SEARCH BAR -->
-        <div class="bg-[#005a4e] rounded-2xl p-6 sm:p-10 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="bg-[#00382e] rounded-2xl p-6 sm:p-10 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2">Katalog E-Book Perpustakaan</h1>
                 <p class="text-sm sm:text-base text-emerald-100 max-w-xl">
@@ -99,11 +99,6 @@
                 @endif
             </div>
         </section>
-
-        <!-- Pagination (Opsional jika ingin tetap di bawah slider) -->
-        <div class="mt-4">
-            {{ $ebooks->withQueryString()->links() }}
-        </div>
 
     </div>
 </div>
