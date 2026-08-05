@@ -25,5 +25,8 @@
         @yield('content')
     </main>
 
+    <!-- Memanggil Footer User -->
+    @include('layouts.pages.users.provider.footer')
+
 </body>
 </html>

@@ -67,24 +67,43 @@
                     <ul class="space-y-2 text-sm font-medium">
                         <li class="flex justify-between border-b border-[#004d40]/10 py-1">
                             <span>Senin - Kamis</span>
-                            <span class="font-bold">07.30 - 15.30 WITA</span>
+                            <span class="font-bold">08.00 - 15.00 WITA</span>
                         </li>
                         <li class="flex justify-between border-b border-[#004d40]/10 py-1">
                             <span>Jumat</span>
-                            <span class="font-bold">07.30 - 11.30 WITA</span>
-                        </li>
-                        <li class="flex justify-between border-b border-[#004d40]/10 py-1">
-                            <span>Sabtu</span>
-                            <span class="font-bold">08.00 - 12.00 WITA</span>
+                            <span class="font-bold">08.00 - 15.30 WITA</span>
                         </li>
                         <li class="flex justify-between text-red-800 font-bold py-1">
-                            <span>Minggu & Hari Libur</span>
+                            <span>Sabtu, Minggu & Hari Libur</span>
                             <span>Tutup</span>
                         </li>
                     </ul>
                 </div>
             </div>
 
+        </div>
+
+        <!-- Section Google Maps Embed Interaktif -->
+        <div class="bg-[#b2c8c6] rounded-2xl p-4 md:p-6 shadow-xl text-[#003d30]">
+            <h3 class="text-lg font-bold mb-4 flex items-center gap-2 border-b border-[#004d40]/30 pb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+                Peta Lokasi Madrasah
+            </h3>
+
+            <!-- Container iFrame Peta -->
+            <div class="w-full h-80 md:h-[380px] rounded-xl overflow-hidden shadow-inner border border-[#004d40]/20">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.6644262100803!2d117.1140738!3d-0.5544039!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df681725d5f004d%3A0xf100e2a208d049a5!2sMadrasah%20Darussalam%20IBS%20Samarinda!5e0!3m2!1sid!2sid!4v1710000000000!5m2!1sid!2sid" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
         </div>
 
     </div>

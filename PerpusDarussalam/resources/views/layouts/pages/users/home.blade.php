@@ -137,59 +137,8 @@
             </p>
         </section>
 
-        <!-- 4. KATEGORI BUKU & LITERASI -->
-        <section class="space-y-6">
-            <div class="flex justify-between items-end border-b border-emerald-800/60 pb-3">
-                <div>
-                    <h3 class="text-xl md:text-2xl font-bold">Kategori Koleksi</h3>
-                    <p class="text-xs text-emerald-200 font-light mt-0.5">Jelajahi buku berdasarkan kategori bidang studi</p>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-[#003d30] border border-emerald-700/50 rounded-xl p-5 hover:border-emerald-400 transition group cursor-pointer shadow-lg flex flex-col justify-between">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-800/60 flex items-center justify-center text-emerald-300 mb-3 group-hover:scale-110 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm md:text-base text-white">Agama & Pendidikan Islam</h4>
-                        <p class="text-xs text-gray-300 mt-1">Al-Qur'an, Hadits, Fiqih, Aqidah</p>
-                    </div>
-                </div>
-
-                <div class="bg-[#003d30] border border-emerald-700/50 rounded-xl p-5 hover:border-emerald-400 transition group cursor-pointer shadow-lg flex flex-col justify-between">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-800/60 flex items-center justify-center text-emerald-300 mb-3 group-hover:scale-110 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm md:text-base text-white">Sains & Teknologi</h4>
-                        <p class="text-xs text-gray-300 mt-1">Komputer, Biologi, Fisika, Kimia</p>
-                    </div>
-                </div>
-
-                <div class="bg-[#003d30] border border-emerald-700/50 rounded-xl p-5 hover:border-emerald-400 transition group cursor-pointer shadow-lg flex flex-col justify-between">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-800/60 flex items-center justify-center text-emerald-300 mb-3 group-hover:scale-110 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm md:text-base text-white">Bahasa & Sastra</h4>
-                        <p class="text-xs text-gray-300 mt-1">Bahasa Arab, Inggris, Indonesia</p>
-                    </div>
-                </div>
-
-                <div class="bg-[#003d30] border border-emerald-700/50 rounded-xl p-5 hover:border-emerald-400 transition group cursor-pointer shadow-lg flex flex-col justify-between">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-800/60 flex items-center justify-center text-emerald-300 mb-3 group-hover:scale-110 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm md:text-base text-white">Umum & Fiksi</h4>
-                        <p class="text-xs text-gray-300 mt-1">Novel, Sejarah, Ensiklopedia</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. INFORMATION & INFORMASI JAM OPERASIONAL -->
+        <!-- 4. INFORMATION & INFORMASI JAM OPERASIONAL -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2 bg-[#003d30] border border-emerald-700/50 rounded-2xl p-6 shadow-xl space-y-4">
                 <h3 class="text-lg font-bold text-emerald-300 border-b border-emerald-800/60 pb-2">
@@ -222,10 +171,10 @@
                     </div>
                     <div class="flex justify-between">
                         <span>Jum'at</span>
-                        <span class="font-bold">08.00 - 11.30 WITA</span>
+                        <span class="font-bold">08.00 - 15.30 WITA</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Sabtu - Minggu</span>
+                        <span>Sabtu, Minggu & Hari Libur</span>
                         <span class="font-bold text-red-700">Tutup</span>
                     </div>
                 </div>
