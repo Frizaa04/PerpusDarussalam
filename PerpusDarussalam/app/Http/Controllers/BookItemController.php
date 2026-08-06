@@ -93,4 +93,27 @@ class BookItemController extends Controller
 
         return view('layouts.pages.admin.print_all_barcodes', compact('book'));
     }
+
+    public function printSelectedBarcodes(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:book_items,id'
+        ]);
+
+        // Ambil data item beserta relasi book-nya berdasarkan ID yang dicentang
+        $items = BookItem::with('book')->whereIn('id', $request->ids)->get();
+
+        if ($items->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada eksemplar yang dipilih.');
+        }
+
+        // Ambil buku induk dari item pertama (untuk referensi judul/info buku)
+        $book = $items->first()->book;
+        
+        // Timpa relasi bookItems dengan kumpulan item yang dipilih saja
+        $book->setRelation('bookItems', $items);
+
+        return view('layouts.pages.admin.print_all_barcodes', compact('book'));
+    }
 }

@@ -464,14 +464,22 @@
             </form>
 
             <!-- Di dalam file view modal Anda, di atas tabel list item -->
-            <div class="flex justify-between items-center mb-2">
+            <div class="flex flex-wrap justify-between items-center mb-2 gap-2">
                 <h4 class="text-sm font-bold tracking-wide">Pilih Eksemplar untuk Diedit / Dihapus</h4>
 
-                <!-- Tombol Cetak Semua Barcode Buku Ini -->
-                <a href="#" id="btnPrintAllBarcode" target="_blank"
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1 rounded shadow transition hidden">
-                    🖨️ Cetak Semua Barcode Buku Ini
-                </a>
+                <div class="flex items-center gap-2">
+                    <!-- Tombol Cetak Terpilih (Baru) -->
+                    <button type="button" onclick="printSelectedBarcodes()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1 rounded shadow transition">
+                        🖨️ Cetak Barcode Terpilih (<span id="selectedCount">0</span>)
+                    </button>
+
+                    <!-- Tombol Cetak Semua Barcode Buku Ini -->
+                    <a href="#" id="btnPrintAllBarcode" target="_blank"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1 rounded shadow transition hidden">
+                        🖨️ Cetak Semua
+                    </a>
+                </div>
             </div>
 
             <!-- List / Daftar Item Eksemplar Buku -->
@@ -479,6 +487,10 @@
                 <table class="min-w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-[#003d30] text-white border-b border-white/30">
+                            <!-- Kolom Checkbox Pilih Semua -->
+                            <th class="p-2.5 text-center w-10">
+                                <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)" class="cursor-pointer accent-blue-600 w-4 h-4 rounded">
+                            </th>
                             <th class="p-2.5">No. Inventaris</th>
                             <th class="p-2.5">Kondisi</th>
                             <th class="p-2.5">Status</th>
@@ -487,7 +499,7 @@
                     </thead>
                     <tbody id="kelolaItemList" class="divide-y divide-white/20 bg-[#005a4e]">
                         <tr>
-                            <td colspan="4" class="p-4 text-center text-white/70">Memuat data...</td>
+                            <td colspan="5" class="p-4 text-center text-white/70">Memuat data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -543,7 +555,7 @@
     </div>
 
     <!-- SCRIPT JS KONTROL MODAL & FITUR HAPUS -->
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         // Otomatis buka modal tambah buku jika validasi store gagal
         @if ($errors->bookStoreForm->any())
@@ -619,6 +631,9 @@
 
                     tbody.innerHTML += `
                     <tr class="hover:bg-white/10 transition-colors">
+                        <td class="p-2.5 text-center">
+                            <input type="checkbox" name="selected_items[]" value="${item.id}" onchange="updateSelectedCount()" class="item-checkbox cursor-pointer accent-blue-600 w-4 h-4 rounded">
+                        </td>
                         <td class="p-2.5 font-bold">${item.nomor_inventaris}</td>
                         <td class="p-2.5 capitalize">${kondisiFormatted}</td>
                         <td class="p-2.5 uppercase"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} text-white">${item.status_pinjam}</span></td>
@@ -641,6 +656,8 @@
                         </td>
                     </tr>`;
                 });
+                // Reset hitungan terpilih setiap kali modal dibuka ulang
+                updateSelectedCount();
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -717,6 +734,46 @@
             if (selectAllCheckbox) selectAllCheckbox.checked = false;
             document.querySelectorAll('.book-checkbox').forEach(cb => cb.checked = false);
         }
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = master.checked;
+        });
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+        
+        const counterEl = document.getElementById('selectedCount');
+        if (counterEl) counterEl.innerText = checkedCount;
+        
+        const master = document.getElementById('selectAllCheckbox');
+        if (master && checkboxes.length > 0) {
+            master.checked = (checkedCount === checkboxes.length);
+        }
+    }
+
+    // Fungsi untuk memproses cetak barcode item yang dipilih saja
+    function printSelectedBarcodes() {
+        const selectedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
+        
+        if (selectedCheckboxes.length === 0) {
+            alert('Silakan pilih minimal satu eksemplar buku yang ingin dicetak barcodenya!');
+            return;
+        }
+
+        // Ambil semua ID eksemplar yang dicentang
+        const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+        // Buat URL dengan query parameter ids[]
+        const baseUrl = "{{ route('book.item.print.selected.barcodes') }}";
+        const queryString = ids.map(id => `ids[]=${id}`).join('&');
+        
+        window.open(`${baseUrl}?${queryString}`, '_blank');
     }
 </script>
 @endsection

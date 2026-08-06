@@ -12,4 +12,9 @@ class Ebook extends Model
     protected $table = 'ebooks';
 
     protected $guarded = ['id'];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'categories_id', 'id');
+    }
 }

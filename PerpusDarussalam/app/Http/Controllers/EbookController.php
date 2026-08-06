@@ -11,24 +11,23 @@ class EbookController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->get('search');
+        $search = $request->input('search');
 
-        $ebooks = Ebook::when($search, function ($query, $search) {
-            // Dibungkus fungsi closure agar klausa OR terkelompok dalam tanda kurung SQL
-            return $query->where(function ($q) use ($search) {
-                $q->where('judul', 'like', "%{$search}%")
-                ->orWhere('kode_ebook', 'like', "%{$search}%")
-                ->orWhere('penulis', 'like', "%{$search}%")
-                ->orWhere('penerbit', 'like', "%{$search}%")
-                ->orWhere('isbn', 'like', "%{$search}%");
-            });
-        })
-        ->latest() // Opsional: mengurutkan dari e-book terbaru
-        ->paginate(10)
-        ->withQueryString();
+        $ebooks = Ebook::with('category') // <-- Tambahkan with('category') di sini
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('kode_ebook', 'like', "%{$search}%")
+                    ->orWhere('penulis', 'like', "%{$search}%")
+                    ->orWhere('penerbit', 'like', "%{$search}%")
+                    ->orWhere('isbn', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         $categories = Category::all();
-
         return view('layouts.pages.admin.ebook', compact('ebooks', 'categories', 'search'));
     }
 

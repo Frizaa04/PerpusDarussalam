@@ -98,6 +98,7 @@ Route::middleware(['admin'])->group(function () {
     Route::delete('/book/item/{id}', [BookItemController::class, 'destroy'])->name('book.item.destroy');
     Route::get('/book/{id}/print-all-barcodes', [BookItemController::class, 'printAllBarcodes'])->name('book.print-all-barcodes');
     Route::get('/book/item/{id}/print-barcode', [BookItemController::class, 'printBarcode'])->name('book.item.print-barcode');
+    Route::get('/book/item/print-selected', [BookItemController::class, 'printSelectedBarcodes'])->name('book.item.print.selected.barcodes');
 
     // Sirkulasi
     Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');
