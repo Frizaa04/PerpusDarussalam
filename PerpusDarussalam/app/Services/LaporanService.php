@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Book;
 use App\Models\User;
 use App\Models\Visits;
+use App\Models\Ebook;
 use App\Models\Borrowing;
 use Carbon\Carbon;
 
@@ -46,7 +47,7 @@ class LaporanService
         return [
             'totalKoleksi'        => Book::sum('stok'),
             'totalJudulBukuFisik' => Book::count(),
-            'totalEbook'          => 0,
+            'totalEbook'          => Ebook::count(),
             'totalStokBukuFisik'  => Book::sum('stok'),
             'kategoriReferensi'   => Book::whereHas('categories', function($q) {
                 $q->where('nama', 'Referensi');
@@ -139,13 +140,13 @@ class LaporanService
         $startOfWeek = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
         $endOfWeek   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
 
-        // Ambil data kunjungan dikelompokkan per tanggal dalam minggu tersebut
+        // Ambil data kunjungan dikelompokkan per tanggal dalam minggu 
         $visitsData = Visits::selectRaw('DATE(visited_at) as date, COUNT(*) as count')
             ->whereBetween('visited_at', [$startOfWeek, $endOfWeek])
             ->groupBy('date')
             ->pluck('count', 'date');
 
-        // Ambil data peminjaman dikelompokkan per tanggal dalam minggu tersebut
+        // Ambil data peminjaman dikelompokkan per tanggal dalam minggu 
         $borrowingsData = Borrowing::selectRaw('DATE(tanggal_pinjam) as date, COUNT(*) as count')
             ->whereBetween('tanggal_pinjam', [$startOfWeek, $endOfWeek])
             ->groupBy('date')
@@ -160,7 +161,7 @@ class LaporanService
             $date = $startOfWeek->copy()->addDays($i);
             $dateStr = $date->format('Y-m-d');
 
-            $labels[] = $date->translatedFormat('D, d M'); // Contoh: Sen, 01 Jan
+            $labels[] = $date->translatedFormat('D, d M'); 
             $pengunjungValues[] = $visitsData[$dateStr] ?? 0;
             $peminjamanValues[] = $borrowingsData[$dateStr] ?? 0;
         }

@@ -24,8 +24,7 @@ class UserAuthController extends Controller
         $loginInput = $request->input('username');
         $password = $request->input('password');
 
-        // Cari user yang cocok berdasarkan email, nis, nik, atau username
-        // Cari user yang cocok berdasarkan email, nis, atau nik
+        // Cari user yang cocok berdasarkan email, nis, atau nik 
         $user = User::where('email', $loginInput)
             ->orWhere('nis', $loginInput)
             ->orWhere('nik', $loginInput)
@@ -35,7 +34,6 @@ class UserAuthController extends Controller
         if ($user && Auth::guard('web')->attempt(['email' => $user->email, 'password' => $password])) {
             $request->session()->regenerate();
             
-            // Hapus jejak redirect bekas session admin
             $request->session()->forget('url.intended');
 
             return redirect()->route('user.home');
@@ -48,10 +46,8 @@ class UserAuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Hanya logout dari guard 'web' (User)
         Auth::guard('web')->logout();
 
-        // Hapus data khusus milik user dari session (jika ada), TANPA menghancurkan session admin
         $request->session()->forget('login_web_' . sha1(static::class));
 
         // Regenerate token CSRF demi keamanan

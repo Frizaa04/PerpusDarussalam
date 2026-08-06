@@ -12,13 +12,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('categories_id')
                 ->constrained('categories')
-                ->cascadeOnDelete();
-            $table->string('kode_ebook')->unique();
-            $table->string('judul');
-            $table->string('penulis');
+                ->cascadeOnDelete(); 
+            $table->string('kode_ebook')->unique(); 
+            $table->string('judul')->index(); 
+            $table->string('penulis')->index(); 
             $table->string('penerbit');
             $table->year('tahun_terbit');
-            $table->string('isbn')->nullable();
+            $table->string('isbn')->nullable()->index(); 
             $table->string('file_pdf'); 
             $table->string('cover')->nullable();
             $table->timestamps();

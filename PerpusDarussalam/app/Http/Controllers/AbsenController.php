@@ -28,16 +28,15 @@ class AbsenController extends Controller
         return view('layouts.pages.admin.absen', compact('visits', 'role'));
     }
 
-    // Tambahkan method ini untuk memproses barcode yang di-scan
+    // Memproses barcode yang di-scan
     public function store(Request $request)
     {
         $request->validate([
             'kode' => 'required',
         ]);
 
-        // Mencari user berdasarkan NIS, NIP, atau NIK
+        // Mencari user berdasarkan NIS atau NIK 
         $user = User::where('nis', $request->kode)
-                    ->orWhere('nip', $request->kode)
                     ->orWhere('nik', $request->kode)
                     ->first();
 

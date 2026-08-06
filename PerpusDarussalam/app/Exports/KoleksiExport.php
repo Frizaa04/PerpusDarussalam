@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Book;
 use App\Models\BookItem;
+use App\Models\Ebook; 
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -24,18 +25,19 @@ class KoleksiExport implements WithMultipleSheets
         $this->selectedDate = $date ? Carbon::parse($date) : today();
     }
 
-    // Membagi data menjadi 2 sheet di dalam file Excel yang sama
+    // Membagi data menjadi 3 sheet 
     public function sheets(): array
     {
         return [
             'Daftar_Buku' => new DaftarBukuSheet(),
             'Buku_Item'   => new BukuItemSheet(),
+            'Data_Ebook'  => new EbookSheet(), 
         ];
     }
 }
 
 /**
- * Sheet 1: Daftar Buku (Sesuai kode asli Anda)
+ * Sheet 1: Daftar Buku
  */
 class DaftarBukuSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitle
 {
@@ -120,7 +122,6 @@ class BukuItemSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitle
     {
         $data = [];
 
-        // Header Sheet Buku Item sesuai permintaan
         $data[] = [
             'Judul Buku', 
             'Nomor Inventaris', 
@@ -134,7 +135,7 @@ class BukuItemSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitle
             $data[] = [
                 $item->book->judul ?? 'Buku Tidak Ditemukan',
                 $item->nomor_inventaris,
-                ucfirst(str_replace('_', ' ', $item->kondisi)), // Mengubah format misal 'rusak_ringan' jadi 'Rusak ringan'
+                ucfirst(str_replace('_', ' ', $item->kondisi)),
             ];
         }
 
@@ -157,7 +158,6 @@ class BukuItemSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitle
             ],
         ];
 
-        // Karena kolom Buku Item berjumlah 3 (Kolom A sampai C)
         $sheet->getStyle('A1:C1')->applyFromArray($styleHeaderHijau);
 
         if ($this->jumlahItem > 0) {
@@ -170,5 +170,74 @@ class BukuItemSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitle
     public function title(): string
     {
         return 'Buku_Item';
+    }
+}
+
+/**
+ * Sheet 3: Data E-Book (Tempat khusus E-Book)
+ */
+class EbookSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitle
+{
+    protected $jumlahEbook = 0;
+
+    public function array(): array
+    {
+        $data = [];
+
+        $data[] = [
+            'ID Ebook', 'Kode Ebook', 'Judul Ebook', 'Penulis', 'Penerbit', 
+            'Tahun Terbit', 'ISBN', 'Kategori', 'File PDF', 'Tanggal Dibuat'
+        ];
+
+        // Load data ebook beserta relasi kategorinya
+        $ebooks = Ebook::with('category')->get();
+        $this->jumlahEbook = $ebooks->count();
+
+        foreach ($ebooks as $ebook) {
+            $data[] = [
+                $ebook->id,
+                $ebook->kode_ebook,
+                $ebook->judul,
+                $ebook->penulis,
+                $ebook->penerbit,
+                $ebook->tahun_terbit,
+                $ebook->isbn ?? '-',
+                $ebook->category->nama ?? '-', 
+                $ebook->file_pdf,              
+                $ebook->created_at->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        return $data;
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        $styleHeaderHijau = [
+            'font' => ['bold' => true, 'color' => ['argb' => Color::COLOR_WHITE]],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['argb' => '00B050'], 
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+
+        $sheet->getStyle('A1:J1')->applyFromArray($styleHeaderHijau);
+
+        if ($this->jumlahEbook > 0) {
+            $sheet->getStyle('A2:J' . (1 + $this->jumlahEbook))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        }
+
+        return [];
+    }
+
+    public function title(): string
+    {
+        return 'Ebook';
     }
 }

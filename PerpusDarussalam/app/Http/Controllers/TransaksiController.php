@@ -17,7 +17,7 @@ class TransaksiController extends Controller
 
         $query = Transaction::with('user');
 
-        // Fitur Pencarian
+        // Fitur Pencarian 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('jenis', 'like', "%{$search}%")
@@ -27,7 +27,6 @@ class TransaksiController extends Controller
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('id', 'like', "%{$search}%")
                         ->orWhere('nis', 'like', "%{$search}%")
-                        ->orWhere('nip', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%");
                 });
             });
@@ -58,7 +57,7 @@ class TransaksiController extends Controller
         $userId = null;
         $namaUser = 'Non-Anggota'; // Default jika tidak ditemukan
 
-        // Jika No Identitas diisi, cari user yang cocok di database
+        // Jika No Identitas diisi, cari user yang cocok di database 
         if ($request->filled('no_identitas')) {
             $identitas = trim($request->no_identitas);
 
@@ -66,7 +65,6 @@ class TransaksiController extends Controller
                 $query->where('id', $identitas)
                       ->orWhere('email', $identitas)
                       ->orWhere('nis', $identitas)
-                      ->orWhere('nip', $identitas)
                       ->orWhere('nik', $identitas);
             })->first();
 
@@ -111,11 +109,11 @@ class TransaksiController extends Controller
         if ($request->filled('no_identitas')) {
             $identitas = trim($request->no_identitas);
 
+            // Pencarian user
             $user = User::where(function($query) use ($identitas) {
                 $query->where('id', $identitas)
                       ->orWhere('email', $identitas)
                       ->orWhere('nis', $identitas)
-                      ->orWhere('nip', $identitas)
                       ->orWhere('nik', $identitas);
             })->first();
 
@@ -151,11 +149,11 @@ class TransaksiController extends Controller
 
     public function cariUser($identitas)
     {
+        // Pencarian user 
         $user = User::where(function($query) use ($identitas) {
             $query->where('id', $identitas)
                   ->orWhere('email', $identitas)
                   ->orWhere('nis', $identitas)
-                  ->orWhere('nip', $identitas)
                   ->orWhere('nik', $identitas);
         })->first();
 

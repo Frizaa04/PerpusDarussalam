@@ -15,7 +15,6 @@ class BorrowingService
         return DB::transaction(function () use ($data) {
 
             $user = User::where('nis', $data['identitas'])
-                ->orWhere('nip', $data['identitas'])
                 ->orWhere('nik', $data['identitas'])
                 ->first();
 
@@ -109,6 +108,4 @@ class BorrowingService
         });
 
     }
-
-    
 }

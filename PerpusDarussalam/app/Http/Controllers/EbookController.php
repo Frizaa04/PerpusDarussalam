@@ -13,7 +13,7 @@ class EbookController extends Controller
     {
         $search = $request->input('search');
 
-        $ebooks = Ebook::with('category') // <-- Tambahkan with('category') di sini
+        $ebooks = Ebook::with('category') 
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('judul', 'like', "%{$search}%")
@@ -42,7 +42,7 @@ class EbookController extends Controller
             'penerbit' => 'required|string|max:255',
             'tahun_terbit' => 'required|digits:4',
             'isbn' => 'nullable|string|max:255',
-            'cover' => 'nullable|file|mimes:jpg,jpeg,png|max:5000',
+            'cover' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5000',
             'file_pdf' => 'required|file|mimes:pdf|max:20000',
         ]);
 
@@ -81,8 +81,8 @@ class EbookController extends Controller
             'penerbit' => 'required|string|max:255',
             'tahun_terbit' => 'required|digits:4',
             'isbn' => 'nullable|string|max:255',
-            'cover' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'file_pdf' => 'nullable|mimes:pdf|max:10000',
+            'cover' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5000',
+            'file_pdf' => 'nullable|file|mimes:pdf|max:20000',
         ]);
 
         $data = [

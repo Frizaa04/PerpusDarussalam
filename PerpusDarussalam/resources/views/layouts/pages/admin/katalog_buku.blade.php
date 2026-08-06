@@ -48,9 +48,9 @@
                                 <!-- Pengecekan Select All (Hanya muncul saat mode hapus aktif) -->
                                 <div id="selectAllContainer"
                                     class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
-                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"
+                                    <input type="checkbox" id="selectAllCheckboxMain" onclick="toggleSelectAll(this, 'book-checkbox')"
                                         class="w-4 h-4 accent-red-600 cursor-pointer rounded">
-                                    <label for="selectAllCheckbox"
+                                    <label for="selectAllCheckboxMain"
                                         class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
                                 </div>
 
@@ -214,7 +214,8 @@
             <h3 class="text-xl font-bold mb-5 tracking-wide">Tambah Buku Baru</h3>
 
             <!-- Kotak Error Tambah Buku -->
-            <div class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->bookStoreForm->any() ? '' : 'hidden' }}">
+            <div
+                class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->bookStoreForm->any() ? '' : 'hidden' }}">
                 @if ($errors->bookStoreForm->any())
                     @foreach ($errors->bookStoreForm->all() as $error)
                         <div>- {{ $error }}</div>
@@ -317,7 +318,8 @@
             <h3 class="text-xl font-bold mb-5 tracking-wide">Edit Data Buku</h3>
 
             <!-- Kotak Error Edit Buku -->
-            <div class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->bookUpdateForm->any() ? '' : 'hidden' }}">
+            <div
+                class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->bookUpdateForm->any() ? '' : 'hidden' }}">
                 @if ($errors->bookUpdateForm->any())
                     @foreach ($errors->bookUpdateForm->all() as $error)
                         <div>- {{ $error }}</div>
@@ -489,7 +491,8 @@
                         <tr class="bg-[#003d30] text-white border-b border-white/30">
                             <!-- Kolom Checkbox Pilih Semua -->
                             <th class="p-2.5 text-center w-10">
-                                <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)" class="cursor-pointer accent-blue-600 w-4 h-4 rounded">
+                                <input type="checkbox" id="selectAllHeaderTable" onclick="toggleSelectAll(this, 'item-checkbox')"
+                                    class="cursor-pointer accent-red-600 w-4 h-4 rounded">
                             </th>
                             <th class="p-2.5">No. Inventaris</th>
                             <th class="p-2.5">Kondisi</th>
@@ -555,81 +558,84 @@
     </div>
 
     <!-- SCRIPT JS KONTROL MODAL & FITUR HAPUS -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Otomatis buka modal tambah buku jika validasi store gagal
-        @if ($errors->bookStoreForm->any())
-            openAddModal();
-        @endif
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Otomatis buka modal tambah buku jika validasi store gagal
+            @if ($errors->bookStoreForm->any())
+                openAddModal();
+            @endif
 
-        // Opsional: jika ingin otomatis membuka modal edit jika terjadi error pada update
-        @if ($errors->bookUpdateForm->any())
-            // Jika ada ID buku yang sedang diedit, bisa disesuaikan atau biarkan modal tertutup
-        @endif
-    });
+            // Otomatis membuka modal edit jika terjadi error pada update
+            @if ($errors->bookUpdateForm->any())
 
-    // Modal Tambah Buku
-    function openAddModal() {
-        document.getElementById('addModal').classList.remove('hidden');
-    }
+            @endif
+        });
 
-    function closeAddModal() {
-        document.getElementById('addModal').classList.add('hidden');
-    }
+        // Modal Tambah Buku
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
 
-    // Modal Edit Data Buku
-    function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku, tahunTerbit) {
-        document.getElementById('editBookId').value = id;
-        document.getElementById('editJudul').value = judul;
-        document.getElementById('editPenulis').value = penulis;
-        document.getElementById('editPenerbit').value = penerbit;
-        document.getElementById('editDeskripsi').value = deskripsi;
-        document.getElementById('editIsbn').value = isbn;
-        document.getElementById('editTanggalPembelian').value = tglPembelian;
-        document.getElementById('editCategoriesId').value = catId;
-        document.getElementById('editStok').value = stok;
-        document.getElementById('editRak').value = rak;
-        document.getElementById('editKodeBuku').value = kodeBuku;
-        document.getElementById('editTahunTerbit').value = tahunTerbit;
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
 
-        document.getElementById('editModal').classList.remove('hidden');
-    }
+        // Modal Edit Data Buku
+        function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku,
+            tahunTerbit) {
+            document.getElementById('editBookId').value = id;
+            document.getElementById('editJudul').value = judul;
+            document.getElementById('editPenulis').value = penulis;
+            document.getElementById('editPenerbit').value = penerbit;
+            document.getElementById('editDeskripsi').value = deskripsi;
+            document.getElementById('editIsbn').value = isbn;
+            document.getElementById('editTanggalPembelian').value = tglPembelian;
+            document.getElementById('editCategoriesId').value = catId;
+            document.getElementById('editStok').value = stok;
+            document.getElementById('editRak').value = rak;
+            document.getElementById('editKodeBuku').value = kodeBuku;
+            document.getElementById('editTahunTerbit').value = tahunTerbit;
 
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-    }
+            document.getElementById('editModal').classList.remove('hidden');
+        }
 
-    // Modal Kelola Eksemplar Buku
-    function openKelolaModal(bookId, bookTitle) {
-        document.getElementById('kelolaBookId').value = bookId;
-        document.getElementById('kelolaBookTitle').innerText = "Judul Buku: " + bookTitle;
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
 
-        // Set URL untuk tombol cetak massal
-        let btnPrintAll = document.getElementById('btnPrintAllBarcode');
-        btnPrintAll.href = `/book/${bookId}/print-all-barcodes`;
-        btnPrintAll.classList.remove('hidden');
+        // Modal Kelola Eksemplar Buku
+        function openKelolaModal(bookId, bookTitle) {
+            document.getElementById('kelolaBookId').value = bookId;
+            document.getElementById('kelolaBookTitle').innerText = "Judul Buku: " + bookTitle;
 
-        document.getElementById('kelolaModal').classList.remove('hidden');
+            // Set URL untuk tombol cetak massal
+            let btnPrintAll = document.getElementById('btnPrintAllBarcode');
+            btnPrintAll.href = `/book/${bookId}/print-all-barcodes`;
+            btnPrintAll.classList.remove('hidden');
 
-        let tbody = document.getElementById('kelolaItemList');
-        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>`;
+            document.getElementById('kelolaModal').classList.remove('hidden');
 
-        fetch(`/book/${bookId}/items`)
-            .then(response => response.json())
-            .then(data => {
-                tbody.innerHTML = '';
-                if (data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-white/70">Belum ada eksemplar terdaftar untuk buku ini.</td></tr>`;
-                    btnPrintAll.classList.add('hidden');
-                    return;
-                }
+            let tbody = document.getElementById('kelolaItemList');
+            tbody.innerHTML =
+            `<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>`;
 
-                data.forEach(item => {
-                    let badgeColor = item.status_pinjam === 'tersedia' ? 'bg-emerald-600' : 'bg-amber-600';
-                    let kondisiFormatted = item.kondisi.replace('_', ' ');
-                    let printBarcodeUrl = `/book/item/${item.id}/print-barcode`;
+            fetch(`/book/${bookId}/items`)
+                .then(response => response.json())
+                .then(data => {
+                    tbody.innerHTML = '';
+                    if (data.length === 0) {
+                        tbody.innerHTML =
+                            `<tr><td colspan="4" class="p-4 text-center text-white/70">Belum ada eksemplar terdaftar untuk buku ini.</td></tr>`;
+                        btnPrintAll.classList.add('hidden');
+                        return;
+                    }
 
-                    tbody.innerHTML += `
+                    data.forEach(item => {
+                        let badgeColor = item.status_pinjam === 'tersedia' ? 'bg-emerald-600' : 'bg-amber-600';
+                        let kondisiFormatted = item.kondisi.replace('_', ' ');
+                        let printBarcodeUrl = `/book/item/${item.id}/print-barcode`;
+
+                        tbody.innerHTML += `
                     <tr class="hover:bg-white/10 transition-colors">
                         <td class="p-2.5 text-center">
                             <input type="checkbox" name="selected_items[]" value="${item.id}" onchange="updateSelectedCount()" class="item-checkbox cursor-pointer accent-blue-600 w-4 h-4 rounded">
@@ -655,125 +661,128 @@
                             </form>
                         </td>
                     </tr>`;
+                    });
+                    // Reset hitungan terpilih setiap kali modal dibuka ulang
+                    updateSelectedCount();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    tbody.innerHTML =
+                        `<tr><td colspan="4" class="p-4 text-center text-red-300">Gagal memuat data eksemplar.</td></tr>`;
                 });
-                // Reset hitungan terpilih setiap kali modal dibuka ulang
-                updateSelectedCount();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-300">Gagal memuat data eksemplar.</td></tr>`;
+        }
+
+        function closeKelolaModal() {
+            document.getElementById('kelolaModal').classList.add('hidden');
+        }
+
+        // Membuka sub-modal edit item spesifik
+        function openEditItemModal(itemId, nomorInv, kondisi, statusPinjam) {
+            document.getElementById('editNomorInventaris').value = nomorInv;
+            document.getElementById('editKondisiItem').value = kondisi;
+            document.getElementById('editStatusPinjamItem').value = statusPinjam;
+
+            document.getElementById('formEditItem').action = `/book/item/${itemId}`;
+            document.getElementById('editItemModal').classList.remove('hidden');
+        }
+
+        function closeEditItemModal() {
+            document.getElementById('editItemModal').classList.add('hidden');
+        }
+
+        // Menutup modal saat klik area luar (overlay)
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addModal');
+            const editModal = document.getElementById('editModal');
+            if (event.target === addModal) closeAddModal();
+            if (event.target === editModal) closeEditModal();
+        }
+
+        // Mode Hapus Massal / Checkbox Aksi
+        let isDeleteModeActive = false;
+
+        function toggleDeleteMode() {
+            isDeleteModeActive = !isDeleteModeActive;
+
+            let btnToggle = document.getElementById('btnToggleDelete');
+            let btnConfirm = document.getElementById('btnConfirmDelete');
+            let selectAllContainer = document.getElementById('selectAllContainer');
+            let btnText = document.getElementById('btnText');
+            let trashIcon = document.getElementById('trashIcon');
+            let editActions = document.querySelectorAll('.edit-mode-action');
+            let deleteActions = document.querySelectorAll('.delete-mode-action');
+
+            if (isDeleteModeActive) {
+                btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
+                btnToggle.classList.add('bg-gray-700', 'hover:bg-gray-800');
+                btnText.textContent = "Batal";
+
+                trashIcon.innerHTML =
+                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
+
+                if (btnConfirm) btnConfirm.classList.remove('hidden');
+                if (selectAllContainer) selectAllContainer.classList.remove('hidden');
+
+                editActions.forEach(el => el.classList.add('hidden'));
+                deleteActions.forEach(el => el.classList.remove('hidden'));
+            } else {
+                btnToggle.classList.remove('bg-gray-700', 'hover:bg-gray-800');
+                btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
+                btnText.textContent = "Hapus Buku";
+
+                trashIcon.innerHTML =
+                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
+
+                if (btnConfirm) btnConfirm.classList.add('hidden');
+                if (selectAllContainer) selectAllContainer.classList.add('hidden');
+
+                editActions.forEach(el => el.classList.remove('hidden'));
+                deleteActions.forEach(el => el.classList.add('hidden'));
+
+                let selectAllCheckbox = document.getElementById('selectAllCheckbox');
+                if (selectAllCheckbox) selectAllCheckbox.checked = false;
+                document.querySelectorAll('.book-checkbox').forEach(cb => cb.checked = false);
+            }
+        }
+
+        function toggleSelectAll(master, targetClass = 'book-checkbox') {
+            const checkboxes = document.querySelectorAll('.' + targetClass);
+            checkboxes.forEach(cb => {
+                cb.checked = master.checked;
             });
-    }
-
-    function closeKelolaModal() {
-        document.getElementById('kelolaModal').classList.add('hidden');
-    }
-
-    // Membuka sub-modal edit item spesifik
-    function openEditItemModal(itemId, nomorInv, kondisi, statusPinjam) {
-        document.getElementById('editNomorInventaris').value = nomorInv;
-        document.getElementById('editKondisiItem').value = kondisi;
-        document.getElementById('editStatusPinjamItem').value = statusPinjam;
-
-        document.getElementById('formEditItem').action = `/book/item/${itemId}`;
-        document.getElementById('editItemModal').classList.remove('hidden');
-    }
-
-    function closeEditItemModal() {
-        document.getElementById('editItemModal').classList.add('hidden');
-    }
-
-    // Menutup modal saat klik area luar (overlay)
-    window.onclick = function(event) {
-        const addModal = document.getElementById('addModal');
-        const editModal = document.getElementById('editModal');
-        if (event.target === addModal) closeAddModal();
-        if (event.target === editModal) closeEditModal();
-    }
-
-    // Mode Hapus Massal / Checkbox Aksi
-    let isDeleteModeActive = false;
-
-    function toggleDeleteMode() {
-        isDeleteModeActive = !isDeleteModeActive;
-
-        let btnToggle = document.getElementById('btnToggleDelete');
-        let btnConfirm = document.getElementById('btnConfirmDelete');
-        let selectAllContainer = document.getElementById('selectAllContainer');
-        let btnText = document.getElementById('btnText');
-        let trashIcon = document.getElementById('trashIcon');
-        let editActions = document.querySelectorAll('.edit-mode-action');
-        let deleteActions = document.querySelectorAll('.delete-mode-action');
-
-        if (isDeleteModeActive) {
-            btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
-            btnToggle.classList.add('bg-gray-700', 'hover:bg-gray-800');
-            btnText.textContent = "Batal";
-
-            trashIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
-
-            if (btnConfirm) btnConfirm.classList.remove('hidden');
-            if (selectAllContainer) selectAllContainer.classList.remove('hidden');
-
-            editActions.forEach(el => el.classList.add('hidden'));
-            deleteActions.forEach(el => el.classList.remove('hidden'));
-        } else {
-            btnToggle.classList.remove('bg-gray-700', 'hover:bg-gray-800');
-            btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
-            btnText.textContent = "Hapus Buku";
-
-            trashIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
-
-            if (btnConfirm) btnConfirm.classList.add('hidden');
-            if (selectAllContainer) selectAllContainer.classList.add('hidden');
-
-            editActions.forEach(el => el.classList.remove('hidden'));
-            deleteActions.forEach(el => el.classList.add('hidden'));
-
-            let selectAllCheckbox = document.getElementById('selectAllCheckbox');
-            if (selectAllCheckbox) selectAllCheckbox.checked = false;
-            document.querySelectorAll('.book-checkbox').forEach(cb => cb.checked = false);
-        }
-    }
-
-    function toggleSelectAll(master) {
-        const checkboxes = document.querySelectorAll('.item-checkbox');
-        checkboxes.forEach(cb => {
-            cb.checked = master.checked;
-        });
-        updateSelectedCount();
-    }
-
-    function updateSelectedCount() {
-        const checkboxes = document.querySelectorAll('.item-checkbox');
-        const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
-        
-        const counterEl = document.getElementById('selectedCount');
-        if (counterEl) counterEl.innerText = checkedCount;
-        
-        const master = document.getElementById('selectAllCheckbox');
-        if (master && checkboxes.length > 0) {
-            master.checked = (checkedCount === checkboxes.length);
-        }
-    }
-
-    // Fungsi untuk memproses cetak barcode item yang dipilih saja
-    function printSelectedBarcodes() {
-        const selectedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
-        
-        if (selectedCheckboxes.length === 0) {
-            alert('Silakan pilih minimal satu eksemplar buku yang ingin dicetak barcodenya!');
-            return;
+            updateSelectedCount(); 
         }
 
-        // Ambil semua ID eksemplar yang dicentang
-        const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
 
-        // Buat URL dengan query parameter ids[]
-        const baseUrl = "{{ route('book.item.print.selected.barcodes') }}";
-        const queryString = ids.map(id => `ids[]=${id}`).join('&');
-        
-        window.open(`${baseUrl}?${queryString}`, '_blank');
-    }
-</script>
+            const counterEl = document.getElementById('selectedCount');
+            if (counterEl) counterEl.innerText = checkedCount;
+
+            const master = document.getElementById('selectAllCheckbox');
+            if (master && checkboxes.length > 0) {
+                master.checked = (checkedCount === checkboxes.length);
+            }
+        }
+
+        // Fungsi untuk memproses cetak barcode item yang dipilih saja
+        function printSelectedBarcodes() {
+            const selectedCheckboxes = document.querySelectorAll('.item-checkbox:checked');
+
+            if (selectedCheckboxes.length === 0) {
+                alert('Silakan pilih minimal satu eksemplar buku yang ingin dicetak barcodenya!');
+                return;
+            }
+
+            // Ambil semua ID eksemplar yang dicentang
+            const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            // Buat URL dengan query parameter ids[]
+            const baseUrl = "{{ route('book.item.print.selected.barcodes') }}";
+            const queryString = ids.map(id => `ids[]=${id}`).join('&');
+
+            window.open(`${baseUrl}?${queryString}`, '_blank');
+        }
+    </script>
 @endsection
