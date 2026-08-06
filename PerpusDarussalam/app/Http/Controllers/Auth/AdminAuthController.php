@@ -37,9 +37,13 @@ class AdminAuthController extends Controller
     // Proses logout admin
     public function logout(Request $request)
     {
+        // Hanya logout dari guard 'admin'
         Auth::guard('admin')->logout();
 
-        $request->session()->invalidate();
+        // Hapus data khusus milik admin dari session, TANPA merusak session user
+        $request->session()->forget('login_admin_' . sha1(static::class));
+
+        // Regenerate token CSRF demi keamanan
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')->with('success', 'Anda telah keluar dari sesi Admin.');

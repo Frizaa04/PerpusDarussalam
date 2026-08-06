@@ -112,7 +112,7 @@
     </div>
 
     <!-- Form Logout -->
-    <form action="{{ route('logout') }}" method="POST">
+    <form action="{{ route('admin.logout') }}" method="POST">
         @csrf
         <button type="submit"
             class="bg-[#005a4e] hover:bg-[#004d40] text-white px-4 py-1.5 rounded font-bold text-sm tracking-wide transition shadow-sm">
