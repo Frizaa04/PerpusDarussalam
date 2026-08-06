@@ -48,9 +48,13 @@ class UserAuthController extends Controller
 
     public function logout(Request $request)
     {
+        // Hanya logout dari guard 'web' (User)
         Auth::guard('web')->logout();
 
-        $request->session()->invalidate();
+        // Hapus data khusus milik user dari session (jika ada), TANPA menghancurkan session admin
+        $request->session()->forget('login_web_' . sha1(static::class));
+
+        // Regenerate token CSRF demi keamanan
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
