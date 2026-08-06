@@ -17,11 +17,12 @@ class CirculationController extends Controller
         $notificationService->generateLateNotifications();
 
         $search = $request->query('search');
-        $status = $request->query('status'); // Menerima input dari dropdown filter status
+        $status = $request->query('status');
 
+        // Eager loading relasi secara presisi
         $queryBuilder = Borrowing::with(['user', 'bookItem.book']);
 
-        // Filter Pencarian
+        // 1. Filter Pencarian
         if ($search) {
             $queryBuilder->where(function($q) use ($search) {
                 $q->whereHas('user', function($userQuery) use ($search) {
@@ -39,27 +40,26 @@ class CirculationController extends Controller
             });
         }
 
-        // Filter Dropdown Status
+        // 2. Filter Status (Menggunakan today() agar aman untuk format DATE)
         if ($status) {
-            if ($status == 'dipinjam') {
-                // Peminjaman aktif yang belum lewat jatuh tempo
+            if ($status === 'dipinjam') {
                 $queryBuilder->where('status', 'dipinjam')
-                            ->where('tanggal_jatuh_tempo', '>=', now());
-            } elseif ($status == 'telat') {
-                // Peminjaman aktif yang sudah lewat jatuh tempo
+                            ->whereDate('tanggal_jatuh_tempo', '>=', today());
+            } elseif ($status === 'telat') {
                 $queryBuilder->where('status', 'dipinjam')
-                            ->where('tanggal_jatuh_tempo', '<', now());
-            } elseif ($status == 'selesai') {
-                // Peminjaman yang sudah dikembalikan / selesai
+                            ->whereDate('tanggal_jatuh_tempo', '<', today());
+            } elseif ($status === 'selesai') {
                 $queryBuilder->whereIn('status', ['selesai', 'dikembalikan']);
             }
         }
 
-        // Paginasi dengan mapping data
+        // 3. Mapping Data untuk View
         $circulations = $queryBuilder->latest()->paginate(10)->through(function ($item) {
-            if ($item->status === 'dipinjam' && Carbon::parse($item->tanggal_jatuh_tempo)->isPast()) {
+            $isLate = $item->status === 'dipinjam' && Carbon::parse($item->tanggal_jatuh_tempo)->isPast();
+
+            if ($isLate) {
                 $statusText = 'Telat';
-            } elseif ($item->status === 'dikembalikan' || $item->status === 'selesai') {
+            } elseif (in_array($item->status, ['dikembalikan', 'selesai'])) {
                 $statusText = 'Selesai';
             } else {
                 $statusText = 'Peminjaman';
@@ -78,7 +78,6 @@ class CirculationController extends Controller
             ];
         })->withQueryString();
 
-        // 'lateOnly' diganti menjadi 'status' agar sesuai variabel yang dikirim ke view
         return view('layouts.pages.admin.sirkulasi', compact('circulations', 'search', 'status'));
     }
 

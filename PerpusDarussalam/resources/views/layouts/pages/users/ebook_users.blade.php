@@ -23,6 +23,7 @@
             </div>
         </div>
 
+
         <!-- SECTION SLIDER / DAFTAR E-BOOK MIRIP KOLEKSI BUKU TERBARU -->
         <section class="bg-[#00382e] text-white rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 w-full relative border border-emerald-700/60">
             <div class="flex justify-between items-end border-b border-emerald-800/80 pb-4">

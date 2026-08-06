@@ -14,15 +14,18 @@ class UserEbookController extends Controller
     {
         $search = $request->input('search');
 
-        // Mengambil data e-book dengan fitur pencarian dan pagination (10 per halaman)
+        // Mengambil data e-book dengan fitur pencarian yang dibungkus rapi
         $ebooks = Ebook::when($search, function ($query, $search) {
-                return $query->where('judul', 'like', "%{$search}%")
-                             ->orWhere('penulis', 'like', "%{$search}%");
+                return $query->where(function ($q) use ($search) {
+                    $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('penulis', 'like', "%{$search}%")
+                    ->orWhere('penerbit', 'like', "%{$search}%"); // Opsional: tambah penerbit jika ada
+                });
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString(); // Mempertahankan parameter URL saat ganti halaman pagination
 
-        // Arahkan ke file blade user yang baru dibuat
         return view('layouts.pages.users.ebook_users', compact('ebooks'));
     }
 

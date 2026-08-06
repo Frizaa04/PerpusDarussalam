@@ -14,12 +14,18 @@ class EbookController extends Controller
         $search = $request->get('search');
 
         $ebooks = Ebook::when($search, function ($query, $search) {
-            return $query->where('judul', 'like', "%{$search}%")
+            // Dibungkus fungsi closure agar klausa OR terkelompok dalam tanda kurung SQL
+            return $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
                 ->orWhere('kode_ebook', 'like', "%{$search}%")
                 ->orWhere('penulis', 'like', "%{$search}%")
                 ->orWhere('penerbit', 'like', "%{$search}%")
                 ->orWhere('isbn', 'like', "%{$search}%");
-        })->paginate(10)->withQueryString();
+            });
+        })
+        ->latest() // Opsional: mengurutkan dari e-book terbaru
+        ->paginate(10)
+        ->withQueryString();
 
         $categories = Category::all();
 

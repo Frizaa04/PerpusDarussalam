@@ -15,17 +15,19 @@ class UserController extends Controller
         $queryBuilder = Book::with('categories');
 
         if ($search) {
-            $books = $queryBuilder->where(function ($q) use ($search) {
+            $queryBuilder->where(function ($q) use ($search) {
                 $q->where('judul', 'LIKE', "%{$search}%")
                 ->orWhere('kode_buku', 'LIKE', "%{$search}%")
                 ->orWhere('penulis', 'LIKE', "%{$search}%")
                 ->orWhere('penerbit', 'LIKE', "%{$search}%")
                 ->orWhere('isbn', 'LIKE', "%{$search}%");
-            })->latest()->get();
+            });
         } else {
-            // Tampilkan tepat 6 BUKU TERBARU agar pas memenuhi 1 baris
-            $books = $queryBuilder->latest()->get();
+            // Ambil 12 atau 15 buku agar melebihi 1 baris layar PC sehingga tombol geser bisa berfungsi!
+            $queryBuilder->take(12); 
         }
+
+        $books = $queryBuilder->latest()->get();
 
         return view('layouts.pages.users.home', compact('books'));
     }

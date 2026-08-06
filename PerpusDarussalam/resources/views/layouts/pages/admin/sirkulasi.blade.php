@@ -14,10 +14,18 @@
             <div class="flex items-center gap-4">
                 <div class="max-w-md w-full">
                     <form id="searchForm" action="{{ route('circulation.index') }}" method="GET" class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari Data Peminjaman" class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">
-                        @if(request('late'))
-                            <input type="hidden" name="late" value="1">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Data Peminjaman..." class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">
+                        
+                        {{-- Mempertahankan filter status (dipinjam / telat / selesai) jika sedang aktif --}}
+                        @if(request('status'))
+                            <input type="hidden" name="status" value="{{ request('status') }}">
                         @endif
+
+                        {{-- Mempertahankan parameter late jika masih digunakan --}}
+                        @if(request('late'))
+                            <input type="hidden" name="late" value="{{ request('late') }}">
+                        @endif
+
                         <button type="submit" class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
                             <span class="material-icons">search</span>
                         </button>

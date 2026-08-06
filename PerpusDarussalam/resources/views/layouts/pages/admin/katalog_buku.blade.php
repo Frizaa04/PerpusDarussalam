@@ -16,7 +16,7 @@
                     <div class="max-w-md w-full">
                         <form action="{{ route('book.index') }}" method="GET"
                             class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
-                            <input type="text" name="search" value="{{ $search }}" placeholder="Cari Data Buku"
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Data Buku"
                                 class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">
                             <button type="submit"
                                 class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">

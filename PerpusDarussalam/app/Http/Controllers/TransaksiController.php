@@ -13,7 +13,7 @@ class TransaksiController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search = $request->query('search');
 
         $query = Transaction::with('user');
 
@@ -21,24 +21,22 @@ class TransaksiController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('jenis', 'like', "%{$search}%")
-                  ->orWhere('keterangan', 'like', "%{$search}%")
-                  // HAPUS BARIS INI: ->orWhere('name', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($u) use ($search) {
-                      $u->where('name', 'like', "%{$search}%")
+                ->orWhere('keterangan', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($u) use ($search) {
+                    $u->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('id', 'like', "%{$search}%")
                         ->orWhere('nis', 'like', "%{$search}%")
                         ->orWhere('nip', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%");
-                  });
+                });
             });
         }
 
-        // Urutkan berdasarkan tanggal terbaru & gunakan paginasi (10 data per halaman)
-        $transactions = $query->orderBy('id', 'desc')->paginate(10);
-
-        // Pertahankan parameter search saat ganti halaman paginasi
-        $transactions->appends($request->all());
+        // Urutkan & Paginate (dengan retaining query string untuk link paginasi)
+        $transactions = $query->latest('id')
+                            ->paginate(10)
+                            ->withQueryString();
 
         return view('layouts.pages.admin.transaksi', compact('transactions', 'search'));
     }
