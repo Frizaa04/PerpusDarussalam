@@ -31,7 +31,7 @@ class MemberController extends Controller
 
     $students = $query->latest()->paginate(10)->withQueryString();
 
-        return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search'));
+        return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search', 'roleFilter'));
     }
 
 

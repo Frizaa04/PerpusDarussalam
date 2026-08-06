@@ -32,8 +32,15 @@
                     <!-- Form Cari Data -->
                     <form action="{{ route('transaction.index') }}" method="GET"
                         class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white w-full sm:w-80 shadow-sm">
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari Data Transaksi"
+                        
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Data Transaksi"
                             class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">
+
+                        {{-- Sisipkan parameter filter lain di sini jika ada (seperti filter tanggal/jenis) --}}
+                        @if(request('jenis'))
+                            <input type="hidden" name="jenis" value="{{ request('jenis') }}">
+                        @endif
+
                         <button type="submit"
                             class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
                             <span class="material-icons">search</span>

@@ -66,22 +66,22 @@
                 
                 <div class="flex items-center gap-2">
                     @if(request('search'))
-                        <a href="{{ route('user.home') }}" class="text-xs text-emerald-300 font-semibold hover:underline mr-2">
+                        <a href="{{ route('user.home') }}" class="text-xs text-emerald-300 font-semibold hover:underline mr-3">
                             Reset Pencarian
                         </a>
-                    @else
-                        <!-- Tombol Navigasi Slider Buku -->
-                        <button id="slideLeft" type="button" class="bg-[#002820] hover:bg-emerald-800 text-emerald-200 p-2.5 rounded-full border border-emerald-700/60 shadow-sm transition active:scale-95">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </button>
-                        <button id="slideRight" type="button" class="bg-[#002820] hover:bg-emerald-800 text-emerald-200 p-2.5 rounded-full border border-emerald-700/60 shadow-sm transition active:scale-95">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
                     @endif
+
+                    <!-- Tombol Navigasi Slider Buku Selalu Ditampilkan -->
+                    <button id="slideLeft" type="button" class="bg-[#002820] hover:bg-emerald-800 text-emerald-200 p-2.5 rounded-full border border-emerald-700/60 shadow-sm transition active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button id="slideRight" type="button" class="bg-[#002820] hover:bg-emerald-800 text-emerald-200 p-2.5 rounded-full border border-emerald-700/60 shadow-sm transition active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -127,13 +127,21 @@
         </section>
 
         <!-- 3. SECTION KUTIPAN AYAT AL-QUR'AN -->
-        <section class="bg-[#b2c8c6] text-[#003d30] rounded-2xl p-6 md:p-8 shadow-xl text-center space-y-3 border border-white/20">
+        <section class="bg-[#b2c8c6] text-[#003d30] rounded-2xl p-6 md:p-8 shadow-xl text-center space-y-4 border border-white/20">
             <div class="inline-block bg-[#004d40] text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                Mutiara Al-Qur'an
+                Mutiara Hadis
             </div>
-            <h2 class="text-xl md:text-2xl font-bold">QS. Al-Baqarah: 152</h2>
+
+            <h2 class="text-xl md:text-2xl font-bold">HR. Muslim, No. 2699</h2>
+
+            <!-- Teks Arab -->
+            <p class="text-2xl md:text-3xl font-serif leading-loose text-[#002820]" dir="rtl">
+                مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ
+            </p>
+
+            <!-- Terjemahan -->
             <p class="text-base md:text-lg italic font-medium leading-relaxed max-w-3xl mx-auto">
-                "Maka ingatlah kepada-Ku, Aku pun akan mengingatmu. Bersyukurlah kepada-Ku dan janganlah kamu ingkar kepada-Ku."
+                "Barangsiapa menempuh suatu jalan untuk mencari ilmu, maka Allah akan memudahkan baginya jalan menuju surga."
             </p>
         </section>
 

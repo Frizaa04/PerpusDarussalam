@@ -21,9 +21,9 @@ use App\Http\Controllers\UserEbookController;
 use App\Http\Controllers\AboutUserController;
 use App\Http\Controllers\BannerController;
 
-// Halaman Awal (Public)
+// Halaman Awal (Public) - Langsung Mengarah ke Home User
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('user.home');
 })->name('welcome');
 
 // AUTHENTICATION USER (Pemustaka)
