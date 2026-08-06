@@ -20,7 +20,7 @@
                                 placeholder="Cari Nama / No Induk"
                                 class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400 text-sm">
                             @if (request('role'))
-                                <input type="hidden" name="role" value="{{ request('role') }}">
+                            <input type="hidden" name="role" value="{{ request('role') }}">
                             @endif
                             <button type="submit"
                                 class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
@@ -80,45 +80,44 @@
                             </thead>
                             <tbody class="text-white divide-y divide-white/40">
                                 @forelse($students as $student)
-                                    <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                        <!-- Kolom Foto -->
-                                        <td class="p-3 text-sm text-center">
-                                            @if ($student->foto)
-                                                <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto"
-                                                    class="w-10 h-10 rounded-full object-cover mx-auto border border-white">
-                                            @else
-                                                <div
-                                                    class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold mx-auto text-white">
-                                                    {{ strtoupper(substr($student->name, 0, 2)) }}
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <!-- Kolom No Induk -->
-                                        <td class="p-3 text-sm font-bold text-white/90">
-                                            {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}
-                                        </td>
-                                        <!-- Kolom Nama -->
-                                        <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
-                                        <!-- Kolom Jenis Kelamin -->
-                                        <td class="p-3 text-sm font-bold text-white/90">
-                                            {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
-                                        </td>
-                                        <!-- Kolom Peran -->
-                                        <td class="p-3 text-sm font-bold text-white/90">
-                                            <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
-                                                {{ $student->role ?? 'Siswa' }}
-                                            </span>
-                                        </td>
-                                        <!-- Kolom Email -->
-                                        <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
-                                        <!-- Kolom Alamat -->
-                                        <td class="p-3 text-sm font-medium text-white/90 truncate max-w-xs">
-                                            {{ $student->alamat ?? '-' }}</td>
+                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                    <!-- Kolom Foto -->
+                                    <td class="p-3 text-sm text-center">
+                                        @if ($student->foto)
+                                        <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto"
+                                            class="w-10 h-10 rounded-full object-cover mx-auto border border-white">
+                                        @else
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold mx-auto text-white">
+                                            {{ strtoupper(substr($student->name, 0, 2)) }}
+                                        </div>
+                                        @endif
+                                    </td>
+                                    <!-- Kolom No Induk -->
+                                    <td class="p-3 text-sm font-bold text-white/90">
+                                        {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}
+                                    </td>
+                                    <!-- Kolom Nama -->
+                                    <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
+                                    <!-- Kolom Jenis Kelamin -->
+                                    <td class="p-3 text-sm font-bold text-white/90">
+                                        {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
+                                    </td>
+                                    <!-- Kolom Peran -->
+                                    <td class="p-3 text-sm font-bold text-white/90">
+                                        <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
+                                            {{ $student->role ?? 'Siswa' }}
+                                        </span>
+                                    </td>
+                                    <!-- Kolom Email -->
+                                    <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
+                                    <!-- Kolom Alamat -->
+                                    <td class="p-3 text-sm font-medium text-white/90 truncate max-w-xs">
+                                        {{ $student->alamat ?? '-' }}</td>
 
-                                        <!-- Tombol Aksi Edit -->
-                                        <td class="p-3 text-sm text-center">
-                                            <button type="button"
-                                                onclick="openEditModal(
+                                    <!-- Tombol Aksi Edit -->
+                                    <td class="p-3 text-sm text-center">
+                                        <button type="button" onclick="openEditModal(
             '{{ $student->id }}', 
             '{{ $student->nis ?? '' }}', 
             '{{ $student->nik ?? '' }}', 
@@ -128,17 +127,16 @@
             '{{ $student->role }}', 
             '{{ $student->jenis_kelamin }}', 
             '{{ $student->alamat }}'
-        )"
-                                                class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
-                                                Edit Data
-                                            </button>
-                                        </td>
-                                    </tr>
+        )" class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
+                                            Edit Data
+                                        </button>
+                                    </td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data
-                                            user tidak ditemukan.</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data
+                                        user tidak ditemukan.</td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -172,9 +170,9 @@
             <div id="addUserErrorContainer"
                 class="mb-4 p-3 bg-red-600 text-white rounded text-xs {{ $errors->addUserForm->any() ? '' : 'hidden' }}">
                 @if ($errors->addUserForm->any())
-                    @foreach ($errors->addUserForm->all() as $error)
-                        <div>- {{ $error }}</div>
-                    @endforeach
+                @foreach ($errors->addUserForm->all() as $error)
+                <div>- {{ $error }}</div>
+                @endforeach
                 @endif
             </div>
 
@@ -378,34 +376,34 @@
                     <table class="min-w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-[#003d30] border-b border-white/40 divide-x divide-white/40">
+                                <th class="p-2.5 text-sm font-bold">No. Induk</th>
+                                <th class="p-2.5 text-sm font-bold">Nama</th>
+                                <th class="p-2.5 text-sm font-bold">Peran</th>
                                 <th class="p-2.5 text-sm font-bold text-center w-12">
                                     <!-- Checkbox Pilih Semua -->
                                     <input type="checkbox" id="selectAll" class="rounded cursor-pointer"
                                         onclick="toggleSelectAll(this)">
                                 </th>
-                                <th class="p-2.5 text-sm font-bold">No. Induk</th>
-                                <th class="p-2.5 text-sm font-bold">Nama</th>
-                                <th class="p-2.5 text-sm font-bold">Peran</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/40">
                             @forelse($students as $student)
-                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                    <td class="p-2.5 text-center">
-                                        <!-- Checkbox per Baris Data -->
-                                        <input type="checkbox" name="selected_users[]" value="{{ $student->id }}"
-                                            class="user-checkbox rounded cursor-pointer">
-                                    </td>
-                                    <td class="p-2.5 text-sm font-medium">
-                                        {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}</td>
-                                    <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
-                                    <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
-                                </tr>
+                            <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                <td class="p-2.5 text-sm font-medium">
+                                    {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}</td>
+                                <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
+                                <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
+                                <td class="p-2.5 text-center">
+                                    <!-- Checkbox per Baris Data -->
+                                    <input type="checkbox" name="selected_users[]" value="{{ $student->id }}"
+                                        class="user-checkbox rounded cursor-pointer">
+                                </td>
+                            </tr>
                             @empty
-                                <tr>
-                                    <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data
-                                        tidak ditemukan.</td>
-                                </tr>
+                            <tr>
+                                <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data
+                                    tidak ditemukan.</td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
