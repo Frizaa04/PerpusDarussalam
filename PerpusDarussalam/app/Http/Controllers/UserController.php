@@ -22,12 +22,10 @@ class UserController extends Controller
                 ->orWhere('penerbit', 'LIKE', "%{$search}%")
                 ->orWhere('isbn', 'LIKE', "%{$search}%");
             });
-        } else {
-            // Ambil 12 atau 15 buku agar melebihi 1 baris layar PC sehingga tombol geser bisa berfungsi!
-            $queryBuilder->take(12); 
         }
 
-        $books = $queryBuilder->latest()->get();
+        // ->withQueryString() agar parameter pencarian tetap ikut saat berpindah halaman
+        $books = $queryBuilder->latest()->paginate(6)->withQueryString()->fragment('katalog-buku');
 
         return view('layouts.pages.users.home', compact('books'));
     }
@@ -55,5 +53,12 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Data berhasil disimpan!');
+    }
+
+    public function showBookDetail($id)
+    {
+        $book = Book::with('categories')->findOrFail($id);
+        
+        return view('layouts.pages.users.book_detail', compact('book'));
     }
 }

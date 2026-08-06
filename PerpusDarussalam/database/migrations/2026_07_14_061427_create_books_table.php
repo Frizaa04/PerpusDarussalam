@@ -6,27 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-  public function up(): void
+
+    public function up(): void
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->foreignId('categories_id')
                 ->constrained('categories')
-                ->cascadeOnDelete();
-            $table->string('kode_buku')->unique();
-            $table->string('judul');
-            $table->string('penulis');
+                ->cascadeOnDelete(); 
+            $table->string('kode_buku')->unique(); 
+            $table->string('judul')->index(); 
+            $table->string('penulis')->index(); 
             $table->string('penerbit');
             $table->year('tahun_terbit');
-            $table->string('isbn'); 
+            $table->string('isbn')->index(); 
             $table->date('tanggal_pembelian');
             $table->integer('stok')->default(0);
             $table->string('cover')->nullable();
-            $table->string('deskripsi');
-            $table->string('rak');
+            $table->text('deskripsi')->nullable();
+            $table->string('rak')->index(); 
             $table->timestamps();
         });
     }

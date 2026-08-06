@@ -47,6 +47,9 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/user/e-book', [UserEbookController::class, 'index'])->name('user.ebook.index');
     Route::get('/user/e-book/read/{id}', [UserEbookController::class, 'read'])->name('user.ebook.read');
 
+    // Route menuju halaman detail buku / e-book user
+    Route::get('/book/view/{id}', [UserController::class, 'showBookDetail'])->name('user.book.show');
+
     // 4. TAMBAHKAN ROUTE TENTANG KAMI DI SINI
     Route::get('/tentang-kami', [AboutUserController::class, 'index'])->name('user.about');
 
@@ -65,7 +68,7 @@ Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
 
 // ROUTE DASHBOARD ADMIN 
-Route::middleware(['admin'])->group(function () {
+Route::middleware(['auth:admin'])->group(function () {
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::post('/admin/announcement', [AdminAnnouncementController::class, 'store'])->name('admin.announcement.store');
@@ -107,7 +110,7 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
 
     // API Cek Anggota Otomatis
-    Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisNip']);
+    Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNis']);
     Route::get('/api/check-book/{nomor}', [CirculationController::class, 'getBookByInventory']);
 
     // Halaman Transaksi Keuangan

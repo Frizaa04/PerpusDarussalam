@@ -28,7 +28,6 @@ class CirculationController extends Controller
                 $q->whereHas('user', function($userQuery) use ($search) {
                     $userQuery->where('name', 'LIKE', "%{$search}%")
                             ->orWhere('nis', 'LIKE', "%{$search}%")
-                            ->orWhere('nip', 'LIKE', "%{$search}%")
                             ->orWhere('nik', 'LIKE', "%{$search}%");
                 })
                 ->orWhereHas('bookItem.book', function($bookQuery) use ($search) {
@@ -40,7 +39,7 @@ class CirculationController extends Controller
             });
         }
 
-        // 2. Filter Status (Menggunakan today() agar aman untuk format DATE)
+        // 2. Filter Status 
         if ($status) {
             if ($status === 'dipinjam') {
                 $queryBuilder->where('status', 'dipinjam')
@@ -67,7 +66,7 @@ class CirculationController extends Controller
 
             return (object)[
                 'id'          => $item->id,
-                'identitas'   => $item->user->nis ?? $item->user->nip ?? $item->user->nik ?? '-',
+                'identitas'   => $item->user->nis ?? $item->user->nik ?? '-', 
                 'name'        => $item->user->name ?? 'Tanpa Nama',      
                 'book_title'  => $item->bookItem->book->judul ?? 'Buku Terhapus',   
                 'nomor_inv'   => $item->bookItem->nomor_inventaris ?? '-', 
@@ -100,15 +99,14 @@ class CirculationController extends Controller
             return back()
                 ->withErrors([
                     'error' => $e->getMessage()
-                ], 'borrowForm') // <-- Berikan nama error bag khusus 'borrowForm'
+                ], 'borrowForm') 
                 ->withInput();
         }
     }
 
-    public function getUserByNikNisNip($nomor)
+    public function getUserByNikNis($nomor)
     {
         $user = User::where('nis', $nomor)
-                    ->orWhere('nip', $nomor)
                     ->orWhere('nik', $nomor)
                     ->first();
 
@@ -127,10 +125,9 @@ class CirculationController extends Controller
 
     public function getBookByInventory($nomorInventaris)
     {
-        // Mengambil data book_item beserta relasi ke tabel book untuk mendapatkan judulnya
         $bookItem = BookItem::with('book')
                     ->where('nomor_inventaris', $nomorInventaris)
-                    ->orWhere('id', $nomorInventaris) // Mengantisipasi jika yang diinput ID-nya
+                    ->orWhere('id', $nomorInventaris) 
                     ->first();
 
         if ($bookItem && $bookItem->book) {

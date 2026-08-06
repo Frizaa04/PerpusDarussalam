@@ -11,9 +11,9 @@
             margin: 10mm;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             background: #fff;
-            color: #000;
+            color: #111;
             margin: 0;
             padding: 0;
         }
@@ -24,89 +24,139 @@
             justify-content: center;
         }
 
-        /* Desain Ukuran */
+        /* Desain Ukuran Kartu Standar ID Card (CR-80) */
         .card {
             width: 85.6mm;
             height: 54mm;
-            border: 1px dashed #999; 
+            border: 1px solid #d1d5db; 
             box-sizing: border-box;
-            padding: 8px;
+            padding: 8px 10px 0 10px;
             background: #ffffff;
             position: relative;
             page-break-inside: avoid;
             overflow: hidden;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Watermark Latar Belakang Tipis */
+        .card::before {
+            content: "MDIBS";
+            position: absolute;
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 55px;
+            font-weight: 900;
+            color: rgba(0, 77, 64, 0.03);
+            z-index: 0;
+            pointer-events: none;
+            letter-spacing: 5px;
         }
 
         /* Header Kartu */
         .card-header {
-            background-color: #004d40;
+            background: linear-gradient(135deg, #004d40, #00695c);
             color: white;
             text-align: center;
             padding: 4px;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: bold;
             text-transform: uppercase;
-            border-radius: 2px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
         }
         .card-sub-header {
-            font-size: 8px;
+            font-size: 7.5px;
             text-align: center;
-            margin-bottom: 6px;
-            color: #333;
+            margin-top: 2px;
+            margin-bottom: 5px;
+            color: #004d40;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 1.5px solid #004d40;
+            padding-bottom: 3px;
         }
 
         /* Konten Kartu */
         .card-body {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: flex-start;
+            position: relative;
+            z-index: 1;
         }
         .photo-box {
-            width: 22mm;
-            height: 28mm;
-            border: 1px solid #004d40;
-            background: #e0e0e0;
+            width: 20mm;
+            height: 25mm; /* Disesuaikan agar seimbang dengan teks yang diperbesar */
+            border: 1.5px solid #004d40;
+            background: #f3f4f6;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 9px;
-            color: #555;
+            font-size: 8px;
+            color: #6b7280;
             flex-shrink: 0;
+            border-radius: 3px;
+            overflow: hidden;
         }
+        
+        /* Teks Diperbesar dan Jarak Baris Disesuaikan */
         .info-table {
-            font-size: 8.5px;
+            font-size: 8.5px; 
             width: 100%;
             border-collapse: collapse;
         }
         .info-table td {
-            padding: 1.5px 0;
+            padding: 1.2px 0; /* Memberi jarak pas agar tidak terlalu renggang/kosong */
             vertical-align: top;
+            color: #1f2937;
         }
         .info-table td.label {
             width: 32%;
             font-weight: bold;
+            color: #374151;
         }
+        
+        /* Barcode Full Kiri-Kanan Tanpa Stretch (Sesuai Kode Asli Anda) */
         .barcode-section {
+            background-color: #ffffff;
             text-align: center;
-            margin-top: 5px;
-            width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2px 8px 4px 8px;
+            z-index: 1;
         }
         .barcode-section img {
-            width: 92%; 
-            height: 10mm; 
-            object-fit: contain; 
+            width: 100%; 
+            height: 13mm; 
+            object-fit: contain; /* Mengunci proporsi agar garis tidak melar/gepeng */
             display: block;
-            margin-left: auto;
-            margin-right: auto;
         }
-        .barcode-text {
-            font-size: 8px;
-            letter-spacing: 1px;
-            margin-top: 2px;
-            font-weight: bold;
-        }
+
         @media print {
+            body {
+                background: transparent;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10mm;
+            }
+            .card {
+                border: 1px solid #9ca3af !important; 
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
             .no-print {
                 display: none;
             }
@@ -118,14 +168,14 @@
     <div class="print-container">
         @foreach($users as $user)
             @php
-                $noInduk = $user->nis ?? ($user->nip ?? ($user->nik ?? '000000'));
+                $noInduk = $user->nis ?? ($user->nik ?? '000000');
             @endphp
             <div class="card">
                 <div class="card-header">
                     Kartu Anggota Perpustakaan
                 </div>
                 <div class="card-sub-header">
-                    Sistem Layanan Mandiri Madrasah
+                    Madrasah Darussalam Internasional Boarding School
                 </div>
                 
                 <div class="card-body">
@@ -138,7 +188,7 @@
                         @endif
                     </div>
 
-                    <!-- Informasi Identitas -->
+                    <!-- Informasi Identitas (Teks Diperbesar) -->
                     <table class="info-table">
                         <tr>
                             <td class="label">Nama</td>
@@ -149,7 +199,7 @@
                             <td>: {{ $noInduk }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Peran</td>
+                            <td class="label">Status</td>
                             <td>: {{ ucfirst($user->role) }}</td>
                         </tr>
                         <tr>
@@ -163,9 +213,9 @@
                     </table>
                 </div>
 
-                <!-- Bagian Barcode Berisi No Identitas -->
+                <!-- Bagian Barcode Full Kiri Kanan Proporsional -->
                 <div class="barcode-section">
-                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $noInduk }}&code=Code128&dpi=150" alt="Barcode">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $noInduk }}&code=Code128&dpi=300" alt="Barcode">
                 </div>
             </div>
         @endforeach

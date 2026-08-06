@@ -14,7 +14,10 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         Category::create([
-            'nama' => 'Novel',
+            'nama' => 'Referensi Guru/Siswa',
+            'deskripsi' => 'Buku Referensi untuk Guru dan Siswa.']);
+        Category::create([
+            'nama' => 'Buku Bacaan',
                 'deskripsi' => 'Buku Bacaan.']);
     }
 }

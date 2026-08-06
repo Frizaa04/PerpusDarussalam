@@ -8,23 +8,24 @@ use App\Models\Ebook;
 class UserEbookController extends Controller
 {
     /**
-     * Menampilkan daftar katalog e-book di sisi User (Pemustaka)
+     * Menampilkan daftar katalog e-book di sisi User 
      */
     public function index(Request $request)
     {
         $search = $request->input('search');
 
-        // Mengambil data e-book dengan fitur pencarian yang dibungkus rapi
+        // Mengambil data e-book 
         $ebooks = Ebook::when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('judul', 'like', "%{$search}%")
                     ->orWhere('penulis', 'like', "%{$search}%")
-                    ->orWhere('penerbit', 'like', "%{$search}%"); // Opsional: tambah penerbit jika ada
+                    ->orWhere('penerbit', 'like', "%{$search}%");
                 });
             })
             ->latest()
-            ->paginate(10)
-            ->withQueryString(); // Mempertahankan parameter URL saat ganti halaman pagination
+            ->paginate(6)
+            ->withQueryString() 
+            ->fragment('katalog-ebook'); 
 
         return view('layouts.pages.users.ebook_users', compact('ebooks'));
     }
@@ -36,7 +37,6 @@ class UserEbookController extends Controller
     {
         $ebook = Ebook::findOrFail($id);
         
-        // Sesuaikan kolom database penyimpanan file PDF Anda (misal: $ebook->file_pdf atau $ebook->file)
         $path = storage_path('app/public/' . $ebook->file_pdf); 
 
         if (!file_exists($path)) {

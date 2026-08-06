@@ -20,7 +20,7 @@
                                 placeholder="Cari Nama / No Induk"
                                 class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400 text-sm">
                             @if (request('role'))
-                            <input type="hidden" name="role" value="{{ request('role') }}">
+                                <input type="hidden" name="role" value="{{ request('role') }}">
                             @endif
                             <button type="submit"
                                 class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
@@ -69,7 +69,7 @@
                             <thead>
                                 <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                     <th class="p-3 text-xs font-bold tracking-wider">Foto</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NIS/NIK/NIP)</th>
+                                    <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NIS/NIK)</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Nama</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Kelamin</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Peran</th>
@@ -80,63 +80,64 @@
                             </thead>
                             <tbody class="text-white divide-y divide-white/40">
                                 @forelse($students as $student)
-                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                    <!-- Kolom Foto -->
-                                    <td class="p-3 text-sm text-center">
-                                        @if ($student->foto)
-                                        <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto"
-                                            class="w-10 h-10 rounded-full object-cover mx-auto border border-white">
-                                        @else
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold mx-auto text-white">
-                                            {{ strtoupper(substr($student->name, 0, 2)) }}
-                                        </div>
-                                        @endif
-                                    </td>
-                                    <!-- Kolom No Induk -->
-                                    <td class="p-3 text-sm font-bold text-white/90">
-                                        {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}
-                                    </td>
-                                    <!-- Kolom Nama -->
-                                    <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
-                                    <!-- Kolom Jenis Kelamin -->
-                                    <td class="p-3 text-sm font-bold text-white/90">
-                                        {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
-                                    </td>
-                                    <!-- Kolom Peran -->
-                                    <td class="p-3 text-sm font-bold text-white/90">
-                                        <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
-                                            {{ $student->role ?? 'Siswa' }}
-                                        </span>
-                                    </td>
-                                    <!-- Kolom Email -->
-                                    <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
-                                    <!-- Kolom Alamat -->
-                                    <td class="p-3 text-sm font-medium text-white/90 truncate max-w-xs">
-                                        {{ $student->alamat ?? '-' }}</td>
+                                    <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                        <!-- Kolom Foto -->
+                                        <td class="p-3 text-sm text-center">
+                                            @if ($student->foto)
+                                                <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto"
+                                                    class="w-10 h-10 rounded-full object-cover mx-auto border border-white">
+                                            @else
+                                                <div
+                                                    class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold mx-auto text-white">
+                                                    {{ strtoupper(substr($student->name, 0, 2)) }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <!-- Kolom No Induk -->
+                                        <td class="p-3 text-sm font-bold text-white/90">
+                                            {{ $student->nis ?? ($student->nik ?? '-') }}
+                                        </td>
+                                        <!-- Kolom Nama -->
+                                        <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
+                                        <!-- Kolom Jenis Kelamin -->
+                                        <td class="p-3 text-sm font-bold text-white/90">
+                                            {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
+                                        </td>
+                                        <!-- Kolom Peran -->
+                                        <td class="p-3 text-sm font-bold text-white/90">
+                                            <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
+                                                {{ $student->role ?? 'Siswa' }}
+                                            </span>
+                                        </td>
+                                        <!-- Kolom Email -->
+                                        <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
+                                        <!-- Kolom Alamat -->
+                                        <td class="p-3 text-sm font-medium text-white/90 truncate max-w-xs">
+                                            {{ $student->alamat ?? '-' }}</td>
 
-                                    <!-- Tombol Aksi Edit -->
-                                    <td class="p-3 text-sm text-center">
-                                        <button type="button" onclick="openEditModal(
-            '{{ $student->id }}', 
-            '{{ $student->nis ?? '' }}', 
-            '{{ $student->nik ?? '' }}', 
-            '{{ $student->nip ?? '' }}', 
-            '{{ $student->name }}', 
-            '{{ $student->email }}', 
-            '{{ $student->role }}', 
-            '{{ $student->jenis_kelamin }}', 
-            '{{ $student->alamat }}'
-        )" class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
-                                            Edit Data
-                                        </button>
-                                    </td>
-                                </tr>
+                                        <!-- Tombol Aksi Edit -->
+                                        <td class="p-3 text-sm text-center">
+                                            <button type="button"
+                                                onclick="openEditModal(
+                                                    '{{ $student->id }}', 
+                                                    '{{ $student->nis ?? '' }}', 
+                                                    '{{ $student->nik ?? '' }}', 
+                                                    '{{ addslashes($student->name) }}', 
+                                                    '{{ $student->email }}', 
+                                                    '{{ $student->role }}', 
+                                                    '{{ $student->jenis_kelamin }}', 
+                                                    '{{ addslashes($student->alamat) }}'
+                                                )"
+                                                class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
+                                                Edit Data
+                                            </button>
+                                        </td>
+                                    </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data
-                                        user tidak ditemukan.</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data
+                                            user tidak ditemukan.</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -170,9 +171,9 @@
             <div id="addUserErrorContainer"
                 class="mb-4 p-3 bg-red-600 text-white rounded text-xs {{ $errors->addUserForm->any() ? '' : 'hidden' }}">
                 @if ($errors->addUserForm->any())
-                @foreach ($errors->addUserForm->all() as $error)
-                <div>- {{ $error }}</div>
-                @endforeach
+                    @foreach ($errors->addUserForm->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
                 @endif
             </div>
 
@@ -210,8 +211,7 @@
                     </div>
 
                     <div>
-                        <label id="labelNomorAdd" class="block text-sm font-semibold mb-1">No. Induk (NIS / NIK /
-                            NIP)</label>
+                        <label id="labelNomorAdd" class="block text-sm font-semibold mb-1">No. Induk (NIS / NIK)</label>
                         <input type="text" name="nomor_induk" id="inputNomorAdd" placeholder="..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
@@ -281,7 +281,7 @@
                     <!-- Label Dinamis untuk Nomor Induk di Modal Edit -->
                     <div>
                         <label id="modalLabelNomor" class="block text-xs font-semibold mb-1 text-emerald-100">No. Induk
-                            (NIS / NIP / NIK)</label>
+                            (NIS / NIK)</label>
                         <input type="text" id="modalInputNomor" name="nomor_induk"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm"
                             placeholder="Masukkan Nomor...">
@@ -353,7 +353,8 @@
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
                     <div class="w-full sm:w-72">
                         <div class="flex items-center border border-white rounded overflow-hidden bg-white">
-                            <input type="text" placeholder="Cari Data Siswa"
+                            <!-- Input Search dengan ID agar terhubung ke fungsi JS filter -->
+                            <input type="text" id="searchCetakInput" placeholder="Cari Data Siswa..."
                                 class="w-full px-3 py-1.5 text-gray-700 outline-none text-sm placeholder-gray-400">
                             <button type="button"
                                 class="bg-white text-[#004d40] px-3 py-1.5 flex items-center justify-center border-l border-gray-200">
@@ -388,22 +389,22 @@
                         </thead>
                         <tbody class="divide-y divide-white/40">
                             @forelse($students as $student)
-                            <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                <td class="p-2.5 text-sm font-medium">
-                                    {{ $student->nis ?? ($student->nip ?? ($student->nik ?? '-')) }}</td>
-                                <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
-                                <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
-                                <td class="p-2.5 text-center">
-                                    <!-- Checkbox per Baris Data -->
-                                    <input type="checkbox" name="selected_users[]" value="{{ $student->id }}"
-                                        class="user-checkbox rounded cursor-pointer">
-                                </td>
-                            </tr>
+                                <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                    <td class="p-2.5 text-sm font-medium">
+                                        {{ $student->nis ?? ($student->nik ?? '-') }}
+                                    </td>
+                                    <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
+                                    <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
+                                    <td class="p-2.5 text-center">
+                                        <!-- Checkbox per Baris Data -->
+                                        <input type="checkbox" name="selected_users[]" value="{{ $student->id }}"
+                                            class="user-checkbox rounded cursor-pointer">
+                                    </td>
+                                </tr>
                             @empty
-                            <tr>
-                                <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data
-                                    tidak ditemukan.</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data tidak ditemukan.</td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -424,19 +425,16 @@
             if (peran === 'siswa') {
                 labelNomor.innerText = 'NIS (Nomor Induk Siswa)';
                 inputElement.placeholder = 'Masukkan NIS...';
-            } else if (peran === 'guru') {
-                labelNomor.innerText = 'NIP (Nomor Induk Pegawai)';
-                inputElement.placeholder = 'Masukkan NIP...';
-            } else if (peran === 'umum') {
+            } else if (peran === 'guru' || peran === 'umum') {
                 labelNomor.innerText = 'NIK (Nomor Induk Kependudukan)';
                 inputElement.placeholder = 'Masukkan NIK...';
             } else {
-                labelNomor.innerText = 'No. Induk (NIS / NIK / NIP)';
+                labelNomor.innerText = 'No. Induk (NIS / NIK)';
                 inputElement.placeholder = '...';
             }
         }
 
-        // Variabel global sementara untuk menyimpan data asli user yang sedang diedit
+        // Variabel global sementara untuk menyimpan data asli user yang sedang diedit 
         let currentEditData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -445,7 +443,7 @@
                 openAddUserModal();
             @endif
 
-            // --- 2. Event Listener Saat Dropdown Peran Berubah (Untuk Form Tambah) ---
+            // --- 2. Event Listener Saat Dropdown Peran Berubah ---
             const addRoleSelect = document.getElementById('peranAdd');
             const addNomorInput = document.getElementById('inputNomorAdd');
 
@@ -455,7 +453,7 @@
                 });
             }
 
-            // --- 3. Event Listener Saat Dropdown Peran Berubah (Untuk Form Edit) ---
+            // --- 3. Event Listener Saat Dropdown Peran Berubah ---
             const modalRole = document.getElementById('modalRole');
             const modalInputNomor = document.getElementById('modalInputNomor');
 
@@ -463,18 +461,28 @@
                 modalRole.addEventListener('change', function() {
                     let selectedRole = this.value.toLowerCase();
 
-                    // Perbarui label dan placeholder
                     updateNomorField(selectedRole, 'modalLabelNomor', modalInputNomor);
 
                     // Kembalikan nilai jika kembali ke role aslinya, atau kosongkan jika role baru
                     if (selectedRole === 'siswa') {
                         modalInputNomor.value = currentEditData.nis || '';
-                    } else if (selectedRole === 'guru') {
-                        modalInputNomor.value = currentEditData.nip || '';
-                    } else if (selectedRole === 'umum') {
+                    } else if (selectedRole === 'guru' || selectedRole === 'umum') {
                         modalInputNomor.value = currentEditData.nik || '';
                     } else {
                         modalInputNomor.value = '';
+                    }
+                });
+            }
+
+            // --- 4. Validasi Form Cetak Kartu (Mencegah submit jika tidak ada yang dipilih) ---
+            const cetakForm = document.querySelector('#cetakModal form');
+            if (cetakForm) {
+                cetakForm.addEventListener('submit', function(e) {
+                    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+
+                    if (checkedBoxes.length === 0) {
+                        alert('Pilih minimal satu kartu anggota yang ingin dicetak terlebih dahulu!');
+                        e.preventDefault(); // Membatalkan aksi submit & pembukaan tab baru
                     }
                 });
             }
@@ -495,13 +503,12 @@
             }
         }
 
-        // --- Fungsi Modal Edit User ---
-        function openEditModal(id, nis, nik, nip, name, email, role, jenis_kelamin, alamat) {
+        // --- Fungsi Modal Edit User  ---
+        function openEditModal(id, nis, nik, name, email, role, jenis_kelamin, alamat) {
             // 1. Simpan data mentah ke objek global
             currentEditData = {
                 nis: (nis && nis !== 'null' && nis !== 'undefined') ? nis : '',
-                nik: (nik && nik !== 'null' && nik !== 'undefined') ? nik : '',
-                nip: (nip && nip !== 'null' && nip !== 'undefined') ? nip : ''
+                nik: (nik && nik !== 'null' && nik !== 'undefined') ? nik : ''
             };
 
             // 2. Isi field dasar
@@ -526,9 +533,7 @@
 
                 if (activeRole === 'siswa') {
                     modalInputNomor.value = currentEditData.nis;
-                } else if (activeRole === 'guru') {
-                    modalInputNomor.value = currentEditData.nip;
-                } else if (activeRole === 'umum') {
+                } else if (activeRole === 'guru' || activeRole === 'umum') {
                     modalInputNomor.value = currentEditData.nik;
                 } else {
                     modalInputNomor.value = '';
@@ -561,6 +566,27 @@
             if (modal) {
                 modal.classList.remove('hidden');
             }
+        }
+
+        // --- Filter Pencarian di Modal Cetak Kartu ---
+        const searchCetakInput = document.getElementById('searchCetakInput');
+        if (searchCetakInput) {
+            searchCetakInput.addEventListener('keyup', function() {
+                let keyword = this.value.toLowerCase();
+                let rows = document.querySelectorAll('#cetakModal tbody tr');
+
+                rows.forEach(row => {
+                    // Lewatkan baris "Data tidak ditemukan" jika sedang kosong
+                    if (row.querySelector('td').getAttribute('colspan')) return;
+
+                    let textRow = row.innerText.toLowerCase();
+                    if (textRow.includes(keyword)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
         }
 
         function closeCetakModal() {

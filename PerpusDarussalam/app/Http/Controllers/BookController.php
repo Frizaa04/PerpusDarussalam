@@ -42,7 +42,6 @@ class BookController extends Controller
 
     public function store(Request $request, BookService $bookService)
     {
-        // Ganti validasi biasa dengan validateWithBag khusus 'bookStoreForm'
         $request->validateWithBag('bookStoreForm', [
             'categories_id'     => 'required|exists:categories,id',
             'judul'             => 'required|string|max:255',
@@ -52,7 +51,7 @@ class BookController extends Controller
             'isbn'              => 'required|string|max:255',
             'tanggal_pembelian' => 'required|date',
             'stok'              => 'required|integer|min:0',
-            'cover'             => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover'             => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'deskripsi'         => 'required|string',
             'rak'               => 'required|string|max:255',
         ]);
@@ -68,9 +67,8 @@ class BookController extends Controller
     {
         $book = Book::findOrFail($request->id);
         
-        // Ganti validasi biasa dengan validateWithBag khusus 'bookUpdateForm'
         $request->validateWithBag('bookUpdateForm', [
-            'categories_id'     => 'required|exists:categories,id', // Jangan lupa pastikan kategori juga ikut divalidasi saat update jika ada
+            'categories_id'     => 'required|exists:categories,id', 
             'judul'             => 'required|string|max:255',
             'penulis'           => 'required|string|max:255',
             'penerbit'          => 'required|string|max:255',
@@ -102,7 +100,7 @@ class BookController extends Controller
         $books = Book::whereIn('id', $ids)->get();
 
         foreach ($books as $book) {
-            // Memanfaatkan service yang sudah ada untuk menghapus buku (termasuk file cover dan relasinya)
+            
             $bookService->deleteBook($book);
         }
 

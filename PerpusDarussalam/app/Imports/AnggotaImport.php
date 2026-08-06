@@ -16,6 +16,7 @@ class AnggotaImport implements ToModel, WithHeadingRow
         if (empty($nama)) {
             return null;
         }
+
         $cleanNumber = function ($value) {
             if (empty($value) || trim($value) === '-') return null;
     
@@ -29,7 +30,6 @@ class AnggotaImport implements ToModel, WithHeadingRow
         };
 
         $nis = $cleanNumber($row['nis'] ?? null);
-        $nip = $cleanNumber($row['nip'] ?? null);
         $nik = $cleanNumber($row['nik'] ?? null);
         $email = strtolower(trim($row['email'] ?? ''));
         $alamat = trim($row['alamat'] ?? '');
@@ -38,11 +38,19 @@ class AnggotaImport implements ToModel, WithHeadingRow
             $email = strtolower(str_replace(' ', '', $nama)) . rand(100, 999) . '@example.com';
         }
 
+        // Penentuan role disesuaikan
         $role = 'siswa';
-        if ($nip) {
-            $role = 'guru';
-        } elseif ($nik && !$nis) {
-            $role = 'umum';
+        $inputRole = strtolower(trim($row['role'] ?? $row['kategori'] ?? ''));
+
+        if ($inputRole) {
+            if (in_array($inputRole, ['siswa', 'guru', 'umum'])) {
+                $role = $inputRole;
+            }
+        } else {
+            // Otomatisasi jika kolom role di Excel tidak diisi
+            if ($nik && !$nis) {
+                $role = 'guru'; 
+            }
         }
 
         $jkRaw = strtolower(trim($row['jenis_kelamin'] ?? ''));
@@ -56,7 +64,6 @@ class AnggotaImport implements ToModel, WithHeadingRow
             ['email' => $email],
             [
                 'nis'           => $nis,
-                'nip'           => $nip,
                 'nik'           => $nik,
                 'name'          => $nama,
                 'password'      => Hash::make('12345678'), 

@@ -11,21 +11,23 @@ return new class extends Migration
         Schema::create('borrowings', function (Blueprint $table) {
             $table->id();
             
-            // Relasi ke tabel users (peminjam)
+            // Relasi ke tabel users & book_items 
             $table->foreignId('user_id')
                   ->constrained('users')
                   ->cascadeOnDelete();
             $table->foreignId('book_item_id')
                   ->constrained('book_items')
                   ->cascadeOnDelete();
-            $table->date('tanggal_pinjam');
-            $table->date('tanggal_jatuh_tempo');
-            $table->date('tanggal_kembali')->nullable();
+                  
+            $table->date('tanggal_pinjam')->index(); 
+            $table->date('tanggal_jatuh_tempo')->index(); 
+            $table->date('tanggal_kembali')->nullable()->index(); 
+            
             $table->enum('status', [
                 'dipinjam',
                 'dikembalikan',
                 'terlambat'
-            ])->default('dipinjam');
+            ])->default('dipinjam')->index();
             
             $table->timestamps();
         });

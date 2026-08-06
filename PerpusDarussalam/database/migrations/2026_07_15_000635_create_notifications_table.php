@@ -6,29 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void{
+    public function up(): void
+    {
         Schema::create('Notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('borrowing_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                ->constrained('borrowings')
+                ->cascadeOnDelete(); 
             $table->string('title');
             $table->text('message');
             $table->enum('status', [
                 'unread',
                 'read'
-            ])->default('unread');
-            $table->string('type', 50);
+            ])->default('unread')->index(); 
+            $table->string('type', 50)->index(); 
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('Notifications');
     }
 };

@@ -6,19 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void{
+
+    public function up(): void
+    {
         Schema::create('BookLogs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('book_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                ->constrained('books')
+                ->cascadeOnDelete(); 
             $table->foreignId('user_id')
                 ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+                ->constrained('users')
+                ->nullOnDelete(); 
             $table->enum('activity', [
                 'borrow',
                 'return',
@@ -26,18 +25,15 @@ return new class extends Migration
                 'stock_out',
                 'damaged',
                 'lost'
-            ]);
+            ])->index();
             $table->integer('quantity')->default(1);
             $table->text('description')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('book_logs');
+        Schema::dropIfExists('BookLogs');
     }
 };

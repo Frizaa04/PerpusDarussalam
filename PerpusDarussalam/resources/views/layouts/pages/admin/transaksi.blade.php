@@ -357,11 +357,11 @@
             isDeleteActive = !isDeleteActive;
 
             if (isDeleteActive) {
-                // Mode Hapus Aktif: Tombol berubah jadi Batal (Warna Gelap/Abu-abu)
+                // Mode Hapus Aktif
                 btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnToggle.classList.add('bg-gray-700', 'hover:bg-gray-800');
                 textBtn.innerText = 'Batal';
-                btnIcon.innerText = 'close'; // Mengubah ikon material-icons menjadi tanda silang
+                btnIcon.innerText = 'close'; 
 
                 btnSubmit.classList.remove('hidden');
                 labelCheckAll.classList.remove('hidden');
@@ -370,12 +370,11 @@
                 editActions.forEach(el => el.classList.add('hidden'));
 
             } else {
-                // Mode Batal/Normal: Kembali ke Tombol Hapus Data (Warna Hijau)
+                // Mode Batal/Normal
                 btnToggle.classList.remove('bg-gray-700', 'hover:bg-gray-800');
                 btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
                 textBtn.innerText = 'Hapus Data';
-                btnIcon.innerText = 'delete'; // Mengembalikan ikon material-icons menjadi tempat sampah
-
+                btnIcon.innerText = 'delete';
                 btnSubmit.classList.add('hidden');
                 labelCheckAll.classList.add('hidden');
                 deleteActions.forEach(el => {
@@ -449,7 +448,16 @@
         const inputNoIdentitas = document.getElementById('input-no-identitas');
         const inputNamaUser = document.getElementById('input-nama-user');
 
-        // Event listener saat user mengetik di kolom No Identitas
+        // Cegah enter men-submit form saat scanning barcode
+        if (inputNoIdentitas) {
+            inputNoIdentitas.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Mencegah halaman merefresh
+                }
+            });
+        }
+
+        // Event listener saat user mengetik atau scan di kolom No Identitas
         let timeout = null;
         inputNoIdentitas.addEventListener('keyup', function() {
             clearTimeout(timeout);

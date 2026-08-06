@@ -1,125 +1,173 @@
 @extends('layouts.pages.users.provider.app')
 
 @section('content')
-<div class="bg-[#004d40] min-h-screen text-white pb-16 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
-        <!-- HERO / HEADER HALAMAN & SEARCH BAR -->
-        <div class="bg-[#00382e] rounded-2xl p-6 sm:p-10 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Katalog E-Book Perpustakaan</h1>
-                <p class="text-sm sm:text-base text-emerald-100 max-w-xl">
-                    Jelajahi dan baca ratusan buku digital secara daring untuk mendukung proses belajar dan menambah wawasan Anda.
-                </p>
-            </div>
-            <!-- Search Bar Mini di Header -->
-            <div class="w-full md:w-auto">
-                <form action="{{ route('user.ebook.index') }}" method="GET" class="flex items-center bg-white rounded-lg p-1 shadow-md">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul/penulis..." class="px-3 py-2 text-sm text-gray-700 focus:outline-none w-full md:w-64">
-                    <button type="submit" class="bg-[#005a4e] text-white px-4 py-2 rounded-md hover:bg-[#004d40] text-sm font-semibold transition">
-                        Cari
-                    </button>
-                </form>
-            </div>
-        </div>
+    <div class="bg-[#004d40] min-h-screen text-white pb-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-
-        <!-- SECTION SLIDER / DAFTAR E-BOOK MIRIP KOLEKSI BUKU TERBARU -->
-        <section class="bg-[#00382e] text-white rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 w-full relative border border-emerald-700/60">
-            <div class="flex justify-between items-end border-b border-emerald-800/80 pb-4">
+            <!-- HERO / HEADER HALAMAN & SEARCH BAR -->
+            <div
+                class="bg-[#00382e] rounded-2xl p-6 sm:p-10 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
                 <div>
-                    <h3 class="text-xl md:text-2xl font-bold tracking-tight text-white">
-                        {{ request('search') ? 'Hasil Pencarian E-Book: "'.request('search').'"' : 'Koleksi E-Book Terbaru' }}
-                    </h3>
-                    <p class="text-xs text-emerald-200/80 font-light mt-1">
-                        {{ request('search') ? 'Menampilkan e-book yang sesuai dengan kata kunci' : 'Koleksi e-book terupdate dari Perpustakaan' }}
+                    <h1 class="text-2xl sm:text-3xl font-bold mb-2">Katalog E-Book Perpustakaan</h1>
+                    <p class="text-sm sm:text-base text-emerald-100 max-w-xl">
+                        Jelajahi dan baca ratusan buku digital secara daring untuk mendukung proses belajar dan menambah
+                        wawasan Anda.
                     </p>
                 </div>
-                
-                <div class="flex items-center gap-2">
-                    @if(request('search'))
-                        <a href="{{ route('user.ebook.index') }}" class="text-xs text-emerald-300 font-semibold hover:underline mr-2">
-                            Reset Pencarian
-                        </a>
-                    @else
-                        <!-- Tombol Navigasi Slider E-Book -->
-                        <button id="slideLeft" type="button" class="bg-[#002820] hover:bg-emerald-800 text-emerald-200 p-2.5 rounded-full border border-emerald-700/60 shadow-sm transition active:scale-95">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
+                <!-- Search Bar Mini di Header -->
+                <div class="w-full md:w-auto">
+                    <form action="{{ route('user.ebook.index') }}#katalog-ebook" method="GET"
+                        class="flex items-center bg-white rounded-lg p-1 shadow-md">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Cari judul/penulis..."
+                            class="px-3 py-2 text-sm text-gray-700 focus:outline-none w-full md:w-64">
+                        <button type="submit"
+                            class="bg-[#005a4e] text-white px-4 py-2 rounded-md hover:bg-[#004d40] text-sm font-semibold transition">
+                            Cari
                         </button>
-                        <button id="slideRight" type="button" class="bg-[#002820] hover:bg-emerald-800 text-emerald-200 p-2.5 rounded-full border border-emerald-700/60 shadow-sm transition active:scale-95">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
-                    @endif
+                    </form>
                 </div>
             </div>
 
-            <!-- Container Slider Card E-Book -->
-            <div id="bookSlider" class="flex gap-5 overflow-x-auto scroll-smooth no-scrollbar py-4 px-1 w-full">
-                @if(isset($ebooks) && count($ebooks) > 0)
-                    @foreach($ebooks as $ebook)
-                        <div class="w-[calc((100%-1.25rem)/2)] sm:w-[calc((100%-2.5rem)/3)] md:w-[calc((100%-6.25rem)/6)] shrink-0 bg-[#dce8e5] rounded-xl border border-emerald-300/40 p-3 shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:border-emerald-400 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
-                            <div>
-                                <div class="w-full h-52 bg-[#b2c8c6] rounded-lg overflow-hidden relative shadow-inner mb-3">
-                                    <img src="{{ $ebook->cover ? asset('storage/' . $ebook->cover) : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80' }}" 
-                                         alt="{{ $ebook->judul }}" 
-                                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                                    
-                                    <!-- Badge Kategori -->
-                                    <span class="absolute top-2 right-2 bg-[#004d40] text-emerald-100 text-[9px] font-bold px-2 py-0.5 rounded shadow">
-                                        {{ $ebook->kategori ?? 'Umum' }}
-                                    </span>
+
+            <!-- SECTION DAFTAR E-BOOK (DIUBAH MENJADI GRID SEPERTI KATALOG BUKU) -->
+            <section id="katalog-ebook"
+                class="bg-[#00382e] text-white rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 w-full relative border border-emerald-700/60">
+                <div class="flex justify-between items-end border-b border-emerald-800/80 pb-4">
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-bold tracking-tight text-white">
+                            {{ request('search') ? 'Hasil Pencarian E-Book: "' . request('search') . '"' : 'Koleksi E-Book Terbaru' }}
+                        </h3>
+                        <p class="text-xs text-emerald-200/80 font-light mt-1">
+                            {{ request('search') ? 'Menampilkan e-book yang sesuai dengan kata kunci' : 'Koleksi e-book terupdate dari Perpustakaan' }}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        @if (request('search'))
+                            <a href="{{ route('user.ebook.index') }}#katalog-ebook"
+                                class="text-xs text-emerald-300 font-semibold hover:underline mr-2">
+                                Reset Pencarian
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Container Grid E-Book (Menggantikan Horizontal Slider) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full">
+                    @if (isset($ebooks) && count($ebooks) > 0)
+                        @foreach ($ebooks as $ebook)
+                            <div
+                                class="bg-[#002820] rounded-xl border border-emerald-700/60 p-3 shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:border-emerald-500 transition-all duration-300 cursor-pointer group flex flex-col justify-between">
+                                <div>
+                                    <!-- Area Cover Buku -->
+                                    <div
+                                        class="w-full h-52 bg-[#001f19] rounded-lg overflow-hidden relative shadow-inner mb-3 border border-emerald-800/40">
+                                        <img src="{{ $ebook->cover ? asset('storage/' . $ebook->cover) : 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80' }}"
+                                            alt="{{ $ebook->judul }}"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+
+                                        <!-- Badge Kategori -->
+                                        <span
+                                            class="absolute top-2 right-2 bg-[#004d40] text-emerald-100 text-[9px] font-bold px-2 py-0.5 rounded shadow border border-emerald-600/50">
+                                            {{ $ebook->kategori ?? 'Umum' }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Informasi Judul & Penulis -->
+                                    <div class="space-y-1 text-center px-1">
+                                        <h4 class="font-bold text-xs text-white line-clamp-2 leading-snug group-hover:text-emerald-300 transition"
+                                            title="{{ $ebook->judul }}">
+                                            {{ $ebook->judul }}
+                                        </h4>
+                                        <p class="text-[11px] text-emerald-300/80 line-clamp-1 font-medium">
+                                            {{ $ebook->penulis }}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div class="space-y-1 text-center px-1">
-                                    <h4 class="font-bold text-xs text-[#002820] line-clamp-2 leading-snug group-hover:text-[#00695c] transition" title="{{ $ebook->judul }}">
-                                        {{ $ebook->judul }}
-                                    </h4>
-                                    <p class="text-[11px] text-emerald-900/70 line-clamp-1 font-medium">
-                                        {{ $ebook->penulis }}
-                                    </p>
+                                <!-- Tombol Aksi (Baca E-Book) di dalam Card -->
+                                <div class="mt-3 pt-2 border-t border-emerald-800/80">
+                                    <a href="{{ route('user.ebook.read', $ebook->id) }}" target="_blank"
+                                        class="w-full block text-center bg-[#004d40] hover:bg-[#00695c] text-white text-[10px] font-bold py-1.5 rounded transition shadow border border-emerald-600/40">
+                                        Baca E-Book
+                                    </a>
                                 </div>
                             </div>
-
-                            <!-- Tombol Aksi (Baca E-Book) di dalam Card -->
-                            <div class="mt-3 pt-2 border-t border-emerald-300/40">
-                                <a href="{{ route('user.ebook.read', $ebook->id) }}" target="_blank" 
-                                   class="w-full block text-center bg-[#004d40] hover:bg-[#003d30] text-white text-[10px] font-bold py-1.5 rounded transition shadow">
-                                    Baca E-Book
-                                </a>
-                            </div>
+                        @endforeach
+                    @else
+                        <div class="col-span-full text-center py-10 text-emerald-200 text-xs w-full">
+                            E-book tidak ditemukan. Coba dengan kata kunci lain.
                         </div>
-                    @endforeach
-                @else
-                    <div class="col-span-full text-center py-10 text-emerald-200 text-xs w-full">
-                        E-book tidak ditemukan. Coba dengan kata kunci lain.
+                    @endif
+                </div>
+
+                <!-- Paginasi Laravel untuk E-Book -->
+                @if (isset($ebooks) && method_exists($ebooks, 'hasPages') && $ebooks->hasPages())
+                    <div
+                        class="flex justify-center items-center gap-2 mt-6 text-white font-bold select-none pt-4 border-t border-emerald-800/80">
+
+                        {{-- Tombol Previous (<) --}}
+                        @if ($ebooks->onFirstPage())
+                            <span
+                                class="px-3 py-1.5 bg-[#002820] text-white/30 rounded-lg border border-emerald-700/40 cursor-not-allowed">&lt;</span>
+                        @else
+                            <a href="{{ $ebooks->previousPageUrl() }}"
+                                class="px-3 py-1.5 bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">&lt;</a>
+                        @endif
+
+                        {{-- Nomor Halaman --}}
+                        @foreach ($ebooks->getUrlRange(1, $ebooks->lastPage()) as $page => $url)
+                            @if ($page == $ebooks->currentPage())
+                                <span
+                                    class="w-8 h-8 flex items-center justify-center bg-emerald-500 text-[#002820] font-extrabold rounded-lg shadow">
+                                    {{ $page }}
+                                </span>
+                            @else
+                                <a href="{{ $url }}"
+                                    class="w-8 h-8 flex items-center justify-center bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">
+                                    {{ $page }}
+                                </a>
+                            @endif
+                        @endforeach
+
+                        {{-- Tombol Next (>) --}}
+                        @if ($ebooks->hasMorePages())
+                            <a href="{{ $ebooks->nextPageUrl() }}"
+                                class="px-3 py-1.5 bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">&gt;</a>
+                        @else
+                            <span
+                                class="px-3 py-1.5 bg-[#002820] text-white/30 rounded-lg border border-emerald-700/40 cursor-not-allowed">&gt;</span>
+                        @endif
+
                     </div>
                 @endif
-            </div>
-        </section>
-
+            </section>
+        </div>
     </div>
-</div>
 
-<!-- Script untuk Tombol Slider Kiri & Kanan -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const slider = document.getElementById('bookSlider');
-        const btnLeft = document.getElementById('slideLeft');
-        const btnRight = document.getElementById('slideRight');
+    <!-- Script untuk Tombol Slider Kiri & Kanan -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.getElementById('bookSlider');
+            const btnLeft = document.getElementById('slideLeft');
+            const btnRight = document.getElementById('slideRight');
 
-        if (slider && btnLeft && btnRight) {
-            btnLeft.addEventListener('click', () => {
-                slider.scrollBy({ left: -300, behavior: 'smooth' });
-            });
+            if (slider && btnLeft && btnRight) {
+                btnLeft.addEventListener('click', () => {
+                    slider.scrollBy({
+                        left: -300,
+                        behavior: 'smooth'
+                    });
+                });
 
-            btnRight.addEventListener('click', () => {
-                slider.scrollBy({ left: 300, behavior: 'smooth' });
-            });
-        }
-    });
-</script>
+                btnRight.addEventListener('click', () => {
+                    slider.scrollBy({
+                        left: 300,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+    </script>
 @endsection

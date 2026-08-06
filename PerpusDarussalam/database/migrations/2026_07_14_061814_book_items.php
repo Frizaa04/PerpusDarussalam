@@ -6,17 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    
     public function up(): void
     {
         Schema::create('book_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('book_id')
                   ->constrained('books')
-                  ->cascadeOnDelete();
+                  ->cascadeOnDelete(); 
             $table->string('nomor_inventaris')->unique(); 
-            $table->enum('kondisi', ['baik', 'rusak_ringan', 'rusak_berat'])->default('baik');
-            $table->enum('status_pinjam', ['tersedia', 'dipinjam'])->default('tersedia');
-            
+            $table->enum('kondisi', ['baik', 'rusak_ringan', 'rusak_berat'])->default('baik')->index(); 
+            $table->enum('status_pinjam', ['tersedia', 'dipinjam'])->default('tersedia')->index(); 
             $table->timestamps();
         });
     }
