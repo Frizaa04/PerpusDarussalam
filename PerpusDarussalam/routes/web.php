@@ -20,6 +20,7 @@ use App\Http\Controllers\AdminAnnouncementController;
 use App\Http\Controllers\UserEbookController;
 use App\Http\Controllers\AboutUserController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\PushNotificationController; 
 
 // Halaman Awal (Public) - Langsung Mengarah ke Home User
 Route::get('/', function () {
@@ -50,10 +51,14 @@ Route::middleware(['auth:web'])->group(function () {
     // Route menuju halaman detail buku / e-book user
     Route::get('/book/view/{id}', [UserController::class, 'showBookDetail'])->name('user.book.show');
 
-    // 4. TAMBAHKAN ROUTE TENTANG KAMI DI SINI
+    // 4. Route Tentang Kami
     Route::get('/tentang-kami', [AboutUserController::class, 'index'])->name('user.about');
 
-    // 5. Logout User
+    // 5. Simpan Push Notification Token User
+    Route::post('/push-notification/subscribe', [PushNotificationController::class, 'store'])->name('push.subscribe');
+    Route::get('/push-notification/test', [PushNotificationController::class, 'testNotification'])->name('push.test');
+
+    // 6. Logout User
     Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
 });
@@ -155,6 +160,5 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
     Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.readAll');
     Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
-
 
 });

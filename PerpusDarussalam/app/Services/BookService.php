@@ -15,11 +15,25 @@ class BookService
     {
         return DB::transaction(function () use ($data) {
 
-            $category = Category::where('nama', $data['kategori'] ?? null)->first();
+            // 1. Cek apakah yang dikirim ID kategori atau teks kategori baru
+            $categoryId = null;
+            
+            if (!empty($data['categories_id']) && is_numeric($data['categories_id'])) {
+                // Jika yang dikirim berupa angka (ID dari dropdown)
+                $categoryId = $data['categories_id'];
+            } elseif (!empty($data['kategori_baru'])) {
+                // Jika admin mengetik kategori baru
+                $category = Category::firstOrCreate([
+                    'nama' => $data['kategori_baru']
+                ]);
+                $categoryId = $category->id;
+            } else {
+                // Fallback jika kosong semua
+                $categoryId = Category::first()->id ?? 1;
+            }
 
-            $categoryId = $category
-                ? $category->id
-                : (Category::first()->id ?? 1);
+            // Ambil data objek category berdasarkan ID final untuk generate kode buku
+            $category = Category::find($categoryId);
 
             $cover = $this->uploadCover($data['cover'] ?? null);
 
@@ -36,14 +50,10 @@ class BookService
                 'penulis' => $data['penulis'] ?? 'Anonim',
                 'penerbit' => $data['penerbit'] ?? 'Umum',
                 'isbn' => $data['isbn'] ?? '000-0-00-000000-0',
-                'tanggal_pembelian' =>
-                    $data['tanggal_pembelian']
-                    ?? now()->toDateString(),
+                'tanggal_pembelian' => $data['tanggal_pembelian'] ?? now()->toDateString(),
                 'deskripsi' => $data['deskripsi'] ?? null,
                 'rak' => $data['rak'] ?? null,
-                'tahun_terbit' =>
-                    $data['tahun_terbit']
-                    ?? date('Y'),
+                'tahun_terbit' => $data['tahun_terbit'] ?? date('Y'),
                 'stok' => $data['stok'],
                 'cover' => $cover
             ]);

@@ -48,7 +48,8 @@
                                 <!-- Pengecekan Select All (Hanya muncul saat mode hapus aktif) -->
                                 <div id="selectAllContainer"
                                     class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
-                                    <input type="checkbox" id="selectAllCheckboxMain" onclick="toggleSelectAll(this, 'book-checkbox')"
+                                    <input type="checkbox" id="selectAllCheckboxMain"
+                                        onclick="toggleSelectAll(this, 'book-checkbox')"
                                         class="w-4 h-4 accent-red-600 cursor-pointer rounded">
                                     <label for="selectAllCheckboxMain"
                                         class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
@@ -260,15 +261,45 @@
                         <input type="text" name="penulis" placeholder="..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
+
+                    <!-- Kategori -->
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Kategori</label>
-                        <select name="categories_id"
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-semibold">Kategori</label>
+                            <div class="space-x-1.5">
+                                <button type="button" onclick="hapusKategoriAktif()" id="btnHapusKategori"
+                                    class="text-xs underline text-red-300 hover:text-white hidden">
+                                    Hapus
+                                </button>
+                                <button type="button" onclick="editKategoriAktif()" id="btnEditKategori"
+                                    class="text-xs underline text-yellow-200 hover:text-white hidden">
+                                    Edit
+                                </button>
+                                <button type="button" onclick="toggleInputKategori()" id="btnToggleKategori"
+                                    class="text-xs underline text-emerald-200 hover:text-white">
+                                    + Kategori Baru
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Kategori Lama -->
+                        <select name="categories_id" id="selectKategori" onchange="cekPilihKategori(this)"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">...</option>
                             @foreach ($allCategories as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
+                                <option value="{{ $cat->id }}" data-nama="{{ $cat->nama }}">{{ $cat->nama }}
+                                </option>
                             @endforeach
                         </select>
+
+                        <!-- Input Text untuk Kategori Baru / Edit Kategori -->
+                        <input type="text" name="kategori_baru" id="inputKategoriBaru"
+                            placeholder="Ketik kategori baru..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white hidden">
+
+                        <!-- Input hidden untuk penanda mode edit & hapus -->
+                        <input type="hidden" name="edit_category_id" id="editCategoryId">
+                        <input type="hidden" name="delete_category_id" id="deleteCategoryId">
                     </div>
 
                     <div>
@@ -491,7 +522,8 @@
                         <tr class="bg-[#003d30] text-white border-b border-white/30">
                             <!-- Kolom Checkbox Pilih Semua -->
                             <th class="p-2.5 text-center w-10">
-                                <input type="checkbox" id="selectAllHeaderTable" onclick="toggleSelectAll(this, 'item-checkbox')"
+                                <input type="checkbox" id="selectAllHeaderTable"
+                                    onclick="toggleSelectAll(this, 'item-checkbox')"
                                     class="cursor-pointer accent-red-600 w-4 h-4 rounded">
                             </th>
                             <th class="p-2.5">No. Inventaris</th>
@@ -567,7 +599,6 @@
 
             // Otomatis membuka modal edit jika terjadi error pada update
             @if ($errors->bookUpdateForm->any())
-
             @endif
         });
 
@@ -579,6 +610,91 @@
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
         }
+
+        // Munculkan tombol "Edit" dan "Hapus" hanya jika kategori di dropdown dipilih
+        function cekPilihKategori(select) {
+            const btnEdit = document.getElementById('btnEditKategori');
+            const btnHapus = document.getElementById('btnHapusKategori');
+            if (select.value) {
+                btnEdit.classList.remove('hidden');
+                btnHapus.classList.remove('hidden');
+            } else {
+                btnEdit.classList.add('hidden');
+                btnHapus.classList.add('hidden');
+            }
+        }
+
+        // Toggle untuk mode Tambah Kategori Baru
+        function toggleInputKategori() {
+            const selectBox = document.getElementById('selectKategori');
+            const inputBox = document.getElementById('inputKategoriBaru');
+            const editIdInput = document.getElementById('editCategoryId');
+            const deleteIdInput = document.getElementById('deleteCategoryId');
+            const btnToggle = document.getElementById('btnToggleKategori');
+            const btnEdit = document.getElementById('btnEditKategori');
+            const btnHapus = document.getElementById('btnHapusKategori');
+
+            // Reset mode
+            editIdInput.value = "";
+            deleteIdInput.value = "";
+
+            if (inputBox.classList.contains('hidden')) {
+                inputBox.classList.remove('hidden');
+                selectBox.classList.add('hidden');
+                selectBox.value = "";
+                btnEdit.classList.add('hidden');
+                btnHapus.classList.add('hidden');
+                btnToggle.textContent = "Pilih Kategori Eksisting";
+                inputBox.placeholder = "Ketik kategori baru...";
+            } else {
+                inputBox.classList.add('hidden');
+                selectBox.classList.remove('hidden');
+                inputBox.value = "";
+                btnToggle.textContent = "+ Kategori Baru";
+            }
+        }
+
+        // Toggle untuk mode Edit Kategori yang sedang dipilih
+        function editKategoriAktif() {
+            const selectBox = document.getElementById('selectKategori');
+            const selectedOption = selectBox.options[selectBox.selectedIndex];
+            const inputBox = document.getElementById('inputKategoriBaru');
+            const editIdInput = document.getElementById('editCategoryId');
+            const btnToggle = document.getElementById('btnToggleKategori');
+            const btnEdit = document.getElementById('btnEditKategori');
+            const btnHapus = document.getElementById('btnHapusKategori');
+
+            if (selectBox.value) {
+                editIdInput.value = selectBox.value;
+                inputBox.value = selectedOption.getAttribute('data-nama');
+
+                selectBox.classList.add('hidden');
+                inputBox.classList.remove('hidden');
+                btnEdit.classList.add('hidden');
+                btnHapus.classList.add('hidden');
+                btnToggle.textContent = "Batal Edit";
+                inputBox.placeholder = "Edit nama kategori...";
+            }
+        }
+
+        // Fungsi untuk menghapus kategori terpilih
+        function hapusKategoriAktif() {
+            const selectBox = document.getElementById('selectKategori');
+            const selectedOption = selectBox.options[selectBox.selectedIndex];
+            const deleteIdInput = document.getElementById('deleteCategoryId');
+
+            if (selectBox.value) {
+                const namaKategori = selectedOption.text;
+                if (confirm(`Apakah Anda yakin ingin menghapus kategori "${namaKategori}"?`)) {
+                    // Set ID kategori yang mau dihapus ke input hidden
+                    deleteIdInput.value = selectBox.value;
+
+                    // Submit form secara otomatis untuk memproses penghapusan
+                    selectBox.form.submit();
+                }
+            }
+        }
+
 
         // Modal Edit Data Buku
         function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku,
@@ -617,7 +733,7 @@
 
             let tbody = document.getElementById('kelolaItemList');
             tbody.innerHTML =
-            `<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>`;
+                `<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>`;
 
             fetch(`/book/${bookId}/items`)
                 .then(response => response.json())
@@ -750,7 +866,7 @@
             checkboxes.forEach(cb => {
                 cb.checked = master.checked;
             });
-            updateSelectedCount(); 
+            updateSelectedCount();
         }
 
         function updateSelectedCount() {
