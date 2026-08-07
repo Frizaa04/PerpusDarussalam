@@ -11,15 +11,26 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('nis')->nullable()->index(); 
-            $table->string('nik')->nullable()->index(); 
+            $table->string('nisn')->nullable()->index();
+            $table->string('nik')->nullable()->index();
             $table->string('name');
-            $table->string('email')->unique(); 
-            $table->string('password'); 
-            $table->enum('role', ['siswa', 'guru', 'umum'])->default('siswa')->index(); 
-            $table->enum('jenis_kelamin', ['L', 'P'])->nullable(); 
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->enum('status', ['siswa', 'guru', 'umum'])
+                ->default('siswa')
+                ->index();
+            $table->enum('role', ['admin','user'])
+                ->default('user');
+            $table->enum('jenis_kelamin', ['L','P'])->nullable();
             $table->string('alamat')->nullable();
             $table->string('foto')->nullable();
+            $table->enum('jenjang', ['MA','MTS'])
+                ->default('MTS')
+                ->index();
+            $table->string('kelas')->nullable();
+            $table->date('masa_berlaku_mulai')->nullable();
+            $table->date('masa_berlaku_sampai')->nullable();
+            $table->enum('status_kartu', ['aktif','expired'])->default('aktif');
             $table->timestamps();
         });
     }

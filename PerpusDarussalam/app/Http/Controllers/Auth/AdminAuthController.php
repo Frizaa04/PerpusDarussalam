@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AdminAuthController extends Controller
 {
@@ -14,7 +15,7 @@ class AdminAuthController extends Controller
         return view('layouts.pages.admin.login_admin');
     }
 
-    // Proses login admin menggunakan guard 'admin'
+    // Proses login admin menggunakan tabel users tunggal dengan filter role admin
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -22,7 +23,17 @@ class AdminAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::guard('admin')->attempt($credentials)) {
+        // Cek apakah user dengan email tersebut ada dan rolenya adalah admin
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && $user->role !== 'admin') {
+            return back()->withErrors([
+                'email' => 'Akun Anda tidak memiliki hak akses sebagai administrator.',
+            ])->onlyInput('email');
+        }
+
+        // Lakukan autentikasi menggunakan guard 'web'
+        if (Auth::guard('web')->attempt($credentials)) {
             $request->session()->regenerate();
 
             return redirect()->intended(route('admin.dashboard'))
@@ -37,13 +48,9 @@ class AdminAuthController extends Controller
     // Proses logout admin
     public function logout(Request $request)
     {
-        // Hanya logout dari guard 'admin'
-        Auth::guard('admin')->logout();
+        Auth::guard('web')->logout();
 
-        // Hapus data khusus milik admin dari session, TANPA merusak session user
-        $request->session()->forget('login_admin_' . sha1(static::class));
-
-        // Regenerate token CSRF demi keamanan
+        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')->with('success', 'Anda telah keluar dari sesi Admin.');
