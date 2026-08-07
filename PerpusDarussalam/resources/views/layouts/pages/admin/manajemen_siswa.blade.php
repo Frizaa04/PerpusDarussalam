@@ -167,7 +167,7 @@
 
             <h3 class="text-xl font-bold mb-5 tracking-wide">Tambah User Baru</h3>
 
-            <!-- Tempat Error Validasi / Exception (Mirip dengan modal peminjaman) -->
+            <!-- Tempat Error Validasi -->
             <div id="addUserErrorContainer"
                 class="mb-4 p-3 bg-red-600 text-white rounded text-xs {{ $errors->addUserForm->any() ? '' : 'hidden' }}">
                 @if ($errors->addUserForm->any())
@@ -235,6 +235,24 @@
                         <input type="text" name="alamat" placeholder="Alamat lengkap..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
+
+                    <!-- Tambahan: Jenjang -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Jenjang</label>
+                        <select name="jenjang"
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                            <option value="">Pilih Jenjang...</option>
+                            <option value="MTs">MTs</option>
+                            <option value="MA">MA</option>
+                        </select>
+                    </div>
+
+                    <!-- Tambahan: Kelas -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Kelas</label>
+                        <input type="text" name="kelas" placeholder="Contoh: 10A, 12 IPA 1..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                    </div>
                 </div>
 
                 <div class="pt-4 text-center">
@@ -270,7 +288,7 @@
                 <input type="hidden" id="modalId" name="id">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Input Nama Lengkap (Ditambahkan agar tidak error di JS) -->
+                    <!-- Input Nama Lengkap -->
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-emerald-100">Nama Lengkap</label>
                         <input type="text" id="modalName" name="name" required
@@ -306,20 +324,39 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold mb-1 text-emerald-100">Jenis Kelamin</label>
-                    <select id="modalJenisKelamin" name="jenis_kelamin"
-                        class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
-                        <option value="">-- Pilih Jenis Kelamin --</option>
-                        <option value="L">Laki-laki</option>
-                        <option value="P">Perempuan</option>
-                    </select>
+                <!-- Tambahan: Jenjang & Kelas di Edit -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-emerald-100">Jenjang</label>
+                        <select id="modalJenjang" name="jenjang"
+                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
+                            <option value="">Pilih Jenjang...</option>
+                            <option value="MTs">MTs</option>
+                            <option value="MA">MA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-emerald-100">Kelas</label>
+                        <input type="text" id="modalKelas" name="kelas" placeholder="Contoh: 10A, 12 IPA 1..."
+                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold mb-1 text-emerald-100">Alamat</label>
-                    <textarea id="modalAlamat" name="alamat" rows="2"
-                        class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm"></textarea>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-emerald-100">Jenis Kelamin</label>
+                        <select id="modalJenisKelamin" name="jenis_kelamin"
+                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
+                            <option value="">-- Pilih Jenis Kelamin --</option>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-emerald-100">Alamat</label>
+                        <input type="text" id="modalAlamat" name="alamat" placeholder="Alamat lengkap..."
+                            class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
+                    </div>
                 </div>
 
                 <!-- Tombol Konfirmasi -->
@@ -403,7 +440,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data tidak ditemukan.</td>
+                                    <td colspan="4" class="p-4 text-center text-sm font-medium text-white/80">Data
+                                        tidak ditemukan.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -504,7 +542,7 @@
         }
 
         // --- Fungsi Modal Edit User  ---
-        function openEditModal(id, nis, nik, name, email, role, jenis_kelamin, alamat) {
+        function openEditModal(id, nis, nik, name, email, role, jenis_kelamin, alamat, jenjang, kelas) {
             // 1. Simpan data mentah ke objek global
             currentEditData = {
                 nis: (nis && nis !== 'null' && nis !== 'undefined') ? nis : '',
@@ -546,7 +584,18 @@
                 jkSelect.value = (jenis_kelamin && jenis_kelamin !== 'null') ? jenis_kelamin : '';
             }
 
-            // 6. Tampilkan Modal Edit
+            // 6. Atur Dropdown Jenjang & Input Kelas (Baru)
+            const jenjangSelect = document.getElementById('modalJenjang');
+            if (jenjangSelect) {
+                jenjangSelect.value = (jenjang && jenjang !== 'null' && jenjang !== 'undefined') ? jenjang : '';
+            }
+
+            const kelasInput = document.getElementById('modalKelas');
+            if (kelasInput) {
+                kelasInput.value = (kelas && kelas !== 'null' && kelas !== 'undefined') ? kelas : '';
+            }
+
+            // 7. Tampilkan Modal Edit
             const editModal = document.getElementById('editModal');
             if (editModal) {
                 editModal.classList.remove('hidden');

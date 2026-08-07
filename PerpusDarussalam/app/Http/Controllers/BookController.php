@@ -42,6 +42,36 @@ class BookController extends Controller
 
     public function store(Request $request, BookService $bookService)
     {
+        // 1. Cek jika admin ingin MENGHAPUS kategori
+        if ($request->filled('delete_category_id')) {
+            $category = Category::find($request->delete_category_id);
+            if ($category) {
+                // Opsional: Cek apakah kategori masih dipakai buku
+                // if ($category->books()->count() > 0) { ... }
+                $category->delete();
+            }
+            return redirect()
+                ->route('book.index')
+                ->with('success', 'Kategori berhasil dihapus!');
+        }
+
+        // 2. Cek jika admin melakukan Edit Nama Kategori yang ada
+        if ($request->filled('edit_category_id') && $request->filled('kategori_baru')) {
+            $category = Category::find($request->edit_category_id);
+            if ($category) {
+                $category->update(['nama' => $request->kategori_baru]);
+            }
+            $request->merge(['categories_id' => $request->edit_category_id]);
+        }
+        // 3. Cek jika admin mengetik Kategori Baru
+        elseif ($request->filled('kategori_baru')) {
+            $newCategory = Category::create([
+                'nama' => $request->kategori_baru
+            ]);
+            $request->merge(['categories_id' => $newCategory->id]);
+        }
+
+        // 4. Jalankan validasi buku
         $request->validateWithBag('bookStoreForm', [
             'categories_id'     => 'required|exists:categories,id',
             'judul'             => 'required|string|max:255',
@@ -56,11 +86,12 @@ class BookController extends Controller
             'rak'               => 'required|string|max:255',
         ]);
 
+        // 5. Simpan data buku lewat Service
         $bookService->createBook($request->all());
 
         return redirect()
             ->route('book.index')
-            ->with('success', 'Buku baru dan nomor inventaris berhasil ditambahkan!');
+            ->with('success', 'Data buku berhasil ditambahkan!');
     }
 
     public function update(Request $request, BookService $bookService)

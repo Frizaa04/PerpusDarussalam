@@ -30,7 +30,7 @@
             height: 54mm;
             border: 1px solid #d1d5db; 
             box-sizing: border-box;
-            padding: 8px 10px 0 10px;
+            padding: 8px 10mm 0 10px;
             background: #ffffff;
             position: relative;
             page-break-inside: avoid;
@@ -91,39 +91,48 @@
             position: relative;
             z-index: 1;
         }
-        .photo-box {
+        
+        /* Kotak Logo Sekolah (Menggantikan Foto) */
+        .logo-box {
             width: 20mm;
-            height: 25mm; /* Disesuaikan agar seimbang dengan teks yang diperbesar */
-            border: 1.5px solid #004d40;
-            background: #f3f4f6;
+            height: 25mm;
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 8px;
-            color: #6b7280;
+            font-size: 7px;
+            font-weight: bold;
+            color: #004d40;
             flex-shrink: 0;
             border-radius: 3px;
             overflow: hidden;
+            text-align: center;
+            padding: 2px;
+        }
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Agar logo tidak terpotong */
         }
         
-        /* Teks Diperbesar dan Jarak Baris Disesuaikan */
+        /* Teks Informasi Kartu */
         .info-table {
-            font-size: 8.5px; 
+            font-size: 8px; /* Dikecilkan sedikit agar muat tambahan baris jenjang & masa berlaku */
             width: 100%;
             border-collapse: collapse;
         }
         .info-table td {
-            padding: 1.2px 0; /* Memberi jarak pas agar tidak terlalu renggang/kosong */
+            padding: 1px 0; 
             vertical-align: top;
             color: #1f2937;
         }
         .info-table td.label {
-            width: 32%;
+            width: 34%;
             font-weight: bold;
             color: #374151;
         }
         
-        /* Barcode Full Kiri-Kanan Tanpa Stretch (Sesuai Kode Asli Anda) */
+        /* Barcode */
         .barcode-section {
             background-color: #ffffff;
             text-align: center;
@@ -136,8 +145,8 @@
         }
         .barcode-section img {
             width: 100%; 
-            height: 13mm; 
-            object-fit: contain; /* Mengunci proporsi agar garis tidak melar/gepeng */
+            height: 11mm; 
+            object-fit: contain;
             display: block;
         }
 
@@ -169,6 +178,8 @@
         @foreach($users as $user)
             @php
                 $noInduk = $user->nis ?? ($user->nik ?? '000000');
+                // Menghitung masa berlaku (misal: 1 tahun dari tanggal sekarang atau tahun ajaran aktif)
+                $masaBerlaku = \Carbon\Carbon::now()->addYear()->translatedFormat('d F Y');
             @endphp
             <div class="card">
                 <div class="card-header">
@@ -179,16 +190,14 @@
                 </div>
                 
                 <div class="card-body">
-                    <!-- Foto Anggota -->
-                    <div class="photo-box">
-                        @if(!empty($user->foto))
-                            <img src="{{ asset('storage/' . $user->foto) }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        @else
-                            FOTO
-                        @endif
+                    <!-- Logo Sekolah -->
+                    <div class="logo-box">
+                        <!-- Sesuaikan path asset logo sekolah kamu -->
+                        <img src="{{ asset('image/123.png') }}" alt="Logo Sekolah" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none;">LOGO MDIBS</span>
                     </div>
 
-                    <!-- Informasi Identitas (Teks Diperbesar) -->
+                    <!-- Informasi Identitas -->
                     <table class="info-table">
                         <tr>
                             <td class="label">Nama</td>
@@ -203,17 +212,21 @@
                             <td>: {{ ucfirst($user->role) }}</td>
                         </tr>
                         <tr>
+                            <td class="label">Jenjang</td>
+                            <td>: {{ $user->jenjang ?? '-' }}</td>
+                        </tr>
+                        <tr>
                             <td class="label">Kelamin</td>
                             <td>: {{ $user->jenis_kelamin == 'L' ? 'Laki-laki' : ($user->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}</td>
                         </tr>
                         <tr>
-                            <td class="label">Alamat</td>
-                            <td>: {{ $user->alamat ?? '-' }}</td>
+                            <td class="label">Masa Berlaku</td>
+                            <td>: {{ $masaBerlaku }}</td>
                         </tr>
                     </table>
                 </div>
 
-                <!-- Bagian Barcode Full Kiri Kanan Proporsional -->
+                <!-- Bagian Barcode -->
                 <div class="barcode-section">
                     <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $noInduk }}&code=Code128&dpi=300" alt="Barcode">
                 </div>
