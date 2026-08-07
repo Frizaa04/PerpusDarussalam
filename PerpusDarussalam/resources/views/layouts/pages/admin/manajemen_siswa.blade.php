@@ -61,7 +61,8 @@
                 </div>
 
                 <!-- Box Tabel -->
-                <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
+                <div
+                    class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
                     <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Tabel Daftar User</h2>
 
                     <div class="overflow-x-auto rounded">
@@ -69,12 +70,13 @@
                             <thead>
                                 <tr class="bg-[#004d40] text-white divide-x divide-white/40">
                                     <th class="p-3 text-xs font-bold tracking-wider">Foto</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NIS/NIK)</th>
+                                    <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NISN/NIK)</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Nama</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Kelamin</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Peran</th>
                                     <th class="p-3 text-xs font-bold tracking-wider">Email</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Alamat</th>
+                                    <th class="p-3 text-xs font-bold tracking-wider">Masa Berlaku</th>
+                                    <th class="p-3 text-xs font-bold tracking-wider">Status Kartu</th>
                                     <th class="p-3 text-xs font-bold tracking-wider text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -95,7 +97,7 @@
                                         </td>
                                         <!-- Kolom No Induk -->
                                         <td class="p-3 text-sm font-bold text-white/90">
-                                            {{ $student->nis ?? ($student->nik ?? '-') }}
+                                            {{ $student->nisn ?? ($student->nik ?? '-') }}
                                         </td>
                                         <!-- Kolom Nama -->
                                         <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
@@ -111,46 +113,76 @@
                                         </td>
                                         <!-- Kolom Email -->
                                         <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
-                                        <!-- Kolom Alamat -->
-                                        <td class="p-3 text-sm font-medium text-white/90 truncate max-w-xs">
-                                            {{ $student->alamat ?? '-' }}</td>
 
-                                        <!-- Tombol Aksi Edit -->
+                                        <!-- Kolom Masa Berlaku -->
+                                        <td class="p-3 text-xs font-medium text-white/90">
+                                            {{ $student->masa_berlaku_sampai ? \Carbon\Carbon::parse($student->masa_berlaku_sampai)->format('d M Y') : '-' }}
+                                        </td>
+
+                                        <!-- Kolom Status Kartu -->
                                         <td class="p-3 text-sm text-center">
+                                            @if ($student->status_kartu == 'aktif')
+                                                <span
+                                                    class="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold">Aktif</span>
+                                            @else
+                                                <span
+                                                    class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">Expired</span>
+                                            @endif
+                                        </td>
+
+                                        <!-- Tombol Aksi (Edit & Perpanjang Kondisional) -->
+                                        <td class="p-3 text-sm text-center space-y-1">
                                             <button type="button"
                                                 onclick="openEditModal(
                                                     '{{ $student->id }}', 
-                                                    '{{ $student->nis ?? '' }}', 
+                                                    '{{ $student->nisn ?? '' }}', 
                                                     '{{ $student->nik ?? '' }}', 
                                                     '{{ addslashes($student->name) }}', 
                                                     '{{ $student->email }}', 
                                                     '{{ $student->role }}', 
                                                     '{{ $student->jenis_kelamin }}', 
-                                                    '{{ addslashes($student->alamat) }}'
+                                                    '{{ addslashes($student->alamat) }}',
+                                                    '{{ $student->jenjang }}', 
+                                                    '{{ $student->kelas }}'
                                                 )"
-                                                class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block">
+                                                class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block w-full">
                                                 Edit Data
                                             </button>
+
+                                            <!-- Tombol Perpanjang HANYA MUNCUL jika statusnya EXPIRED -->
+                                            @if ($student->status_kartu == 'expired')
+                                                <form action="{{ route('member.perpanjang', $student->id) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Perpanjang masa berlaku kartu untuk {{ $student->name }} hingga 30 Juni tahun depan?')">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit"
+                                                        class="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-amber-700 transition shadow-sm inline-block w-full">
+                                                        Perpanjang
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="p-5 text-center text-sm font-semibold text-white/80">Data
+                                        <td colspan="10" class="p-5 text-center text-sm font-semibold text-white/80">Data
                                             user tidak ditemukan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Pagination Laravel -->
-                    <div class="mt-4">
-                        {{ $students->links() }}
-                    </div>
-
                 </div>
+
+                <!-- Pagination Laravel -->
+                <div class="mt-4">
+                    {{ $students->links() }}
+                </div>
+
             </div>
-        </main>
+    </div>
+    </main>
     </div>
 
     <!-- ====== POP-UP MODAL TAMBAH USER ====== -->
@@ -187,12 +219,13 @@
                         <input type="file" name="foto"
                             class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                     </div>
-                    <!-- Dropdown Peran -->
+
+                    <!-- Dropdown Status (Siswa/Guru/Umum) -->
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Peran</label>
+                        <label class="block text-sm font-semibold mb-1">Status / Kategori</label>
                         <select name="role" id="peranAdd" required
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
-                            <option value="">Pilih Peran...</option>
+                            <option value="">Pilih Status...</option>
                             <option value="siswa">Siswa</option>
                             <option value="guru">Guru</option>
                             <option value="umum">Umum</option>
@@ -211,7 +244,8 @@
                     </div>
 
                     <div>
-                        <label id="labelNomorAdd" class="block text-sm font-semibold mb-1">No. Induk (NIS / NIK)</label>
+                        <label id="labelNomorAdd" class="block text-sm font-semibold mb-1">No. Induk (NISN / NIK)</label>
+                        <!-- Menggunakan name="nisn" atau disesuaikan dengan logic controller (biasanya dipisah nisn/nik atau ditampung jadi satu lalu di-check di controller) -->
                         <input type="text" name="nomor_induk" id="inputNomorAdd" placeholder="..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
@@ -236,13 +270,13 @@
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
 
-                    <!-- Tambahan: Jenjang -->
+                    <!-- Tambahan: Jenjang (Disamakan dengan database: 'MA', 'MTS') -->
                     <div>
                         <label class="block text-sm font-semibold mb-1">Jenjang</label>
                         <select name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="MTs">MTs</option>
+                            <option value="MTS">MTS</option>
                             <option value="MA">MA</option>
                         </select>
                     </div>
@@ -299,7 +333,7 @@
                     <!-- Label Dinamis untuk Nomor Induk di Modal Edit -->
                     <div>
                         <label id="modalLabelNomor" class="block text-xs font-semibold mb-1 text-emerald-100">No. Induk
-                            (NIS / NIK)</label>
+                            (NISN / NIK)</label>
                         <input type="text" id="modalInputNomor" name="nomor_induk"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm"
                             placeholder="Masukkan Nomor...">
@@ -428,7 +462,7 @@
                             @forelse($students as $student)
                                 <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
                                     <td class="p-2.5 text-sm font-medium">
-                                        {{ $student->nis ?? ($student->nik ?? '-') }}
+                                        {{ $student->nisn ?? ($student->nik ?? '-') }}
                                     </td>
                                     <td class="p-2.5 text-sm font-medium">{{ $student->name }}</td>
                                     <td class="p-2.5 text-sm font-medium">{{ ucfirst($student->role ?? 'Siswa') }}</td>
@@ -461,18 +495,19 @@
             let peran = roleValue ? roleValue.toLowerCase() : '';
 
             if (peran === 'siswa') {
-                labelNomor.innerText = 'NIS (Nomor Induk Siswa)';
-                inputElement.placeholder = 'Masukkan NIS...';
+                labelNomor.innerText = 'NISN (Nomor Induk Siswa)';
+                inputElement.placeholder = 'Masukkan NISN...';
             } else if (peran === 'guru' || peran === 'umum') {
                 labelNomor.innerText = 'NIK (Nomor Induk Kependudukan)';
                 inputElement.placeholder = 'Masukkan NIK...';
             } else {
-                labelNomor.innerText = 'No. Induk (NIS / NIK)';
+                labelNomor.innerText = 'No. Induk (NISN / NIK)';
                 inputElement.placeholder = '...';
             }
         }
 
-        // Variabel global sementara untuk menyimpan data asli user yang sedang diedit 
+        // Variabel global untuk status modal edit
+        let isOpeningModal = false;
         let currentEditData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -481,7 +516,7 @@
                 openAddUserModal();
             @endif
 
-            // --- 2. Event Listener Saat Dropdown Peran Berubah ---
+            // --- 2. Event Listener Saat Dropdown Peran (Add) Berubah ---
             const addRoleSelect = document.getElementById('peranAdd');
             const addNomorInput = document.getElementById('inputNomorAdd');
 
@@ -491,19 +526,19 @@
                 });
             }
 
-            // --- 3. Event Listener Saat Dropdown Peran Berubah ---
+            // --- 3. Event Listener Saat Dropdown Peran (Edit) Berubah ---
             const modalRole = document.getElementById('modalRole');
             const modalInputNomor = document.getElementById('modalInputNomor');
 
             if (modalRole && modalInputNomor) {
                 modalRole.addEventListener('change', function() {
-                    let selectedRole = this.value.toLowerCase();
+                    if (isOpeningModal) return;
 
+                    let selectedRole = this.value.toLowerCase();
                     updateNomorField(selectedRole, 'modalLabelNomor', modalInputNomor);
 
-                    // Kembalikan nilai jika kembali ke role aslinya, atau kosongkan jika role baru
                     if (selectedRole === 'siswa') {
-                        modalInputNomor.value = currentEditData.nis || '';
+                        modalInputNomor.value = currentEditData.nisn || '';
                     } else if (selectedRole === 'guru' || selectedRole === 'umum') {
                         modalInputNomor.value = currentEditData.nik || '';
                     } else {
@@ -512,7 +547,7 @@
                 });
             }
 
-            // --- 4. Validasi Form Cetak Kartu (Mencegah submit jika tidak ada yang dipilih) ---
+            // --- 4. Validasi Form Cetak Kartu ---
             const cetakForm = document.querySelector('#cetakModal form');
             if (cetakForm) {
                 cetakForm.addEventListener('submit', function(e) {
@@ -520,7 +555,7 @@
 
                     if (checkedBoxes.length === 0) {
                         alert('Pilih minimal satu kartu anggota yang ingin dicetak terlebih dahulu!');
-                        e.preventDefault(); // Membatalkan aksi submit & pembukaan tab baru
+                        e.preventDefault();
                     }
                 });
             }
@@ -541,11 +576,13 @@
             }
         }
 
-        // --- Fungsi Modal Edit User  ---
-        function openEditModal(id, nis, nik, name, email, role, jenis_kelamin, alamat, jenjang, kelas) {
+        // --- Fungsi Modal Edit User ---
+        function openEditModal(id, nisn, nik, name, email, role, jenis_kelamin, alamat, jenjang, kelas) {
+            isOpeningModal = true;
+
             // 1. Simpan data mentah ke objek global
             currentEditData = {
-                nis: (nis && nis !== 'null' && nis !== 'undefined') ? nis : '',
+                nisn: (nisn && nisn !== 'null' && nisn !== 'undefined') ? nisn : '',
                 nik: (nik && nik !== 'null' && nik !== 'undefined') ? nik : ''
             };
 
@@ -564,13 +601,11 @@
 
             // 4. Masukkan nomor induk yang sesuai ke input form edit
             const modalInputNomor = document.getElementById('modalInputNomor');
-            const modalLabelNomor = document.getElementById('modalLabelNomor');
-
             if (modalInputNomor) {
                 updateNomorField(activeRole, 'modalLabelNomor', modalInputNomor);
 
                 if (activeRole === 'siswa') {
-                    modalInputNomor.value = currentEditData.nis;
+                    modalInputNomor.value = currentEditData.nisn;
                 } else if (activeRole === 'guru' || activeRole === 'umum') {
                     modalInputNomor.value = currentEditData.nik;
                 } else {
@@ -584,7 +619,7 @@
                 jkSelect.value = (jenis_kelamin && jenis_kelamin !== 'null') ? jenis_kelamin : '';
             }
 
-            // 6. Atur Dropdown Jenjang & Input Kelas (Baru)
+            // 6. Atur Dropdown Jenjang & Input Kelas
             const jenjangSelect = document.getElementById('modalJenjang');
             if (jenjangSelect) {
                 jenjangSelect.value = (jenjang && jenjang !== 'null' && jenjang !== 'undefined') ? jenjang : '';
@@ -600,6 +635,10 @@
             if (editModal) {
                 editModal.classList.remove('hidden');
             }
+
+            setTimeout(() => {
+                isOpeningModal = false;
+            }, 100);
         }
 
         function closeEditModal() {
@@ -625,7 +664,6 @@
                 let rows = document.querySelectorAll('#cetakModal tbody tr');
 
                 rows.forEach(row => {
-                    // Lewatkan baris "Data tidak ditemukan" jika sedang kosong
                     if (row.querySelector('td').getAttribute('colspan')) return;
 
                     let textRow = row.innerText.toLowerCase();
@@ -669,11 +707,4 @@
             });
         }
     </script>
-
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            let tableManage = $('.table-manage').hide();
-        });
-    </script> -->
 @endsection

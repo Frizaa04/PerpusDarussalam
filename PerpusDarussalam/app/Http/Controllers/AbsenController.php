@@ -36,7 +36,7 @@ class AbsenController extends Controller
         ]);
 
         // Mencari user berdasarkan NIS atau NIK 
-        $user = User::where('nis', $request->kode)
+        $user = User::where('nisn', $request->kode)
                     ->orWhere('nik', $request->kode)
                     ->first();
 

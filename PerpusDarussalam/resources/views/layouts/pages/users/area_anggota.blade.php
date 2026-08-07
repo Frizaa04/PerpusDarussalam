@@ -57,8 +57,8 @@
                         <span class="font-bold">{{ $user->name ?? ($user->nama ?? '-') }}</span>
 
                         <span>
-                            @if (isset($user->nis) && $user->nis)
-                                NIS
+                            @if (isset($user->nisn) && $user->nisn)
+                                NISN
                             @elseif(isset($user->nik) && $user->nik)
                                 NIK
                             @else
@@ -66,7 +66,7 @@
                             @endif
                         </span>
                         <span>:</span>
-                        <span class="font-bold">{{ $user->nis ?? ($user->nik ?? '-') }}</span>
+                        <span class="font-bold">{{ $user->nisn ?? ($user->nik ?? '-') }}</span>
                     </div>
                 </div>
             </div>

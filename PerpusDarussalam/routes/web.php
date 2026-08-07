@@ -92,6 +92,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::delete('/manajemen-siswa/destroy-multiple', [MemberController::class, 'destroyMultiple'])->name('member.destroyMultiple');
     Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
     Route::post('/manajemen-siswa/cetak-kartu-batch', [MemberController::class, 'printCards'])->name('member.printCards');
+    Route::put('/manajemen-siswa/perpanjang/{id}', [MemberController::class, 'perpanjang'])->name('member.perpanjang');
 
     // Katalog Buku
     Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
@@ -115,7 +116,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
 
     // API Cek Anggota Otomatis
-    Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNis']);
+    Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisn']);
     Route::get('/api/check-book/{nomor}', [CirculationController::class, 'getBookByInventory']);
 
     // Halaman Transaksi Keuangan

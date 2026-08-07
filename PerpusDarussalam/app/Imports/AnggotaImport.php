@@ -29,7 +29,7 @@ class AnggotaImport implements ToModel, WithHeadingRow
             return $val;
         };
 
-        $nis = $cleanNumber($row['nis'] ?? null);
+        $nisn = $cleanNumber($row['nisn'] ?? null);
         $nik = $cleanNumber($row['nik'] ?? null);
         $email = strtolower(trim($row['email'] ?? ''));
         $alamat = trim($row['alamat'] ?? '');
@@ -48,7 +48,7 @@ class AnggotaImport implements ToModel, WithHeadingRow
             }
         } else {
             // Otomatisasi jika kolom role di Excel tidak diisi
-            if ($nik && !$nis) {
+            if ($nik && !$nisn) {
                 $role = 'guru'; 
             }
         }
@@ -63,7 +63,7 @@ class AnggotaImport implements ToModel, WithHeadingRow
         return User::updateOrCreate(
             ['email' => $email],
             [
-                'nis'           => $nis,
+                'nisn'          => $nisn,
                 'nik'           => $nik,
                 'name'          => $nama,
                 'password'      => Hash::make('12345678'), 
