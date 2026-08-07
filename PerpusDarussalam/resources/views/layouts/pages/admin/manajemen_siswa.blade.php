@@ -61,7 +61,7 @@
                 </div>
 
                 <!-- Box Tabel -->
-                <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
+                <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
                     <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Tabel Daftar User</h2>
 
                     <div class="overflow-x-auto rounded">
@@ -669,4 +669,11 @@
             });
         }
     </script>
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            let tableManage = $('.table-manage').hide();
+        });
+    </script> -->
 @endsection

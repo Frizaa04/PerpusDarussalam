@@ -24,11 +24,18 @@ class UserAuthController extends Controller
         $loginInput = $request->input('username');
         $password = $request->input('password');
 
-        // Cari user yang cocok berdasarkan email, nis, atau nik 
+        // Cari user yang cocok berdasarkan email, nisn, atau nik 
         $user = User::where('email', $loginInput)
-            ->orWhere('nis', $loginInput)
+            ->orWhere('nisn', $loginInput)
             ->orWhere('nik', $loginInput)
             ->first();
+
+        // Opsional: Jika ingin mencegah admin login lewat halaman user biasa
+        if ($user && $user->role === 'admin') {
+            return back()->withErrors([
+                'username' => 'Silakan gunakan halaman login khusus administrator.',
+            ])->onlyInput('username');
+        }
 
         // Jika user ditemukan dan pencocokan password berhasil
         if ($user && Auth::guard('web')->attempt(['email' => $user->email, 'password' => $password])) {
@@ -48,9 +55,7 @@ class UserAuthController extends Controller
     {
         Auth::guard('web')->logout();
 
-        $request->session()->forget('login_web_' . sha1(static::class));
-
-        // Regenerate token CSRF demi keamanan
+        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('login');

@@ -73,7 +73,7 @@ Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
 Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
 
 // ROUTE DASHBOARD ADMIN 
-Route::middleware(['auth:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::post('/admin/announcement', [AdminAnnouncementController::class, 'store'])->name('admin.announcement.store');
