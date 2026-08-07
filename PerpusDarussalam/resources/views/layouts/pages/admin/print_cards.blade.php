@@ -177,7 +177,7 @@
     <div class="print-container">
         @foreach($users as $user)
             @php
-                $noInduk = $user->nis ?? ($user->nik ?? '000000');
+                $noInduk = $user->nisn ?? ($user->nik ?? '000000');
                 // Menghitung masa berlaku (misal: 1 tahun dari tanggal sekarang atau tahun ajaran aktif)
                 $masaBerlaku = \Carbon\Carbon::now()->addYear()->translatedFormat('d F Y');
             @endphp

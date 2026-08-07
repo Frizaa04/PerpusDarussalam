@@ -99,7 +99,7 @@
 
                                 <!-- Identitas -->
                                 <td class="p-3 text-sm font-semibold text-white/90">
-                                    {{ $visit->user->nis ?? $visit->user->nik ?? '-' }}
+                                    {{ $visit->user->nisn ?? $visit->user->nik ?? '-' }}
                                 </td>
 
                                 <!-- Nama User -->

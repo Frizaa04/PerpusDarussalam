@@ -186,7 +186,7 @@
             
             <!-- Input Scan Kartu Anggota -->
             <div>
-                <label class="block text-sm font-semibold mb-1 text-white">No. Identitas (NIS / NIK)</label>
+                <label class="block text-sm font-semibold mb-1 text-white">No. Identitas (NISN / NIK)</label>
                 <input type="text" id="inputScanKartu" name="identitas" placeholder="Scan Barcode Kartu Perpus..." value="{{ old('identitas') }}" required class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none">
             </div>
 

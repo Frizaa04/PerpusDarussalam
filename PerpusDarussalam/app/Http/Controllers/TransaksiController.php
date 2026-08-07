@@ -26,7 +26,7 @@ class TransaksiController extends Controller
                     $u->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('id', 'like', "%{$search}%")
-                        ->orWhere('nis', 'like', "%{$search}%")
+                        ->orWhere('nisn', 'like', "%{$search}%")
                         ->orWhere('nik', 'like', "%{$search}%");
                 });
             });
@@ -64,7 +64,7 @@ class TransaksiController extends Controller
             $user = User::where(function($query) use ($identitas) {
                 $query->where('id', $identitas)
                       ->orWhere('email', $identitas)
-                      ->orWhere('nis', $identitas)
+                      ->orWhere('nisn', $identitas)
                       ->orWhere('nik', $identitas);
             })->first();
 
@@ -113,7 +113,7 @@ class TransaksiController extends Controller
             $user = User::where(function($query) use ($identitas) {
                 $query->where('id', $identitas)
                       ->orWhere('email', $identitas)
-                      ->orWhere('nis', $identitas)
+                      ->orWhere('nisn', $identitas)
                       ->orWhere('nik', $identitas);
             })->first();
 
@@ -153,7 +153,7 @@ class TransaksiController extends Controller
         $user = User::where(function($query) use ($identitas) {
             $query->where('id', $identitas)
                   ->orWhere('email', $identitas)
-                  ->orWhere('nis', $identitas)
+                  ->orWhere('nisn', $identitas)
                   ->orWhere('nik', $identitas);
         })->first();
 

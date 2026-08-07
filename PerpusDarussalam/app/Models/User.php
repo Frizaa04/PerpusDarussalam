@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use carbon\Carbon;
 
-#[Fillable(['name', 'email', 'password', 'nis', 'nik', 'role', 'jenis_kelamin', 'alamat', 'foto'])]
+#[Fillable(['name', 'email', 'password', 'nisn', 'nik', 'role', 'jenis_kelamin', 'alamat', 'foto', 'jenjang', 'kelas', 'masa_berlaku_mulai','masa_berlaku_sampai'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -44,5 +45,15 @@ class User extends Authenticatable
 
     public function bookLogs(){
         return $this->hasMany(BookLogs::class);
+    }
+
+    public function getStatusKartuAttribute($value)
+    {
+        // Jika tanggal hari ini melebihi 'masa_berlaku_sampai', maka anggap expired
+        if ($this->masa_berlaku_sampai && Carbon::now()->greaterThan(Carbon::parse($this->masa_berlaku_sampai))) {
+            return 'expired';
+        }
+        
+        return 'aktif';
     }
 }

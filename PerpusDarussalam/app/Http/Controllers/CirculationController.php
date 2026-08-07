@@ -27,7 +27,7 @@ class CirculationController extends Controller
             $queryBuilder->where(function($q) use ($search) {
                 $q->whereHas('user', function($userQuery) use ($search) {
                     $userQuery->where('name', 'LIKE', "%{$search}%")
-                            ->orWhere('nis', 'LIKE', "%{$search}%")
+                            ->orWhere('nisn', 'LIKE', "%{$search}%")
                             ->orWhere('nik', 'LIKE', "%{$search}%");
                 })
                 ->orWhereHas('bookItem.book', function($bookQuery) use ($search) {
@@ -66,7 +66,7 @@ class CirculationController extends Controller
 
             return (object)[
                 'id'          => $item->id,
-                'identitas'   => $item->user->nis ?? $item->user->nik ?? '-', 
+                'identitas'   => $item->user->nisn ?? $item->user->nik ?? '-', 
                 'name'        => $item->user->name ?? 'Tanpa Nama',      
                 'book_title'  => $item->bookItem->book->judul ?? 'Buku Terhapus',   
                 'nomor_inv'   => $item->bookItem->nomor_inventaris ?? '-', 
@@ -104,9 +104,9 @@ class CirculationController extends Controller
         }
     }
 
-    public function getUserByNikNis($nomor)
+    public function getUserByNikNisn($nomor)
     {
-        $user = User::where('nis', $nomor)
+        $user = User::where('nisn', $nomor)
                     ->orWhere('nik', $nomor)
                     ->first();
 
