@@ -113,7 +113,7 @@
 
                                             <!-- KATEGORI -->
                                             <td class="p-3 text-sm text-white/90">
-                                                {{ $book->categories->first()->nama ?? ($book->kategori ?? '-') }}
+                                                {{ $book->categories->nama ?? ($book->kategori ?? '-') }}
                                             </td>
 
                                             <!-- RAK -->

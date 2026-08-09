@@ -30,7 +30,7 @@
             height: 54mm;
             border: 1px solid #d1d5db; 
             box-sizing: border-box;
-            padding: 8px 10mm 0 10px;
+            padding: 6px 8mm 0 8mm; /* Padding kiri-kanan disamakan agar seimbang */
             background: #ffffff;
             position: relative;
             page-break-inside: avoid;
@@ -42,7 +42,7 @@
         .card::before {
             content: "MDIBS";
             position: absolute;
-            top: 42%;
+            top: 45%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-30deg);
             font-size: 55px;
@@ -58,7 +58,7 @@
             color: white;
             text-align: center;
             padding: 4px;
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 4px;
@@ -70,7 +70,7 @@
             font-size: 7.5px;
             text-align: center;
             margin-top: 2px;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: #004d40;
             font-weight: 700;
             text-transform: uppercase;
@@ -81,17 +81,18 @@
             padding-bottom: 3px;
         }
 
+        /* Layout Body dibuat Sejajar di Tengah Secara Vertikal */
         .card-body {
             display: flex;
-            gap: 10px;
-            align-items: flex-start;
+            gap: 12px;
+            align-items: center; /* Membuat logo dan tabel pas di tengah secara vertikal */
             position: relative;
             z-index: 1;
         }
         
         .logo-box {
-            width: 20mm;
-            height: 25mm;
+            width: 22mm; /* Sedikit diperlebar agar seimbang */
+            height: 22mm;
             background: #ffffff;
             display: flex;
             align-items: center;
@@ -103,7 +104,6 @@
             border-radius: 3px;
             overflow: hidden;
             text-align: center;
-            padding: 2px;
         }
         .logo-box img {
             width: 100%;
@@ -112,36 +112,38 @@
         }
         
         .info-table {
-            font-size: 8px; 
+            font-size: 7.8px; 
             width: 100%;
             border-collapse: collapse;
         }
         .info-table td {
-            padding: 1px 0; 
+            padding: 0.8px 0; 
             vertical-align: top;
             color: #1f2937;
         }
         .info-table td.label {
-            width: 34%;
+            width: 32%;
             font-weight: bold;
             color: #374151;
         }
         
+        /* Barcode dirapikan agar berada tepat di tengah bawah */
         .barcode-section {
             background-color: #ffffff;
             text-align: center;
             position: absolute;
-            bottom: 0;
+            bottom: 2px;
             left: 0;
             right: 0;
-            padding: 2px 8px 4px 8px;
+            padding: 0 10mm;
             z-index: 1;
         }
         .barcode-section img {
-            width: 100%; 
-            height: 11mm; 
+            width: 85%; /* Sedikit dikurangi dari 100% agar ada ruang kosong di kiri-kanan (lebih rapi) */
+            height: 9.5mm; 
             object-fit: contain;
             display: block;
+            margin: 0 auto;
         }
 
         @media print {
@@ -172,7 +174,6 @@
         @foreach($users as $user)
             @php
                 $noInduk = $user->nisn ?? ($user->nik ?? '000000');
-                // Menghitung masa berlaku (misal: 1 tahun dari tanggal sekarang atau tahun ajaran aktif)
                 $masaBerlaku = \Carbon\Carbon::now()->addYear()->translatedFormat('d F Y');
             @endphp
             <div class="card">
@@ -214,14 +215,14 @@
                         </tr>
                         <tr>
                             <td class="label">Masa Berlaku</td>
-                            <td>: {{ $user->masaBerlakuFormatted }}</td>
+                            <td>: {{ $user->masaBerlakuFormatted ?? $masaBerlaku }}</td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- Bagian Barcode -->
                 <div class="barcode-section">
-                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $user->noInduk }}&code=Code128&dpi=300" alt="Barcode">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $noInduk }}&code=Code128&dpi=300" alt="Barcode">
                 </div>
             </div>
         @endforeach

@@ -241,7 +241,7 @@
                                     @forelse($recentActivities ?? [] as $activity)
                                         <tr class="divide-x divide-white/30 hover:bg-white/10 transition-colors">
                                             <td class="p-3 text-xs font-bold text-white/90">
-                                                {{ $activity['tanggal'] }} <span class="text-emerald-200 font-normal">({{ $activity['waktu'] }})</span>
+                                                {{ $activity['tanggal'] }} <span class="text-white/90 font-normal">({{ $activity['waktu'] }})</span>
                                             </td>
                                             <td class="p-3 text-xs text-white/90">{{ $activity['tindakan'] }}</td>
                                             <td class="p-3 text-xs text-white/90">{{ $activity['detail_buku'] }}</td>
@@ -293,7 +293,7 @@
                                             <td class="p-3 text-xs text-white/90">
                                                 {{ $trx->user->name ?? 'Umum / Tanpa Akun' }}
                                             </td>
-                                            <td class="p-3 text-xs font-semibold text-emerald-200">
+                                            <td class="p-3 text-xs font-semibold text-white/90">
                                                 Rp {{ number_format($trx->nominal, 0, ',', '.') }}
                                             </td>
                                             <td class="p-3 text-xs text-white/90">

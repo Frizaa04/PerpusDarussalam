@@ -1007,12 +1007,5 @@
             }
         }
 
-        // Fungsi untuk Select All Checkbox
-        function toggleSelectAll(source, className) {
-            const checkboxes = document.querySelectorAll('.' + className);
-            checkboxes.forEach(cb => {
-                cb.checked = source.checked;
-            });
-        }
     </script>
 @endsection

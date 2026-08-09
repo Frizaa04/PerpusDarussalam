@@ -64,9 +64,9 @@ class LaporanService
             'totalAnggota' => User::count(),
             'lakiLaki'     => User::where('jenis_kelamin', 'L')->count(),
             'perempuan'    => User::where('jenis_kelamin', 'P')->count(),
-            'siswa'        => User::where('role', 'siswa')->count(),
-            'guru'         => User::where('role', 'guru')->count(),
-            'umum'         => User::where('role', 'umum')->count()
+            'siswa'        => User::where('status', 'siswa')->count(),
+            'guru'         => User::where('status', 'guru')->count(),
+            'umum'         => User::where('status', 'umum')->count()
         ];
     }
 
@@ -85,9 +85,9 @@ class LaporanService
             'totalPengunjung' => (clone $baseQuery)->count(),
             'lakiLaki'        => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('jenis_kelamin', 'L'))->count(),
             'perempuan'       => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('jenis_kelamin', 'P'))->count(),
-            'siswa'           => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('role', 'siswa'))->count(),
-            'guru'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('role', 'guru'))->count(),
-            'umum'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('role', 'umum'))->count(),
+            'siswa'           => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('status', 'siswa'))->count(),
+            'guru'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('status', 'guru'))->count(),
+            'umum'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('status', 'umum'))->count(),
         ];
     }
 
