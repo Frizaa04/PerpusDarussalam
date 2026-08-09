@@ -9,6 +9,9 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class AnggotaImport implements ToModel, WithHeadingRow
 {
+    public int $importedCount = 0;
+    public array $duplicates = [];
+
     public function model(array $row)
     {
         $nama = $row['nama_lengkap'] ?? $row['nama'] ?? null;
@@ -19,7 +22,7 @@ class AnggotaImport implements ToModel, WithHeadingRow
 
         $cleanNumber = function ($value) {
             if (empty($value) || trim($value) === '-') return null;
-    
+            
             $val = trim($value);
             
             if (stripos($val, 'e') !== false) {
@@ -34,11 +37,33 @@ class AnggotaImport implements ToModel, WithHeadingRow
         $email = strtolower(trim($row['email'] ?? ''));
         $alamat = trim($row['alamat'] ?? '');
 
+        // --- PENGECEKAN DUPLIKAT ---
+        // Pengecekan awal berdasarkan NIS / NIK jika diset di Excel
+        $queryDuplicate = User::query();
+
+        if ($nis || $nik || $email) {
+            $queryDuplicate->where(function ($q) use ($nis, $nik, $email) {
+                if ($nis) $q->orWhere('nis', $nis);
+                if ($nik) $q->orWhere('nik', $nik);
+                if ($email) $q->orWhere('email', $email);
+            });
+        } else {
+            // Jika email, nis, nik kosong, cek berdasarkan Nama
+            $queryDuplicate->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($nama))]);
+        }
+
+        // Jika data sudah ada di database, catat sebagai duplikat & skip
+        if ($queryDuplicate->exists()) {
+            $this->duplicates[] = $nama;
+            return null;
+        }
+
+        // Generate email acak jika tidak diisi di Excel
         if (!$email) {
             $email = strtolower(str_replace(' ', '', $nama)) . rand(100, 999) . '@example.com';
         }
 
-        // Penentuan role disesuaikan
+        // Penentuan role
         $role = 'siswa';
         $inputRole = strtolower(trim($row['role'] ?? $row['kategori'] ?? ''));
 

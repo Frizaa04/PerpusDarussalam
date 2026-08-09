@@ -156,6 +156,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     
     // Route Import Excel
     Route::post('/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
+    Route::post('/laporan/koleksi/import', [LaporanController::class, 'importKoleksi'])->name('laporan.koleksi.import');
 
     // Route Notifikasi
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');

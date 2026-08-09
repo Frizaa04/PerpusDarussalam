@@ -1,7 +1,7 @@
 <!-- Header Area (Logo & Search) -->
 <header class="bg-white px-8 md:px-16 py-4 flex justify-between items-center shadow-sm">
     <div class="flex items-center gap-3">
-        <img src="{{ asset('image/covers/darussalam.png') }}" alt="Logo Darussalam" class="h-12 object-contain">
+        <img src="{{ asset('image/covers/MadrasahDarussalam.png') }}" alt="Logo Darussalam" class="h-15 object-contain">
         <div class="border-l-2 border-gray-300 pl-3">
             <h1 class="font-bold text-[#004d40] leading-tight tracking-wider text-base">PERPUSTAKAAN</h1>
             <p class="text-xs text-gray-500 font-semibold tracking-widest uppercase">MADRASAH DARUSSALAM</p>

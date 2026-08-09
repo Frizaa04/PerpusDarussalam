@@ -113,7 +113,38 @@
                          </div>
                      </form>
                  </div>
-             </div>
+            </div>
+
+            <!-- Bagian Alert Flash Messages -->
+            @if(session('success'))
+                <div class="bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded shadow-sm text-sm font-medium flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-emerald-600">check_circle</span>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-emerald-800 hover:text-emerald-900 font-bold">&times;</button>
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded shadow-sm text-sm font-medium flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-amber-600">warning</span>
+                        <span>{{ session('warning') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-amber-800 hover:text-amber-900 font-bold">&times;</button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-rose-100 border-l-4 border-rose-500 text-rose-800 p-4 rounded shadow-sm text-sm font-medium flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-rose-600">error</span>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-rose-800 hover:text-rose-900 font-bold">&times;</button>
+                </div>
+            @endif
 
             <!-- Garis Pembatas Hijau -->
             <hr class="border-t-2 border-[#004d40]">
