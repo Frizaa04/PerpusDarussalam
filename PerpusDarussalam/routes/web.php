@@ -88,11 +88,12 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     // Manajemen Siswa / User
     Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
     Route::post('/manajemen-siswa/store', [MemberController::class, 'store'])->name('member.store');
-    Route::put('/manajemen-siswa/update', [MemberController::class, 'update'])->name('member.update');
+    Route::put('/manajemen-siswa/update/{id}', [MemberController::class, 'update'])->name('member.update');
     Route::delete('/manajemen-siswa/destroy-multiple', [MemberController::class, 'destroyMultiple'])->name('member.destroyMultiple');
-    Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
+    Route::delete('/manajemen-siswa/destroy-expired', [MemberController::class, 'destroyExpired'])->name('member.destroyExpired');
     Route::post('/manajemen-siswa/cetak-kartu-batch', [MemberController::class, 'printCards'])->name('member.printCards');
     Route::put('/manajemen-siswa/perpanjang/{id}', [MemberController::class, 'perpanjang'])->name('member.perpanjang');
+    Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
     // Katalog Buku
     Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');

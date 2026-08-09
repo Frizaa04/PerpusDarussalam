@@ -11,12 +11,31 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use carbon\Carbon;
 
-#[Fillable(['name', 'email', 'password', 'nisn', 'nik', 'role', 'jenis_kelamin', 'alamat', 'foto', 'jenjang', 'kelas', 'masa_berlaku_mulai','masa_berlaku_sampai'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    protected $fillable = [
+        'name', 
+        'email', 
+        'password', 
+        'nisn', 
+        'nik', 
+        'status', 
+        'role', 
+        'jenis_kelamin', 
+        'alamat', 
+        'foto', 
+        'jenjang', 
+        'kelas', 
+        'masa_berlaku_mulai',
+        'masa_berlaku_sampai'
+    ];
+
+    protected $hidden = [
+        'password', 
+        'remember_token',
+    ];
 
     /**
      * Get the attributes that should be cast.

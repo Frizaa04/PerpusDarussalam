@@ -39,7 +39,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Watermark Latar Belakang Tipis */
         .card::before {
             content: "MDIBS";
             position: absolute;
@@ -54,7 +53,6 @@
             letter-spacing: 5px;
         }
 
-        /* Header Kartu */
         .card-header {
             background: linear-gradient(135deg, #004d40, #00695c);
             color: white;
@@ -83,7 +81,6 @@
             padding-bottom: 3px;
         }
 
-        /* Konten Kartu */
         .card-body {
             display: flex;
             gap: 10px;
@@ -92,7 +89,6 @@
             z-index: 1;
         }
         
-        /* Kotak Logo Sekolah (Menggantikan Foto) */
         .logo-box {
             width: 20mm;
             height: 25mm;
@@ -112,12 +108,11 @@
         .logo-box img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Agar logo tidak terpotong */
+            object-fit: contain; 
         }
         
-        /* Teks Informasi Kartu */
         .info-table {
-            font-size: 8px; /* Dikecilkan sedikit agar muat tambahan baris jenjang & masa berlaku */
+            font-size: 8px; 
             width: 100%;
             border-collapse: collapse;
         }
@@ -132,7 +127,6 @@
             color: #374151;
         }
         
-        /* Barcode */
         .barcode-section {
             background-color: #ffffff;
             text-align: center;
@@ -192,7 +186,6 @@
                 <div class="card-body">
                     <!-- Logo Sekolah -->
                     <div class="logo-box">
-                        <!-- Sesuaikan path asset logo sekolah kamu -->
                         <img src="{{ asset('image/123.png') }}" alt="Logo Sekolah" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span style="display:none;">LOGO MDIBS</span>
                     </div>
@@ -209,7 +202,7 @@
                         </tr>
                         <tr>
                             <td class="label">Status</td>
-                            <td>: {{ ucfirst($user->role) }}</td>
+                            <td>: {{ ucfirst($user->status) }}</td>
                         </tr>
                         <tr>
                             <td class="label">Jenjang</td>
@@ -221,14 +214,14 @@
                         </tr>
                         <tr>
                             <td class="label">Masa Berlaku</td>
-                            <td>: {{ $masaBerlaku }}</td>
+                            <td>: {{ $user->masaBerlakuFormatted }}</td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- Bagian Barcode -->
                 <div class="barcode-section">
-                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $noInduk }}&code=Code128&dpi=300" alt="Barcode">
+                    <img src="https://barcode.tec-it.com/barcode.ashx?data={{ $user->noInduk }}&code=Code128&dpi=300" alt="Barcode">
                 </div>
             </div>
         @endforeach

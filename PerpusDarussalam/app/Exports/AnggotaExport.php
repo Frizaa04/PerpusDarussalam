@@ -28,18 +28,18 @@ class AnggotaExport implements WithMultipleSheets
 }
 
 /**
- * Sheet 1: Data Siswa (Berdasarkan NIS)
+ * Sheet 1: Data Siswa (Berdasarkan NISN)
  */
 class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
     public function collection()
     {
-        return User::whereNotNull('nis')->where('nis', '!=', '')->get();
+        return User::where('status', 'siswa')->get(); 
     }
 
     public function headings(): array
     {
-        return ['ID Anggota', 'NIS', 'Nama Lengkap', 'Email', 'Jenis Kelamin', 'Alamat', 'Tanggal Terdaftar'];
+        return ['ID Anggota', 'NISN', 'Nama Lengkap', 'Email', 'Jenis Kelamin', 'Alamat', 'Tanggal Terdaftar'];
     }
 
     public function map($user): array
@@ -52,7 +52,7 @@ class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, Wi
 
         return [
             $user->id,
-            $user->nis,
+            $user->nisn ?? '-',  
             $user->name,
             $user->email,
             $jk,
@@ -86,16 +86,13 @@ class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, Wi
 }
 
 /**
- * Sheet 2: Data Guru (Berdasarkan NIK dengan filter role guru)
+ * Sheet 2: Data Guru (Berdasarkan NIK, filter dari kolom status)
  */
 class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
     public function collection()
     {
-        return User::whereNotNull('nik')
-            ->where('nik', '!=', '')
-            ->where('role', 'guru') 
-            ->get();
+        return User::where('status', 'guru')->get(); 
     }
 
     public function headings(): array
@@ -113,7 +110,7 @@ class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, Wit
 
         return [
             $user->id,
-            $user->nik,
+            $user->nik ?? '-',
             $user->name,
             $user->email,
             $jk,
@@ -147,16 +144,13 @@ class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, Wit
 }
 
 /**
- * Sheet 3: Data Umum (Berdasarkan NIK dengan filter role umum)
+ * Sheet 3: Data Umum (Berdasarkan NIK, filter dari kolom status)
  */
 class AnggotaUmumSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
     public function collection()
     {
-        return User::whereNotNull('nik')
-            ->where('nik', '!=', '')
-            ->where('role', 'umum') 
-            ->get();
+        return User::where('status', 'umum')->get(); 
     }
 
     public function headings(): array
@@ -174,7 +168,7 @@ class AnggotaUmumSheet implements FromCollection, WithHeadings, WithMapping, Wit
 
         return [
             $user->id,
-            $user->nik,
+            $user->nik ?? '-',
             $user->name,
             $user->email,
             $jk,
