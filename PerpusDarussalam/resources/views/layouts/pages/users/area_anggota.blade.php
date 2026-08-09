@@ -11,47 +11,34 @@
         <div class="w-full max-w-4xl space-y-8">
 
             <!-- Card Profile / Profil Anggota -->
-            <div class="bg-[#b2c8c6] rounded-2xl p-6 md:p-8 shadow-xl flex items-center gap-6 md:gap-8">
-                <!-- Avatar Placeholder / Foto -->
-                <div
-                    class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-300 flex-shrink-0 border-2 border-white/50 overflow-hidden">
+            <div class="bg-[#b2c8c6] rounded-2xl p-6 md:p-8 shadow-xl flex items-center gap-6 md:gap-8 overflow-hidden">
+                <!-- Avatar / Foto -->
+                <div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-300 flex-shrink-0 border-2 border-white/50 overflow-hidden">
                     @php
                         $fotoPath = $user->foto ?? ($user->avatar ?? ($user->photo ?? null));
-
-                        // Cek file ada, tidak kosong, dan BUKAN PDF / dokumen
-                        $isValidPhoto =
-                            !empty($fotoPath) &&
-                            !\Illuminate\Support\Str::endsWith(strtolower($fotoPath), ['.pdf', '.doc', '.docx']);
+                        $isValidPhoto = !empty($fotoPath) && !\Illuminate\Support\Str::endsWith(strtolower($fotoPath), ['.pdf', '.doc', '.docx']);
                     @endphp
 
                     @if ($isValidPhoto)
                         @php
-                            $url = \Illuminate\Support\Str::startsWith($fotoPath, 'storage/')
-                                ? asset($fotoPath)
-                                : asset('storage/' . $fotoPath);
+                            $url = \Illuminate\Support\Str::startsWith($fotoPath, 'storage/') ? asset($fotoPath) : asset('storage/' . $fotoPath);
                         @endphp
-
-                        <img src="{{ $url }}" alt="Foto Profile" class="w-full h-full object-cover"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-
-                        <div
-                            class="w-full h-full bg-gray-400 hidden items-center justify-center text-xl font-bold text-white">
+                        <img src="{{ $url }}" alt="Foto Profile" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="w-full h-full bg-gray-400 hidden items-center justify-center text-xl font-bold text-white">
                             {{ strtoupper(substr($user->name ?? ($user->nama ?? 'U'), 0, 2)) }}
                         </div>
                     @else
-                        <!-- Jika nilai di DB adalah NULL, default.pdf, atau file non-gambar -->
-                        <div
-                            class="w-full h-full bg-gray-400 flex items-center justify-center text-xl font-bold text-white">
+                        <div class="w-full h-full bg-gray-400 flex items-center justify-center text-xl font-bold text-white">
                             {{ strtoupper(substr($user->name ?? ($user->nama ?? 'U'), 0, 2)) }}
                         </div>
                     @endif
                 </div>
 
                 <!-- Detail Info User -->
-                <div class="text-[#003d30] space-y-1">
+                <div class="text-[#003d30] space-y-1 flex-1 relative pr-0 md:pr-44">
                     <h2 class="text-2xl md:text-3xl font-bold mb-2">Selamat Datang!</h2>
-                    <div
-                        class="text-sm md:text-base font-semibold grid grid-cols-[80px_10px_1fr] md:grid-cols-[100px_10px_1fr] gap-1">
+                    
+                    <div class="text-sm md:text-base font-semibold grid grid-cols-[80px_10px_1fr] md:grid-cols-[100px_10px_1fr] gap-1">
                         <span>Nama</span>
                         <span>:</span>
                         <span class="font-bold">{{ $user->name ?? ($user->nama ?? '-') }}</span>
@@ -68,9 +55,62 @@
                         <span>:</span>
                         <span class="font-bold">{{ $user->nisn ?? ($user->nik ?? '-') }}</span>
                     </div>
+
+                    <!-- Tombol Ubah Password -->
+                    <div class="mt-4 md:mt-0 md:absolute md:top-1/2 md:-translate-y-1/2 md:right-0">
+                        <button onclick="document.getElementById('modalResetPassword').classList.remove('hidden')" 
+                                class="px-4 py-2 bg-[#003d30] hover:bg-[#002920] text-white text-sm font-bold rounded-lg shadow transition whitespace-nowrap flex items-center gap-1.5 border border-white/10">
+                            Ubah Password
+                        </button>
+                    </div>
+                </div>
+            </div> 
+
+            <!-- 3. MODAL RESET PASSWORD (Taruh di paling bawah terpisah dari element lain) -->
+            <div id="modalResetPassword" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 @if(!$errors->has('current_password') && !$errors->has('password')) hidden @endif p-4">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 text-slate-800 relative">
+                    <h3 class="text-lg font-bold border-b pb-2 mb-4 text-[#003d30]">Ubah Password</h3>
+                    
+                    <form action="{{ route('password.update.custom') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold mb-1 text-slate-600">Password Lama</label>
+                            <input type="password" name="current_password" required 
+                                class="w-full border @error('current_password') border-red-500 @else border-gray-300 @enderror rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003d30]">
+                            @error('current_password')
+                                <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold mb-1 text-slate-600">Password Baru</label>
+                            <input type="password" name="password" required 
+                                class="w-full border @error('password') border-red-500 @else border-gray-300 @enderror rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003d30]">
+                            @error('password')
+                                <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold mb-1 text-slate-600">Konfirmasi Password Baru</label>
+                            <input type="password" name="password_confirmation" required 
+                                class="w-full border border-gray-300 rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003d30]">
+                        </div>
+
+                        <div class="flex justify-end gap-2 text-sm font-bold">
+                            <button type="button" onclick="document.getElementById('modalResetPassword').classList.add('hidden')" 
+                                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-100 transition">
+                                Batal
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-[#003d30] text-white rounded-lg hover:bg-[#002920] transition">
+                                Simpan
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
             <!-- Card Data Peminjaman -->
             <div class="bg-[#b2c8c6] rounded-2xl p-6 md:p-8 shadow-xl">
                 <h3 class="text-[#003d30] text-xl font-bold mb-4">Data Peminjaman</h3>
@@ -160,4 +200,13 @@
 
         </div>
     </div>
+
+<script>
+    window.addEventListener('click', function(event) {
+        let modal = document.getElementById('modalResetPassword');
+        if (event.target == modal) {
+            modal.classList.add('hidden');
+        }
+    });
+</script>
 @endsection

@@ -44,6 +44,9 @@ Route::middleware(['auth:web'])->group(function () {
     // 2. Area Anggota User
     Route::get('/area-anggota', [AreaAnggotaUserController::class, 'index'])->name('user.area_anggota');
 
+    // 3. Update Password User (Area Anggota)
+    Route::put('/area-anggota/update-password', [AreaAnggotaUserController::class, 'updatePassword'])->name('password.update.custom');
+
     // 3. E-Book User
     Route::get('/user/e-book', [UserEbookController::class, 'index'])->name('user.ebook.index');
     Route::get('/user/e-book/read/{id}', [UserEbookController::class, 'read'])->name('user.ebook.read');
