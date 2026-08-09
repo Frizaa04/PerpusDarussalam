@@ -68,7 +68,7 @@
                     </form>
                 </div>
 
-                <!-- Kanan: Tombol Kembali & Unduh Excel -->
+                <!-- Kanan: Tombol Kembali, Import Excel, Unduh Excel -->
                 <div class="flex items-center gap-3">
                     <a href="{{ route('laporan.index', ['date' => $selectedDate->format('Y-m-d'), 'mode' => $mode]) }}" class="inline-flex items-center gap-2 bg-[#004d40] text-white px-4 py-2.5 rounded font-bold hover:bg-[#003d30] transition shadow text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,12 +77,72 @@
                         Kembali
                     </a>
 
+                    <!-- Tombol Import Excel -->
+                    <button type="button" onclick="document.getElementById('modalImportKoleksi').classList.remove('hidden')" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Import Data Koleksi">
+                        <span class="material-icons text-xl">file_upload</span>
+                        <span>Import Excel</span>
+                    </button>
+
                     <a href="{{ route('laporan.koleksi.export', ['date' => $selectedDate->format('Y-m-d')]) }}" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Unduh Laporan Excel">
                         <span class="material-icons text-xl">file_download</span>
                         <span>Unduh Excel</span>
                     </a>
                 </div>
             </div>
+
+            <!-- Modal Popup Import Excel Koleksi -->
+            <div id="modalImportKoleksi" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+                 <div class="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Import Koleksi Buku</h3>
+                        <button onclick="document.getElementById('modalImportKoleksi').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">&times;</button>
+                    </div>
+
+                    <form action="{{ route('laporan.koleksi.import') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pilih File Excel (.xlsx / .xls)</label>
+                            <input type="file" name="file_excel" required accept=".xlsx, .xls, .csv" class="w-full text-sm text-gray-500 border border-gray-300 rounded-lg p-2 focus:outline-none">
+                        </div>
+
+                        <div class="flex justify-end gap-2">
+                            <button type="button" onclick="document.getElementById('modalImportKoleksi').classList.add('hidden')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm font-medium">Batal</button>
+                            <button type="submit" class="px-4 py-2 bg-[#004d40] text-white rounded-md hover:bg-[#003d30] text-sm font-medium">Upload & Import</button>
+                         </div>
+                     </form>
+                 </div>
+            </div>
+
+            <!-- Bagian Alert Flash Messages -->
+            @if(session('success'))
+                <div class="bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded shadow-sm text-sm font-medium flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-emerald-600">check_circle</span>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-emerald-800 hover:text-emerald-900 font-bold">&times;</button>
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded shadow-sm text-sm font-medium flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-amber-600">warning</span>
+                        <span>{{ session('warning') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-amber-800 hover:text-amber-900 font-bold">&times;</button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-rose-100 border-l-4 border-rose-500 text-rose-800 p-4 rounded shadow-sm text-sm font-medium flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons text-rose-600">error</span>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-rose-800 hover:text-rose-900 font-bold">&times;</button>
+                </div>
+            @endif
 
             <!-- Garis Pembatas Hijau -->
             <hr class="border-t-2 border-[#004d40]">

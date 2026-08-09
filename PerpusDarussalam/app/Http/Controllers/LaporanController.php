@@ -12,6 +12,7 @@ use App\Exports\KoleksiExport;
 use App\Exports\AnggotaExport;
 use App\Exports\BorrowingExport;
 use App\Imports\AnggotaImport;
+use App\Imports\KoleksiImport;
 use App\Services\LaporanService;
 use App\Exports\AttendanceExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -86,11 +87,46 @@ class LaporanController extends Controller
         return Excel::download(new KoleksiExport($tanggal), 'Laporan_Koleksi_' . $tanggal . '.xlsx');
     }
 
-// Sesudah (Perbaikan)
+    // Fungsi Import Koleksi Buku Baru
+    public function importKoleksi(Request $request)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        try {
+            $import = new KoleksiImport();
+            Excel::import($import, $request->file('file_excel'));
+
+            $imported = $import->importedCount;
+            $duplicates = $import->duplicates;
+
+            // Kasus 1: Semua data di Excel duplikat
+            if ($imported === 0 && !empty($duplicates)) {
+                $duplicateList = implode(', ', array_unique($duplicates));
+                return redirect()->back()->with('warning', "Import dibatalkan! Semua data dalam file Excel sudah ada di database: ($duplicateList).");
+            }
+
+            // Kasus 2: Sebagian berhasil, sebagian duplikat
+            if (!empty($duplicates)) {
+                $duplicateList = implode(', ', array_unique($duplicates));
+                return redirect()->back()->with('warning', "Berhasil meng-import $imported data buku baru. Namun terdapat " . count($duplicates) . " data yang dilewati karena duplikat: ($duplicateList).");
+            }
+
+            // Kasus 3: Semua data baru berhasil di-import
+            return redirect()->back()->with('success', "Berhasil meng-import $imported data koleksi buku baru!");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal meng-import data: ' . $e->getMessage());
+        }
+    }
+
     public function exportAnggotaExcel()
     {
         return Excel::download(new AnggotaExport, 'Laporan_Anggota_' . date('Y-m-d') . '.xlsx');
     }
+
+    // Fungsi Import Anggota Baru (Sudah Diperbarui)
     public function importAnggota(Request $request)
     {
         $request->validate([
@@ -98,8 +134,27 @@ class LaporanController extends Controller
         ]);
 
         try {
-            Excel::import(new AnggotaImport, $request->file('file_excel'));
-            return redirect()->back()->with('success', 'Data anggota berhasil di-import!');
+            $import = new AnggotaImport();
+            Excel::import($import, $request->file('file_excel'));
+
+            $imported = $import->importedCount;
+            $duplicates = $import->duplicates;
+
+            // Kasus 1: Semua data di Excel duplikat / sudah ada
+            if ($imported === 0 && !empty($duplicates)) {
+                $duplicateList = implode(', ', array_unique($duplicates));
+                return redirect()->back()->with('warning', "Import dibatalkan! Semua data anggota dalam file Excel sudah ada di database: ($duplicateList).");
+            }
+
+            // Kasus 2: Sebagian berhasil, sebagian duplikat
+            if (!empty($duplicates)) {
+                $duplicateList = implode(', ', array_unique($duplicates));
+                return redirect()->back()->with('warning', "Berhasil meng-import $imported data anggota baru. Namun terdapat " . count($duplicates) . " data yang dilewati karena duplikat: ($duplicateList).");
+            }
+
+            // Kasus 3: Semua data berhasil di-import tanpa ada duplikat
+            return redirect()->back()->with('success', "Berhasil meng-import $imported data anggota baru!");
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal meng-import data: ' . $e->getMessage());
         }
@@ -113,10 +168,7 @@ class LaporanController extends Controller
 
     public function exportAttendanceExcel(Request $request)
     {
-        // Mengambil parameter tanggal dari URL, default ke hari ini jika kosong
         $tanggal = $request->query('date', today()->format('Y-m-d'));
-        
-        // Nama file hasil unduhan
         $namaFile = 'Laporan_Absensi_' . $tanggal . '.xlsx';
 
         return Excel::download(new AttendanceExport($tanggal), $namaFile);
