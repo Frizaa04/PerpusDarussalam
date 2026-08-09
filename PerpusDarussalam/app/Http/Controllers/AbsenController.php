@@ -11,21 +11,21 @@ class AbsenController extends Controller
 {
     public function index(Request $request)
     {
-        // Mengambil filter role dari query string (jika ada)
-        $role = $request->input('role');
+        // Mengambil filter status dari query string (jika ada)
+        $status = $request->input('status');
 
         $visits = Visits::with('user')
-            ->when($role, function ($query, $role) {
-                // Menyaring kunjungan berdasarkan relasi user yang memiliki role tertentu
-                return $query->whereHas('user', function ($q) use ($role) {
-                    $q->where('role', $role);
+            ->when($status, function ($query, $status) {
+                // Menyaring kunjungan berdasarkan relasi user yang memiliki status tertentu
+                return $query->whereHas('user', function ($q) use ($status) {
+                    $q->where('status', $status);
                 });
             })
             ->latest('visited_at')
             ->paginate(10)
-            ->appends(['role' => $role]); // Agar parameter filter tetap ada saat berpindah halaman paginasi
+            ->appends(['status' => $status]); // Agar parameter filter tetap ada saat berpindah halaman paginasi
 
-        return view('layouts.pages.admin.absen', compact('visits', 'role'));
+        return view('layouts.pages.admin.absen', compact('visits', 'status'));
     }
 
     // Memproses barcode yang di-scan

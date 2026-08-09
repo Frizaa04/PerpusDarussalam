@@ -1,28 +1,41 @@
-<!-- Header Area (Logo & Search) -->
-<header class="bg-white px-8 md:px-16 py-4 flex justify-between items-center shadow-sm">
-    <div class="flex items-center gap-3">
-        <img src="{{ asset('image/covers/MadrasahDarussalam.png') }}" alt="Logo Darussalam" class="h-15 object-contain">
-        <div class="border-l-2 border-gray-300 pl-3">
-            <h1 class="font-bold text-[#004d40] leading-tight tracking-wider text-base">PERPUSTAKAAN</h1>
-            <p class="text-xs text-gray-500 font-semibold tracking-widest uppercase">MADRASAH DARUSSALAM</p>
+<!-- Header Area -->
+<header class="bg-white px-4 md:px-16 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
+    
+    <!-- Baris Atas (Logo & Judul) + Tombol Logout -->
+    <div class="flex items-center justify-between w-full md:w-auto">
+        <div class="flex items-center gap-3">
+            <img src="{{ asset('image/covers/MadrasahDarussalam.png') }}" alt="Logo Darussalam" class="h-10 md:h-15 object-contain">
+            <div class="border-l-2 border-gray-300 pl-3">
+                <h1 class="font-bold text-[#004d40] leading-tight tracking-wider text-xs md:text-base">PERPUSTAKAAN</h1>
+                <p class="text-[9px] md:text-xs text-gray-500 font-semibold tracking-widest uppercase">MADRASAH DARUSSALAM</p>
+            </div>
+        </div>
+
+        <!-- Tombol LogOut -->
+        <div class="md:hidden">
+            @auth('web')
+                <form action="{{ route('user.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="bg-[#004d40] text-white font-semibold text-xs px-3 py-1.5 rounded-md shadow">
+                        LogOut
+                    </button>
+                </form>
+            @endauth
         </div>
     </div>
 
-    <!-- Form Pencarian -->
-<div class="flex items-center gap-3">
-    <!-- Form Search Asli -->
+    <!-- Tombol LogOut Khusus Tampilan Laptop/Desktop-->
+    <div class="hidden md:flex items-center">
+        @auth('web')
+            <form action="{{ route('user.logout') }}" method="POST" class="inline">
+                @csrf
+                <button type="submit" class="bg-[#004d40] hover:bg-[#003d30] text-white font-semibold text-sm px-4 py-1.5 rounded-md transition duration-200 shadow flex items-center gap-1">
+                    LogOut
+                </button>
+            </form>
+        @endauth
+    </div>
 
-
-    <!-- Tombol LogOut di Samping Kanan Search -->
-    @auth('web')
-        <form action="{{ route('user.logout') }}" method="POST" class="inline">
-            @csrf
-            <button type="submit" class="bg-[#004d40] hover:bg-[#003d30] text-white font-semibold text-sm px-4 py-1.5 rounded-md transition duration-200 shadow flex items-center gap-1">
-                LogOut
-            </button>
-        </form>
-    @endauth
-</div>
 </header>
 
 <!-- Navigation Bar Menu -->

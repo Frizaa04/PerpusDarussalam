@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- MENGUBAH BACKGROUND HALAMAN JADI HIJAU TUA SAMA SEPERTI HOME (min-h-screen & bg-[#002820]) -->
-<div class="min-h-screen bg-[#002820] py-8 px-4">
+<div class="min-h-screen bg-[#004d40] py-8 px-4">
     <div class="max-w-6xl mx-auto space-y-8">
         
         <!-- Tombol Kembali -->
@@ -16,7 +16,7 @@
         </div>
 
         <!-- Card Utama Detail Buku (Dibuat Beda Warna Dengan BG Utama: bg-[#004d40] agar Pop-out) -->
-        <div class="bg-[#004d40] text-white rounded-2xl p-6 md:p-10 shadow-2xl border border-emerald-600/50 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+        <div class="bg-[#00382e] text-white rounded-2xl p-6 md:p-10 shadow-2xl border border-emerald-600/50 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
             
             <!-- Kolom Cover Buku -->
             <div class="w-full">

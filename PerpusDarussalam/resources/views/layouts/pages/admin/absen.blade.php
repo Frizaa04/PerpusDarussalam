@@ -52,28 +52,28 @@
                         <!-- Tombol Semua -->
                         <a href="{{ route('absen.index') }}"
                             class="px-3 py-1.5 rounded text-xs font-bold transition 
-                        {{ request('role') == '' ? 'bg-white text-slate-800 shadow' : 'bg-[#004d40] text-white hover:bg-[#00332c]' }}">
+                        {{ request('status') == '' ? 'bg-white text-slate-800 shadow' : 'bg-[#004d40] text-white hover:bg-[#00332c]' }}">
                             Semua
                         </a>
 
                         <!-- Tombol Siswa -->
-                        <a href="{{ route('absen.index', ['role' => 'siswa']) }}"
+                        <a href="{{ route('absen.index', ['status' => 'siswa']) }}"
                             class="px-3 py-1.5 rounded text-xs font-bold transition 
-                        {{ request('role') == 'siswa' ? 'bg-white text-slate-800 shadow' : 'bg-emerald-600 text-white hover:bg-emerald-700' }}">
+                        {{ request('status') == 'siswa' ? 'bg-white text-slate-800 shadow' : 'bg-emerald-600 text-white hover:bg-emerald-700' }}">
                             Siswa
                         </a>
 
                         <!-- Tombol Guru -->
-                        <a href="{{ route('absen.index', ['role' => 'guru']) }}"
+                        <a href="{{ route('absen.index', ['status' => 'guru']) }}"
                             class="px-3 py-1.5 rounded text-xs font-bold transition 
-                        {{ request('role') == 'guru' ? 'bg-white text-slate-800 shadow' : 'bg-blue-600 text-white hover:bg-blue-700' }}">
+                        {{ request('status') == 'guru' ? 'bg-white text-slate-800 shadow' : 'bg-blue-600 text-white hover:bg-blue-700' }}">
                             Guru
                         </a>
 
                         <!-- Tombol Umum -->
-                        <a href="{{ route('absen.index', ['role' => 'umum']) }}"
+                        <a href="{{ route('absen.index', ['status' => 'umum']) }}"
                             class="px-3 py-1.5 rounded text-xs font-bold transition 
-                        {{ request('role') == 'umum' ? 'bg-white text-slate-800 shadow' : 'bg-amber-600 text-white hover:bg-amber-700' }}">
+                        {{ request('status') == 'umum' ? 'bg-white text-slate-800 shadow' : 'bg-amber-600 text-white hover:bg-amber-700' }}">
                             Umum
                         </a>
                     </div>
@@ -86,7 +86,7 @@
                                 <th class="p-3 text-sm font-bold tracking-wider">Waktu</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">No Identitas</th>
                                 <th class="p-3 text-sm font-bold tracking-wider">Nama</th>
-                                <th class="p-3 text-sm font-bold tracking-wider">Peran</th> <!-- Kolom Baru -->
+                                <th class="p-3 text-sm font-bold tracking-wider">Peran</th> 
                             </tr>
                         </thead>
                         <tbody class="text-white divide-y divide-white/40">
@@ -111,10 +111,10 @@
                                 <td class="p-3 text-sm font-semibold text-white/90">
                                     @if($visit->user)
                                     <span class="px-2.5 py-1 rounded text-xs uppercase font-bold 
-                                                    @if($visit->user->role == 'guru') bg-blue-600 text-white 
-                                                    @elseif($visit->user->role == 'siswa') bg-emerald-600 text-white 
+                                                    @if($visit->user->status == 'guru') bg-blue-600 text-white 
+                                                    @elseif($visit->user->status == 'siswa') bg-emerald-600 text-white 
                                                     @else bg-amber-600 text-white @endif">
-                                        {{ $visit->user->role }}
+                                        {{ $visit->user->status ?? '-' }}
                                     </span>
                                     @else
                                     -
