@@ -31,48 +31,57 @@ class MemberController extends Controller
 
         $students = $query->latest()->paginate(10)->withQueryString();
 
-        return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search', 'statusFilter'));
+        // AMBIL DATA KELAS UNIK UNTUK DROPDOWN DINAMIS
+        $allKelas = User::whereNotNull('kelas')
+                        ->where('kelas', '!=', '')
+                        ->distinct()
+                        ->pluck('kelas');
+
+        return view('layouts.pages.admin.manajemen_siswa', compact('students', 'search', 'statusFilter', 'allKelas'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'id'            => 'required|exists:users,id',
             'nomor_induk'   => 'nullable|string|max:255',
             'name'          => 'required|string|max:255',
-            'email'         => 'required|email|max:255|unique:users,email,' . $request->id, 
-            'role'          => 'required|in:siswa,guru,umum', // Ini mengarah ke kolom status
+            'email'         => 'required|email|max:255|unique:users,email,' . $id,
+            'status'        => 'required|in:siswa,guru,umum', 
             'jenis_kelamin' => 'nullable|in:L,P',
             'alamat'        => 'nullable|string|max:500',
             'jenjang'       => 'nullable|in:MA,MTS',
             'kelas'         => 'nullable|string|max:255',
+            'kelas_baru'    => 'nullable|string|max:255',
         ]);
 
-        $user = User::findOrFail($request->id);
+        $user = User::findOrFail($id);
 
-        $status = strtolower($request->role); // Dari form add/edit menampung value status di select name="role"
-        
+        $status = strtolower($request->status); 
+
         $nisn = null;
         $nik = null;
 
-        // Isi hanya pada variabel yang sesuai dengan status yang dipilih
         if ($status === 'siswa') {
             $nisn = $request->nomor_induk;
         } elseif ($status === 'guru' || $status === 'umum') {
             $nik = $request->nomor_induk;
         }
 
-        // Simpan ke database 
+        $kelasFinal = $request->kelas;
+        if ($request->filled('kelas_baru')) {
+            $kelasFinal = $request->kelas_baru;
+        }
+
         $user->update([
             'nisn'          => $nisn,
             'nik'           => $nik,
             'name'          => $request->name,
             'email'         => $request->email,
-            'status'        => $status, // Masuk ke kolom status di database
+            'status'        => $status,   
             'jenis_kelamin' => $request->jenis_kelamin,
             'alamat'        => $request->alamat,
             'jenjang'       => $request->jenjang,
-            'kelas'         => $request->kelas,
+            'kelas'         => $kelasFinal,
         ]);
 
         return redirect()->route('member.index')->with('success', 'Data user berhasil diperbarui!');
@@ -90,10 +99,10 @@ class MemberController extends Controller
             'alamat'        => 'nullable|string|max:500',
             'jenjang'       => 'nullable|in:MA,MTS',
             'kelas'         => 'nullable|string|max:255',
+            'kelas_baru'    => 'nullable|string|max:255',
             'foto'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Proses penyimpanan file foto jika diunggah
         $pathFoto = null;
         if ($request->hasFile('foto')) {
             $pathFoto = $request->file('foto')->store('foto-user', 'public');
@@ -115,7 +124,7 @@ class MemberController extends Controller
         // Tentukan tanggal mulai (hari ini)
         $masaMulai = Carbon::now(); 
 
-        // Tentukan bulan cut-off tahun ajaran baru (misal bulan Juni = bulan ke-6)
+        // Tentukan bulan cut-off 
         $tahunSekarang = $masaMulai->year;
         $bulanSekarang = $masaMulai->month;
 
@@ -130,7 +139,12 @@ class MemberController extends Controller
         // Cek apakah sudah expired berdasarkan tanggal hari ini
         $statusKartu = Carbon::now()->lte($masaSampai) ? 'aktif' : 'expired';
 
-        // Proses simpan ke database
+        // Tentukan kelas final (jika isi input kelas_baru, gunakan itu. Jika tidak, pakai pilihan dropdown kelas)
+        $kelasFinal = $request->kelas;
+        if ($request->filled('kelas_baru')) {
+            $kelasFinal = $request->kelas_baru;
+        }
+
         User::create([
             'nisn'                => $nisn,
             'nik'                 => $nik,
@@ -142,7 +156,7 @@ class MemberController extends Controller
             'jenis_kelamin'       => $request->jenis_kelamin,
             'alamat'              => $request->alamat,
             'jenjang'             => $request->jenjang ?? 'MTS',
-            'kelas'               => $request->kelas,
+            'kelas'               => $kelasFinal, 
             'masa_berlaku_mulai'  => $masaMulai->toDateString(),
             'masa_berlaku_sampai' => $masaSampai->toDateString(),
             'status_kartu'        => $statusKartu,
@@ -160,22 +174,26 @@ class MemberController extends Controller
         return redirect()->route('member.index')->with('success', 'User baru berhasil ditambahkan!');
     }
 
-    public function perpanjang($id)
+    public function perpanjang(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        // Tanggal mulai perpanjangan dihitung hari ini
         $masaMulai = Carbon::now();
-        
-        // Masa berlaku sampai diatur ke tanggal 30 Juni tahun depan
         $tahunDepan = $masaMulai->year + 1;
-        $masaSampai = Carbon::create($tahunDepan, 6, 30); // 30 Juni tahun depan
+        $masaSampai = Carbon::create($tahunDepan, 6, 30);
 
         $user->update([
             'masa_berlaku_mulai'  => $masaMulai->toDateString(),
             'masa_berlaku_sampai' => $masaSampai->toDateString(),
-            'status_kartu'        => 'aktif', // Otomatis aktif kembali
+            'status_kartu'        => 'aktif',
         ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Masa berlaku kartu berhasil diperpanjang hingga 30 Juni ' . $tahunDepan . '!'
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Masa berlaku kartu berhasil diperpanjang hingga 30 Juni ' . $tahunDepan . '!');
     }
@@ -222,8 +240,50 @@ class MemberController extends Controller
         }
 
         // Ambil data user dari database berdasarkan ID yang dipilih
-        $users = User::whereIn('id', $selectedIds)->get();
+        $users = User::whereIn('id', $selectedIds)->get()->map(function ($user) {
+            // Format masa berlaku dari database (contoh: 30 Juni 2027)
+            $user->masaBerlakuFormatted = $user->masa_berlaku_sampai 
+                ? \Carbon\Carbon::parse($user->masa_berlaku_sampai)->translatedFormat('d F Y') 
+                : '-';
+            
+            // Tentukan juga No Induk (NISN jika siswa, NIK jika guru/umum)
+            $user->noInduk = $user->nisn ?? $user->nik ?? '-';
+
+            return $user;
+        });
 
         return view('layouts.pages.admin.print_cards', compact('users'));
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+        return redirect()->back()->with('success', 'User berhasil dihapus.');
+    }
+
+    public function destroyMultiple(Request $request)
+    {
+        // Validasi bahwa data yang dikirim berupa array dan ID-nya ada di database
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id' 
+        ]);
+
+        // Hapus data secara massal berdasarkan array ID yang dicentang
+        \App\Models\User::whereIn('id', $request->ids)->delete();
+
+        // Redirect kembali dengan pesan sukses
+        return redirect()->back()->with('success', 'User yang dipilih berhasil dihapus.');
+    }
+
+    public function destroyExpired()
+    {
+        $deleted = User::where('masa_berlaku_sampai', '<', now())
+            ->whereNotNull('masa_berlaku_sampai')
+            ->where('role', '!=', 'admin')
+            ->delete();
+
+        return redirect()->back()->with('success', "Berhasil menghapus {$deleted} user yang berstatus expired.");
     }
 }

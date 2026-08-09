@@ -60,120 +60,170 @@
                     </button>
                 </div>
 
-                <!-- Box Tabel -->
-                <div
-                    class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
-                    <h2 class="text-xl font-bold text-white mb-4 tracking-wide">Tabel Daftar User</h2>
+                <!-- Form Pembungkus untuk Fitur Hapus Massal -->
+                <form id="deleteUserForm" action="{{ route('member.destroyMultiple') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
 
-                    <div class="overflow-x-auto rounded">
-                        <table class="min-w-full text-left border-collapse border border-white/40">
-                            <thead>
-                                <tr class="bg-[#004d40] text-white divide-x divide-white/40">
-                                    <th class="p-3 text-xs font-bold tracking-wider">Foto</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NISN/NIK)</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Nama</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Kelamin</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Peran</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Email</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Masa Berlaku</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider">Status Kartu</th>
-                                    <th class="p-3 text-xs font-bold tracking-wider text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-white divide-y divide-white/40">
-                                @forelse($students as $student)
-                                    <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                        <!-- Kolom Foto -->
-                                        <td class="p-3 text-sm text-center">
-                                            @if ($student->foto)
-                                                <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto"
-                                                    class="w-10 h-10 rounded-full object-cover mx-auto border border-white">
-                                            @else
-                                                <div
-                                                    class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold mx-auto text-white">
-                                                    {{ strtoupper(substr($student->name, 0, 2)) }}
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <!-- Kolom No Induk -->
-                                        <td class="p-3 text-sm font-bold text-white/90">
-                                            {{ $student->nisn ?? ($student->nik ?? '-') }}
-                                        </td>
-                                        <!-- Kolom Nama -->
-                                        <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
-                                        <!-- Kolom Jenis Kelamin -->
-                                        <td class="p-3 text-sm font-bold text-white/90">
-                                            {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
-                                        </td>
-                                        <!-- Kolom Peran -->
-                                        <td class="p-3 text-sm font-bold text-white/90">
-                                            <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
-                                                {{ $student->role ?? 'Siswa' }}
-                                            </span>
-                                        </td>
-                                        <!-- Kolom Email -->
-                                        <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
+                    <!-- Box Tabel -->
+                    <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
+                        
+                        <!-- Header Tabel & Tombol Kontrol -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                            <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar User</h2>
 
-                                        <!-- Kolom Masa Berlaku -->
-                                        <td class="p-3 text-xs font-medium text-white/90">
-                                            {{ $student->masa_berlaku_sampai ? \Carbon\Carbon::parse($student->masa_berlaku_sampai)->format('d M Y') : '-' }}
-                                        </td>
+                            <!-- Area Tombol Kontrol -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                                
+                                <!-- Tombol Hapus Semua Expired-->
+                                <button type="button" id="btnHapusExpired" form="hapusExpiredForm" onclick="confirmDeleteExpired()"
+                                    class="hidden bg-red-900 hover:bg-red-950 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
+                                    Hapus Semua Expired
+                                </button>
 
-                                        <!-- Kolom Status Kartu -->
-                                        <td class="p-3 text-sm text-center">
-                                            @if ($student->status_kartu == 'aktif')
-                                                <span
-                                                    class="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold">Aktif</span>
-                                            @else
-                                                <span
-                                                    class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">Expired</span>
-                                            @endif
-                                        </td>
+                                <!-- Tombol Konfirmasi Hapus Massal (Pilihan Checkbox) -->
+                                <button type="submit" form="deleteUserForm" id="btnConfirmDeleteUser"
+                                    onclick="return confirm('Yakin ingin menghapus user yang dipilih?')"
+                                    class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
+                                    Konfirmasi Hapus
+                                </button>
 
-                                        <!-- Tombol Aksi (Edit & Perpanjang Kondisional) -->
-                                        <td class="p-3 text-sm text-center space-y-1">
-                                            <button type="button"
-                                                onclick="openEditModal(
-                                                    '{{ $student->id }}', 
-                                                    '{{ $student->nisn ?? '' }}', 
-                                                    '{{ $student->nik ?? '' }}', 
-                                                    '{{ addslashes($student->name) }}', 
-                                                    '{{ $student->email }}', 
-                                                    '{{ $student->role }}', 
-                                                    '{{ $student->jenis_kelamin }}', 
-                                                    '{{ addslashes($student->alamat) }}',
-                                                    '{{ $student->jenjang }}', 
-                                                    '{{ $student->kelas }}'
-                                                )"
-                                                class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block w-full">
-                                                Edit Data
-                                            </button>
+                                <!-- Tombol Trigger Mode Hapus / Batal -->
+                                <button type="button" id="btnToggleDeleteUser" onclick="toggleUserDeleteMode()"
+                                    class="bg-[#004d40] hover:bg-[#003d30] text-white font-bold px-3 py-1.5 rounded text-sm transition shadow flex items-center gap-1.5 select-none">
+                                    <svg id="trashIconUser" xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4 text-white transition-colors duration-200" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span id="btnTextUser">Hapus User</span>
+                                </button>
+                            </div>
+                        </div>
 
-                                            <!-- Tombol Perpanjang HANYA MUNCUL jika statusnya EXPIRED -->
-                                            @if ($student->status_kartu == 'expired')
-                                                <form action="{{ route('member.perpanjang', $student->id) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Perpanjang masa berlaku kartu untuk {{ $student->name }} hingga 30 Juni tahun depan?')">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <button type="submit"
-                                                        class="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-amber-700 transition shadow-sm inline-block w-full">
-                                                        Perpanjang
+                        <div class="overflow-x-auto rounded">
+                            <table class="min-w-full text-left border-collapse border border-white/40">
+                                <thead>
+                                    <tr class="bg-[#004d40] text-white divide-x divide-white/40">
+                                        <th class="p-3 text-xs font-bold tracking-wider">Foto</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NISN/NIK)</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Nama</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Kelamin</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Peran</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Email</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Masa Berlaku</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Status Kartu</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-white divide-y divide-white/40">
+                                    @forelse($students as $student)
+                                        <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                            <!-- Kolom Foto -->
+                                            <td class="p-3 text-sm text-center">
+                                                @if ($student->foto)
+                                                    <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto"
+                                                        class="w-10 h-10 rounded-full object-cover mx-auto border border-white">
+                                                @else
+                                                    <div
+                                                        class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold mx-auto text-white">
+                                                        {{ strtoupper(substr($student->name, 0, 2)) }}
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <!-- Kolom No Induk -->
+                                            <td class="p-3 text-sm font-bold text-white/90">
+                                                {{ $student->nisn ?? ($student->nik ?? '-') }}
+                                            </td>
+                                            <!-- Kolom Nama -->
+                                            <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
+                                            <!-- Kolom Jenis Kelamin -->
+                                            <td class="p-3 text-sm font-bold text-white/90">
+                                                {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
+                                            </td>
+                                            <!-- Kolom Peran -->
+                                            <td class="p-3 text-sm font-bold text-white/90">
+                                                <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
+                                                    {{ $student->role ?? 'Siswa' }}
+                                                </span>
+                                            </td>
+                                            <!-- Kolom Email -->
+                                            <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
+
+                                            <!-- Kolom Masa Berlaku -->
+                                            <td class="p-3 text-xs font-medium text-white/90">
+                                                {{ $student->masa_berlaku_sampai ? \Carbon\Carbon::parse($student->masa_berlaku_sampai)->format('d M Y') : '-' }}
+                                            </td>
+
+                                            <!-- Kolom Status Kartu -->
+                                            <td class="p-3 text-sm text-center">
+                                                @if ($student->masa_berlaku_sampai && \Carbon\Carbon::parse($student->masa_berlaku_sampai)->isFuture())
+                                                    <span
+                                                        class="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold">Aktif</span>
+                                                @else
+                                                    <span
+                                                        class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">Expired</span>
+                                                @endif
+                                            </td>
+
+                                            <!-- Tombol Aksi (Edit, Perpanjang, & Checkbox Mode Hapus) -->
+                                            <td class="p-3 text-sm text-center">
+                                                <!-- Mode Normal: Tombol Edit & Perpanjang -->
+                                                <div class="edit-mode-action space-y-1">
+                                                    <button type="button"
+                                                        onclick="openEditModal(
+                                            '{{ $student->id }}', 
+                                            '{{ $student->nisn ?? '' }}', 
+                                            '{{ $student->nik ?? '' }}', 
+                                            '{{ addslashes($student->name) }}', 
+                                            '{{ $student->email }}', 
+                                            '{{ $student->status ?? '' }}', 
+                                            '{{ $student->jenis_kelamin }}', 
+                                            '{{ addslashes($student->alamat) }}',
+                                            '{{ $student->jenjang }}', 
+                                            '{{ $student->kelas }}'
+                                        )"
+                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block w-full">
+                                                        Edit Data
                                                     </button>
-                                                </form>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="10" class="p-5 text-center text-sm font-semibold text-white/80">Data
-                                            user tidak ditemukan.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+
+                                                    <!-- Tombol Perpanjang HANYA MUNCUL jika statusnya EXPIRED -->
+                                                    @if (!$student->masa_berlaku_sampai || \Carbon\Carbon::parse($student->masa_berlaku_sampai)->isPast())
+                                                        <button type="button"
+                                                            onclick="perpanjangKartu('{{ $student->id }}', '{{ addslashes($student->name) }}')"
+                                                            class="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-amber-700 transition shadow-sm inline-block w-full">
+                                                            Perpanjang
+                                                        </button>
+                                                    @endif
+                                                </div>
+
+                                                <!-- Mode Hapus: Checkbox (Tersembunyi secara default) -->
+                                                <div
+                                                    class="delete-mode-action hidden flex items-center justify-center gap-2 py-1">
+                                                    <input type="checkbox" name="ids[]" value="{{ $student->id }}"
+                                                        class="user-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
+                                                    <span class="text-xs font-semibold text-red-200 italic">Pilih</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="9"
+                                                class="p-5 text-center text-sm font-semibold text-white/80">Data
+                                                user tidak ditemukan.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                </form>
+
+                <form id="hapusExpiredForm" action="{{ route('member.destroyExpired') }}" method="POST" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
 
                 <!-- Pagination Laravel -->
                 <div class="mt-4">
@@ -212,7 +262,6 @@
             <form action="{{ route('member.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
 
-                <!-- Form Grid 2 Kolom -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Foto</label>
@@ -245,7 +294,6 @@
 
                     <div>
                         <label id="labelNomorAdd" class="block text-sm font-semibold mb-1">No. Induk (NISN / NIK)</label>
-                        <!-- Menggunakan name="nisn" atau disesuaikan dengan logic controller (biasanya dipisah nisn/nik atau ditampung jadi satu lalu di-check di controller) -->
                         <input type="text" name="nomor_induk" id="inputNomorAdd" placeholder="..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
@@ -270,7 +318,7 @@
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
 
-                    <!-- Tambahan: Jenjang (Disamakan dengan database: 'MA', 'MTS') -->
+                    <!-- Jenjang -->
                     <div>
                         <label class="block text-sm font-semibold mb-1">Jenjang</label>
                         <select name="jenjang"
@@ -281,11 +329,44 @@
                         </select>
                     </div>
 
-                    <!-- Tambahan: Kelas -->
+                    <!-- Kelas -->
                     <div>
-                        <label class="block text-sm font-semibold mb-1">Kelas</label>
-                        <input type="text" name="kelas" placeholder="Contoh: 10A, 12 IPA 1..."
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-semibold">Kelas</label>
+                            <div class="space-x-1.5">
+                                <button type="button" onclick="hapusKelasAktif()" id="btnHapusKelas"
+                                    class="text-xs underline text-red-300 hover:text-white hidden">
+                                    Hapus
+                                </button>
+                                <button type="button" onclick="editKelasAktif()" id="btnEditKelas"
+                                    class="text-xs underline text-yellow-200 hover:text-white hidden">
+                                    Edit
+                                </button>
+                                <button type="button" onclick="toggleInputKelas()" id="btnToggleKelas"
+                                    class="text-xs underline text-emerald-200 hover:text-white">
+                                    + Kelas Baru
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Kelas Eksisting (Ambil dari data kelas yang sudah ada, misal $allKelas) -->
+                        <select name="kelas" id="selectKelas" onchange="cekPilihKelas(this)"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                            <option value="">Pilih Kelas...</option>
+                            @foreach ($allKelas as $kls)
+                                <option value="{{ $kls }}" data-nama="{{ $kls }}">{{ $kls }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <!-- Input Text untuk Kelas Baru / Edit Kelas -->
+                        <input type="text" name="kelas_baru" id="inputKelasBaru"
+                            placeholder="Contoh: 10A, 12 IPA 1..."
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white hidden">
+
+                        <!-- Input hidden untuk penanda mode edit/hapus kelas -->
+                        <input type="hidden" name="edit_kelas_lama" id="editKelasLama">
+                        <input type="hidden" name="delete_kelas" id="deleteKelasVal">
                     </div>
                 </div>
 
@@ -314,12 +395,12 @@
             <h3 class="text-xl font-bold mb-5 tracking-wide">Edit Data User</h3>
 
             <!-- Form Edit -->
-            <form action="{{ route('member.update') }}" method="POST" class="space-y-3">
+            <form id="editForm" onsubmit="event.preventDefault(); submitEditForm();" class="space-y-3">
                 @csrf
                 @method('PUT')
 
-                <!-- ID Tersembunyi -->
-                <input type="hidden" id="modalId" name="id">
+                <!-- Input hidden untuk ID siswa -->
+                <input type="hidden" id="editUserId" name="id">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Input Nama Lengkap -->
@@ -349,7 +430,7 @@
                     <!-- Dropdown Peran Edit -->
                     <div>
                         <label class="block text-xs font-semibold mb-1 text-emerald-100">Peran (Role)</label>
-                        <select id="modalRole" name="role"
+                        <select id="modalRole" name="status"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="siswa">Siswa</option>
                             <option value="guru">Guru</option>
@@ -365,7 +446,7 @@
                         <select id="modalJenjang" name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="MTs">MTs</option>
+                            <option value="MTS">MTs</option>
                             <option value="MA">MA</option>
                         </select>
                     </div>
@@ -395,7 +476,7 @@
 
                 <!-- Tombol Konfirmasi -->
                 <div class="pt-3 text-center">
-                    <button type="submit"
+                    <button type="button" onclick="submitEditForm()"
                         class="bg-white text-[#004d40] hover:bg-emerald-50 px-6 py-2 rounded font-bold transition shadow-md w-full">
                         Simpan Perubahan
                     </button>
@@ -485,7 +566,6 @@
         </div>
     </div>
 
-    <!-- SCRIPT UNTUK CONTROL MODAL -->
     <script>
         // --- Fungsi Bantuan untuk Mengubah Label & Placeholder Nomor Induk ---
         function updateNomorField(roleValue, labelElementId, inputElement) {
@@ -506,9 +586,13 @@
             }
         }
 
-        // Variabel global untuk status modal edit
-        let isOpeningModal = false;
-        let currentEditData = {};
+        // Variabel global aman dari duplikasi
+        if (typeof window.isOpeningModal === 'undefined') {
+            window.isOpeningModal = false;
+        }
+        if (typeof window.currentEditData === 'undefined') {
+            window.currentEditData = {};
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             // --- 1. OTOMATIS BUKA MODAL TAMBAH USER JIKA ADA ERROR DARI SERVER ---
@@ -532,15 +616,15 @@
 
             if (modalRole && modalInputNomor) {
                 modalRole.addEventListener('change', function() {
-                    if (isOpeningModal) return;
+                    if (window.isOpeningModal) return;
 
                     let selectedRole = this.value.toLowerCase();
                     updateNomorField(selectedRole, 'modalLabelNomor', modalInputNomor);
 
                     if (selectedRole === 'siswa') {
-                        modalInputNomor.value = currentEditData.nisn || '';
+                        modalInputNomor.value = window.currentEditData.nisn || '';
                     } else if (selectedRole === 'guru' || selectedRole === 'umum') {
-                        modalInputNomor.value = currentEditData.nik || '';
+                        modalInputNomor.value = window.currentEditData.nik || '';
                     } else {
                         modalInputNomor.value = '';
                     }
@@ -576,27 +660,121 @@
             }
         }
 
+        // Munculkan tombol "Edit" dan "Hapus" hanya jika kelas di dropdown dipilih
+        function cekPilihKelas(select) {
+            const btnEdit = document.getElementById('btnEditKelas');
+            const btnHapus = document.getElementById('btnHapusKelas');
+            if (select.value) {
+                btnEdit.classList.remove('hidden');
+                btnHapus.classList.remove('hidden');
+            } else {
+                btnEdit.classList.add('hidden');
+                btnHapus.classList.add('hidden');
+            }
+        }
+
+        // Toggle untuk mode Tambah Kelas Baru
+        function toggleInputKelas() {
+            const selectBox = document.getElementById('selectKelas');
+            const inputBox = document.getElementById('inputKelasBaru');
+            const editKelasLama = document.getElementById('editKelasLama');
+            const deleteKelasVal = document.getElementById('deleteKelasVal');
+            const btnToggle = document.getElementById('btnToggleKelas');
+            const btnEdit = document.getElementById('btnEditKelas');
+            const btnHapus = document.getElementById('btnHapusKelas');
+
+            editKelasLama.value = "";
+            deleteKelasVal.value = "";
+
+            if (inputBox.classList.contains('hidden')) {
+                inputBox.classList.remove('hidden');
+                selectBox.classList.add('hidden');
+                selectBox.value = "";
+                btnEdit.classList.add('hidden');
+                btnHapus.classList.add('hidden');
+                btnToggle.textContent = "Pilih Kelas Eksisting";
+                inputBox.placeholder = "Ketik kelas baru...";
+            } else {
+                inputBox.classList.add('hidden');
+                selectBox.classList.remove('hidden');
+                inputBox.value = "";
+                btnToggle.textContent = "+ Kelas Baru";
+            }
+        }
+
+        // Toggle untuk mode Edit Kelas yang sedang dipilih
+        function editKelasAktif() {
+            const selectBox = document.getElementById('selectKelas');
+            const selectedOption = selectBox.options[selectBox.selectedIndex];
+            const inputBox = document.getElementById('inputKelasBaru');
+            const editKelasLama = document.getElementById('editKelasLama');
+            const btnToggle = document.getElementById('btnToggleKelas');
+            const btnEdit = document.getElementById('btnEditKelas');
+            const btnHapus = document.getElementById('btnHapusKelas');
+
+            if (selectBox.value) {
+                editKelasLama.value = selectBox.value;
+                inputBox.value = selectedOption.getAttribute('data-nama');
+
+                selectBox.classList.add('hidden');
+                inputBox.classList.remove('hidden');
+                btnEdit.classList.add('hidden');
+                btnHapus.classList.add('hidden');
+                btnToggle.textContent = "Batal Edit";
+                inputBox.placeholder = "Edit nama kelas...";
+            }
+        }
+
+        // Fungsi untuk menghapus kelas terpilih
+        function hapusKelasAktif() {
+            const selectBox = document.getElementById('selectKelas');
+            const selectedOption = selectBox.options[selectBox.selectedIndex];
+            const deleteKelasVal = document.getElementById('deleteKelasVal');
+
+            if (selectBox.value) {
+                const namaKelas = selectedOption.text;
+                if (confirm(`Apakah Anda yakin ingin menghapus kelas "${namaKelas}" dari daftar?`)) {
+                    deleteKelasVal.value = selectBox.value;
+                    selectBox.form.submit();
+                }
+            }
+        }
+
         // --- Fungsi Modal Edit User ---
         function openEditModal(id, nisn, nik, name, email, role, jenis_kelamin, alamat, jenjang, kelas) {
-            isOpeningModal = true;
+            window.isOpeningModal = true;
 
             // 1. Simpan data mentah ke objek global
-            currentEditData = {
+            window.currentEditData = {
                 nisn: (nisn && nisn !== 'null' && nisn !== 'undefined') ? nisn : '',
                 nik: (nik && nik !== 'null' && nik !== 'undefined') ? nik : ''
             };
 
             // 2. Isi field dasar
-            document.getElementById('modalId').value = id;
+            document.getElementById('editUserId').value = id;
             document.getElementById('modalName').value = (name && name !== 'null') ? name : '';
             document.getElementById('modalEmail').value = (email && email !== 'null') ? email : '';
             document.getElementById('modalAlamat').value = (alamat && alamat !== 'null') ? alamat : '';
 
-            // 3. Atur Dropdown Role
+            // Mengatur URL action form secara dinamis membawa ID user
+            const editForm = document.getElementById('editForm');
+            if (editForm) {
+                editForm.action = "/manajemen-siswa/update/" + id;
+            }
+
+            // 3. Atur Dropdown Role secara case-insensitive
             const roleSelect = document.getElementById('modalRole');
             let activeRole = role ? role.toLowerCase().trim() : '';
             if (roleSelect) {
-                roleSelect.value = activeRole;
+                let foundMatch = false;
+                for (let option of roleSelect.options) {
+                    if (option.value.toLowerCase() === activeRole) {
+                        roleSelect.value = option.value;
+                        foundMatch = true;
+                        break;
+                    }
+                }
+                if (!foundMatch) roleSelect.value = '';
             }
 
             // 4. Masukkan nomor induk yang sesuai ke input form edit
@@ -605,9 +783,9 @@
                 updateNomorField(activeRole, 'modalLabelNomor', modalInputNomor);
 
                 if (activeRole === 'siswa') {
-                    modalInputNomor.value = currentEditData.nisn;
+                    modalInputNomor.value = window.currentEditData.nisn;
                 } else if (activeRole === 'guru' || activeRole === 'umum') {
-                    modalInputNomor.value = currentEditData.nik;
+                    modalInputNomor.value = window.currentEditData.nik;
                 } else {
                     modalInputNomor.value = '';
                 }
@@ -616,13 +794,32 @@
             // 5. Atur Dropdown Jenis Kelamin
             const jkSelect = document.getElementById('modalJenisKelamin');
             if (jkSelect) {
-                jkSelect.value = (jenis_kelamin && jenis_kelamin !== 'null') ? jenis_kelamin : '';
+                let activeJk = jenis_kelamin ? jenis_kelamin.toLowerCase().trim() : '';
+                let jkFound = false;
+                for (let option of jkSelect.options) {
+                    if (option.value.toLowerCase() === activeJk) {
+                        jkSelect.value = option.value;
+                        jkFound = true;
+                        break;
+                    }
+                }
+                if (!jkFound) jkSelect.value = '';
             }
 
             // 6. Atur Dropdown Jenjang & Input Kelas
             const jenjangSelect = document.getElementById('modalJenjang');
             if (jenjangSelect) {
-                jenjangSelect.value = (jenjang && jenjang !== 'null' && jenjang !== 'undefined') ? jenjang : '';
+                let activeJenjang = (jenjang && jenjang !== 'null' && jenjang !== 'undefined') ? jenjang.toLowerCase()
+                    .trim() : '';
+                let jenjangFound = false;
+                for (let option of jenjangSelect.options) {
+                    if (option.value.toLowerCase() === activeJenjang) {
+                        jenjangSelect.value = option.value;
+                        jenjangFound = true;
+                        break;
+                    }
+                }
+                if (!jenjangFound) jenjangSelect.value = '';
             }
 
             const kelasInput = document.getElementById('modalKelas');
@@ -637,7 +834,7 @@
             }
 
             setTimeout(() => {
-                isOpeningModal = false;
+                window.isOpeningModal = false;
             }, 100);
         }
 
@@ -646,6 +843,66 @@
             if (modal) {
                 modal.classList.add('hidden');
             }
+        }
+
+        function submitEditForm() {
+            const form = document.getElementById('editForm');
+            const id = document.getElementById('editUserId').value;
+            const formData = new FormData(form);
+
+            fetch("/manajemen-siswa/update/" + id, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                            '',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Tutup modal edit jika ada fungsi penutupnya
+                        closeEditModal();
+                        // Otomatis muat ulang halaman untuk melihat perubahan data terbaru
+                        location.reload();
+                    } else {
+                        return response.text().then(text => {
+                            console.error('Respon Error Server:', text);
+                            alert('Gagal memperbarui data. Periksa kembali inputan Anda.');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan pada jaringan atau server.');
+                });
+        }
+
+        function perpanjangKartu(id, name) {
+            if (!confirm(`Perpanjang masa berlaku kartu untuk ${name} hingga 30 Juni tahun depan?`)) {
+                return;
+            }
+
+            fetch(`/manajemen-siswa/perpanjang/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(async response => {
+                const text = await response.text();
+                console.log('STATUS:', response.status, 'BODY:', text); 
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Gagal memperpanjang kartu. Status: ' + response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan pada jaringan atau server.');
+            });
         }
 
         // --- Fungsi Modal Cetak ---
@@ -704,6 +961,57 @@
             const checkboxes = document.querySelectorAll('.user-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = source.checked;
+            });
+        }
+
+        function toggleUserDeleteMode() {
+            const btnConfirmDelete = document.getElementById('btnConfirmDeleteUser');
+            const btnHapusExpired = document.getElementById('btnHapusExpired'); 
+            const btnToggleDelete = document.getElementById('btnToggleDeleteUser');
+            const btnText = document.getElementById('btnTextUser');
+            const trashIcon = document.getElementById('trashIconUser');
+            
+            const editActions = document.querySelectorAll('.edit-mode-action');
+            const deleteActions = document.querySelectorAll('.delete-mode-action');
+
+            const isHidden = btnConfirmDelete.classList.contains('hidden');
+
+            if (isHidden) {
+                btnConfirmDelete.classList.remove('hidden');
+                btnHapusExpired.classList.remove('hidden'); 
+                
+                btnToggleDelete.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
+                btnToggleDelete.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                btnText.textContent = 'Batal';
+                trashIcon.classList.add('rotate-45');
+
+                editActions.forEach(el => el.classList.add('hidden'));
+                deleteActions.forEach(el => el.classList.remove('hidden'));
+            } else {
+                btnConfirmDelete.classList.add('hidden');
+                btnHapusExpired.classList.add('hidden'); 
+                
+                btnToggleDelete.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                btnToggleDelete.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
+                btnText.textContent = 'Hapus User';
+                trashIcon.classList.remove('rotate-45');
+
+                editActions.forEach(el => el.classList.remove('hidden'));
+                deleteActions.forEach(el => el.classList.add('hidden')); 
+            }
+        }
+
+        function confirmDeleteExpired() {
+            if (confirm('Yakin ingin menghapus SEMUA user yang berstatus expired (kecuali admin)?')) {
+                document.getElementById('hapusExpiredForm').submit();
+            }
+        }
+
+        // Fungsi untuk Select All Checkbox
+        function toggleSelectAll(source, className) {
+            const checkboxes = document.querySelectorAll('.' + className);
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
             });
         }
     </script>
