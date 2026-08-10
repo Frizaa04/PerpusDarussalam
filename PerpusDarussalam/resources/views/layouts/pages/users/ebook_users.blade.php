@@ -102,46 +102,9 @@
                     @endif
                 </div>
 
-                <!-- Paginasi Laravel untuk E-Book -->
-                @if (isset($ebooks) && method_exists($ebooks, 'hasPages') && $ebooks->hasPages())
-                    <div
-                        class="flex justify-center items-center gap-2 mt-6 text-white font-bold select-none pt-4 border-t border-emerald-800/80">
-
-                        {{-- Tombol Previous (<) --}}
-                        @if ($ebooks->onFirstPage())
-                            <span
-                                class="px-3 py-1.5 bg-[#002820] text-white/30 rounded-lg border border-emerald-700/40 cursor-not-allowed">&lt;</span>
-                        @else
-                            <a href="{{ $ebooks->previousPageUrl() }}"
-                                class="px-3 py-1.5 bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">&lt;</a>
-                        @endif
-
-                        {{-- Nomor Halaman --}}
-                        @foreach ($ebooks->getUrlRange(1, $ebooks->lastPage()) as $page => $url)
-                            @if ($page == $ebooks->currentPage())
-                                <span
-                                    class="w-8 h-8 flex items-center justify-center bg-emerald-500 text-[#002820] font-extrabold rounded-lg shadow">
-                                    {{ $page }}
-                                </span>
-                            @else
-                                <a href="{{ $url }}"
-                                    class="w-8 h-8 flex items-center justify-center bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">
-                                    {{ $page }}
-                                </a>
-                            @endif
-                        @endforeach
-
-                        {{-- Tombol Next (>) --}}
-                        @if ($ebooks->hasMorePages())
-                            <a href="{{ $ebooks->nextPageUrl() }}"
-                                class="px-3 py-1.5 bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">&gt;</a>
-                        @else
-                            <span
-                                class="px-3 py-1.5 bg-[#002820] text-white/30 rounded-lg border border-emerald-700/40 cursor-not-allowed">&gt;</span>
-                        @endif
-
-                    </div>
-                @endif
+                <div class="mt-4">
+                    {{ $ebooks->links('vendor.pagination.custom') }}
+                </div>
             </section>
         </div>
     </div>

@@ -169,36 +169,9 @@
                             </table>
                         </div>
 
-                        <!-- Paginasi -->
-                        @if ($ebooks->total() > 0)
-                            <div class="mt-6 flex items-center justify-center gap-2">
-                                @if ($ebooks->onFirstPage())
-                                    <span class="px-2 py-1 text-white/50 font-bold select-none cursor-default">&lt;</span>
-                                @else
-                                    <a href="{{ $ebooks->previousPageUrl() }}"
-                                        class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&lt;</a>
-                                @endif
-
-                                @foreach ($ebooks->getUrlRange(1, $ebooks->lastPage()) as $page => $url)
-                                    @if ($page == $ebooks->currentPage())
-                                        <!-- Halaman Aktif (Kotak Putih) -->
-                                        <span
-                                            class="bg-white text-[#004d40] font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow cursor-default">{{ $page }}</span>
-                                    @else
-                                        <!-- Halaman Tidak Aktif (Teks Biasa, Kotak Putih Hanya Saat Hover) -->
-                                        <a href="{{ $url }}"
-                                            class="text-white font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm hover:bg-white hover:text-[#004d40] transition duration-200">{{ $page }}</a>
-                                    @endif
-                                @endforeach
-
-                                @if ($ebooks->hasMorePages())
-                                    <a href="{{ $ebooks->nextPageUrl() }}"
-                                        class="px-2 py-1 text-white font-bold hover:text-gray-200 transition">&gt;</a>
-                                @else
-                                    <span class="px-2 py-1 text-white/50 font-bold select-none cursor-default">&gt;</span>
-                                @endif
-                            </div>
-                        @endif
+                        <div class="mt-4">
+                            {{ $ebooks->links('vendor.pagination.custom') }}
+                        </div>
 
                     </div>
                 </form>

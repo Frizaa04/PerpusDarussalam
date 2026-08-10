@@ -183,18 +183,9 @@
                     </table>
                 </div>
 
-                <!-- Tombol Paginasi (Menggunakan Style Tailwind Tema Berwarna Gelap) -->
-                @if ($peminjamans->hasPages())
-                    <div class="mt-4 flex justify-between items-center text-xs font-semibold text-[#003d30]">
-                        <div>
-                            Menampilkan {{ $peminjamans->firstItem() }} - {{ $peminjamans->lastItem() }} dari
-                            {{ $peminjamans->total() }} data
-                        </div>
-                        <div>
-                            {{ $peminjamans->links() }}
-                        </div>
-                    </div>
-                @endif
+                <div class="mt-4">
+                    {{ $peminjamans->links('vendor.pagination.custom') }}
+                </div>
 
             </div>
 

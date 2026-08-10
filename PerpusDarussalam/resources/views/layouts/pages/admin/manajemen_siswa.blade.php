@@ -225,11 +225,9 @@
                     @method('DELETE')
                 </form>
 
-                <!-- Pagination Laravel -->
                 <div class="mt-4">
-                    {{ $students->links() }}
+                    {{ $students->links('vendor.pagination.custom') }}
                 </div>
-
             </div>
     </div>
     </main>

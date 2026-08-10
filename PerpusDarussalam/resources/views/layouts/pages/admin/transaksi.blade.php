@@ -146,41 +146,9 @@
                             </table>
                         </div>
 
-                        <!-- Navigasi Paginasi Sesuai Format Baru -->
-                        @if ($transactions->hasPages())
-                            <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold">
-
-                                {{-- Tombol Previous (<) --}}
-                                @if ($transactions->onFirstPage())
-                                    <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
-                                @else
-                                    <a href="{{ $transactions->previousPageUrl() }}"
-                                        class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
-                                @endif
-
-                                {{-- Nomor Halaman --}}
-                                @foreach ($transactions->getUrlRange(1, max($transactions->lastPage(), 1)) as $page => $url)
-                                    @if ($page == $transactions->currentPage())
-                                        {{-- Halaman Aktif (Kotak Putih, Teks Gelap) --}}
-                                        <span
-                                            class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
-                                    @else
-                                        {{-- Halaman Lain --}}
-                                        <a href="{{ $url }}"
-                                            class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
-                                    @endif
-                                @endforeach
-
-                                {{-- Tombol Next (>) --}}
-                                @if ($transactions->hasMorePages())
-                                    <a href="{{ $transactions->nextPageUrl() }}"
-                                        class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
-                                @else
-                                    <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
-                                @endif
-
-                            </div>
-                        @endif
+                        <div class="mt-4">
+                            {{ $transactions->links('vendor.pagination.custom') }}
+                        </div>
 
                     </div>
                 </form>
