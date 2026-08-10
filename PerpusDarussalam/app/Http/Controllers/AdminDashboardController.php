@@ -68,7 +68,7 @@ class AdminDashboardController extends Controller
                 $time = $isReturn ? $item->updated_at : $item->created_at;
 
                 return [
-                    'tanggal'     => Carbon::parse($time)->format('d M Y'), // Ditambahkan untuk kolom tanggal
+                    'tanggal'     => Carbon::parse($time)->format('d M Y'),
                     'waktu'       => Carbon::parse($time)->format('H:i'),
                     'tindakan'    => $isReturn ? 'Pengembalian' : 'Peminjaman',
                     'detail_buku' => $item->bookItem->book->judul ?? 'Buku Terhapus',
@@ -77,7 +77,7 @@ class AdminDashboardController extends Controller
             });
 
         $perPage = 5;
-        $currentPage = LengthAwarePaginator::resolveCurrentPage('activity_page'); // Gunakan parameter kustom agar tidak bentrok dengan paginator lain jika ada
+        $currentPage = LengthAwarePaginator::resolveCurrentPage('activity_page');
         $currentItems = $allActivities->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
         $recentActivities = new LengthAwarePaginator(

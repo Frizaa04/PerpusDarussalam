@@ -58,7 +58,7 @@
         <div class="max-w-6xl mx-auto px-4 space-y-12">
 
             <!-- 2. HASIL PENCARIAN / KATALOG BUKU TERBARU -->
-            <section id="katalog-buku" class="bg-[#00382e] text-white rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 w-full relative border border-emerald-700/60">
+            <section id="katalog-buku" class="bg-[#b2c8c6] text-white rounded-2xl p-6 md:p-8 shadow-2xl space-y-6 w-full relative border border-emerald-700/60">
                 <div class="flex justify-between items-end border-b border-emerald-800/80 pb-4">
                     <div>
                         <h3 class="text-xl md:text-2xl font-bold tracking-tight text-white">
@@ -123,42 +123,9 @@
                     @endif
                 </div>
 
-                <!-- Paginasi Laravel (Mengikuti style halaman absensi & warna tema) -->
-                @if (isset($books) && method_exists($books, 'hasPages') && $books->hasPages())
-                    <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold select-none pt-4 border-t border-emerald-800/80">
-                        
-                        {{-- Tombol Previous (<) --}}
-                        @if ($books->onFirstPage())
-                            <span class="px-3 py-1.5 bg-[#002820] text-white/30 rounded-lg border border-emerald-700/40 cursor-not-allowed">&lt;</span>
-                        @else
-                            <a href="{{ $books->previousPageUrl() }}"
-                                class="px-3 py-1.5 bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">&lt;</a>
-                        @endif
-
-                        {{-- Nomor Halaman (1, 2, dst) --}}
-                        @foreach ($books->getUrlRange(1, $books->lastPage()) as $page => $url)
-                            @if ($page == $books->currentPage())
-                                <span class="w-8 h-8 flex items-center justify-center bg-emerald-500 text-[#002820] font-extrabold rounded-lg shadow">
-                                    {{ $page }}
-                                </span>
-                            @else
-                                <a href="{{ $url }}"
-                                    class="w-8 h-8 flex items-center justify-center bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">
-                                    {{ $page }}
-                                </a>
-                            @endif
-                        @endforeach
-
-                        {{-- Tombol Next (>) --}}
-                        @if ($books->hasMorePages())
-                            <a href="{{ $books->nextPageUrl() }}"
-                                class="px-3 py-1.5 bg-[#002820] text-white hover:bg-emerald-800 rounded-lg border border-emerald-700/60 transition">&gt;</a>
-                        @else
-                            <span class="px-3 py-1.5 bg-[#002820] text-white/30 rounded-lg border border-emerald-700/40 cursor-not-allowed">&gt;</span>
-                        @endif
-
-                    </div>
-                @endif
+                <div class="mt-4">
+                    {{ $books->links('vendor.pagination.custom') }}
+                </div>
             </section>
 
         <!-- 3. SECTION KUTIPAN AYAT AL-QUR'AN -->

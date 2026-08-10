@@ -132,43 +132,9 @@
                     </table>
                 </div>
 
-                <!-- Paginasi -->
-                @if ($visits->hasPages())
-                <div class="flex justify-center items-center gap-3 mt-6 text-white font-bold select-none">
-                    {{-- Tombol Previous (<) --}}
-                    @if ($visits->onFirstPage())
-                    <span class="px-2 py-1 text-white/40 cursor-not-allowed">&lt;</span>
-                    @else
-                    <a href="{{ $visits->previousPageUrl() }}"
-                        class="px-2 py-1 text-white hover:text-white/80 transition">&lt;</a>
-                    @endif
-
-                    {{-- Nomor Halaman (1, 2, dst) --}}
-                    @foreach ($visits->getUrlRange(1, $visits->lastPage()) as $page => $url)
-                    @if ($page == $visits->currentPage())
-                    {{-- Halaman Aktif: Kotak Putih Teks Gelap --}}
-                    <span
-                        class="w-8 h-8 flex items-center justify-center bg-white text-slate-800 font-extrabold rounded-md shadow">
-                        {{ $page }}
-                    </span>
-                    @else
-                    {{-- Halaman Lain: Teks Putih Tanpa Background --}}
-                    <a href="{{ $url }}"
-                        class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-md transition">
-                        {{ $page }}
-                    </a>
-                    @endif
-                    @endforeach
-
-                    {{-- Tombol Next (>) --}}
-                    @if ($visits->hasMorePages())
-                    <a href="{{ $visits->nextPageUrl() }}"
-                        class="px-2 py-1 text-white hover:text-white/80 transition">&gt;</a>
-                    @else
-                    <span class="px-2 py-1 text-white/40 cursor-not-allowed">&gt;</span>
-                    @endif
+                <div class="mt-4">
+                    {{ $visits->links('vendor.pagination.custom') }}
                 </div>
-                @endif
             </div>
         </div>
     </main>

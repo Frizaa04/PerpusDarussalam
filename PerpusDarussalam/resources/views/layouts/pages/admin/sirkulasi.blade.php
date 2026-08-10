@@ -127,34 +127,8 @@
                     </table>
                 </div>
 
-                <!-- Paginasi Bersih dan Minimalis -->
-                <div class="flex justify-center items-center gap-2 mt-6 text-white font-bold">
-                    
-                    {{-- Tombol Sebelumnya (<) --}}
-                    @if ($circulations->onFirstPage())
-                        <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
-                    @else
-                        <a href="{{ $circulations->previousPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&lt;</a>
-                    @endif
-
-                    {{-- Nomor Halaman (Selalu Tampil Minimal 1) --}}
-                    @foreach ($circulations->getUrlRange(1, max($circulations->lastPage(), 1)) as $page => $url)
-                        @if ($page == $circulations->currentPage())
-                            {{-- Halaman Aktif (Kotak Putih, Teks Gelap) --}}
-                            <span class="px-2.5 py-1 bg-white text-gray-700 rounded text-sm shadow">{{ $page }}</span>
-                        @else
-                            {{-- Halaman Lain --}}
-                            <a href="{{ $url }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">{{ $page }}</a>
-                        @endif
-                    @endforeach
-
-                    {{-- Tombol Selanjutnya (>) --}}
-                    @if ($circulations->hasMorePages())
-                        <a href="{{ $circulations->nextPageUrl() }}" class="px-2.5 py-1 hover:bg-white/20 rounded text-sm transition">&gt;</a>
-                    @else
-                        <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
-                    @endif
-
+                <div class="mt-4">
+                    {{ $circulations->links('vendor.pagination.custom') }}
                 </div>
 
             </div>

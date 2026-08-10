@@ -1,8 +1,5 @@
 @if ($paginator->hasPages())
-    <div class="flex items-center justify-between border-t border-white/20 pt-3 mt-3 text-xs text-white">
-        <div>
-            <span>Menampilkan <b>{{ $paginator->firstItem() }}</b> sampai <b>{{ $paginator->lastItem() }}</b> dari <b>{{ $paginator->total() }}</b> data</span>
-        </div>
+    <div class="flex justify-center items-center w-full mt-4">
         <div class="flex items-center gap-1">
             {{-- Tombol Previous --}}
             @if ($paginator->onFirstPage())
