@@ -15,13 +15,27 @@ class MemberController extends Controller
 
         $query = User::query();
 
-        // Filter berdasarkan Pencarian (Nama / NISN / NIK) 
+        // Filter berdasarkan Pencarian
         if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('nisn', 'LIKE', "%{$search}%")
-                  ->orWhere('nik', 'LIKE', "%{$search}%");
-            });
+            $searchTerm = strtolower(trim($search));
+
+            if ($searchTerm === 'expired') {
+                // Jika diketik "expired", cari user yang masa berlakunya lewat dari hari ini ATAU NULL
+                $query->where(function ($q) {
+                    $q->where('masa_berlaku_sampai', '<', now())
+                    ->orWhereNull('masa_berlaku_sampai');
+                });
+            } elseif ($searchTerm === 'aktif') {
+                // Jika diketik "aktif", cari user yang masa berlakunya masih aktif (>= hari ini)
+                $query->where('masa_berlaku_sampai', '>=', now());
+            } else {
+                // Jika mengetik biasa (Nama / NISN / NIK)
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('nisn', 'LIKE', "%{$search}%")
+                    ->orWhere('nik', 'LIKE', "%{$search}%");
+                });
+            }
         }
 
         // Filter berdasarkan Status (Siswa, Guru, Umum)
@@ -279,9 +293,11 @@ class MemberController extends Controller
 
     public function destroyExpired()
     {
-        $deleted = User::where('masa_berlaku_sampai', '<', now())
-            ->whereNotNull('masa_berlaku_sampai')
-            ->where('role', '!=', 'admin')
+        $deleted = User::where('role', '!=', 'admin')
+            ->where(function ($query) {
+                $query->where('masa_berlaku_sampai', '<', now())
+                    ->orWhereNull('masa_berlaku_sampai');
+            })
             ->delete();
 
         return redirect()->back()->with('success', "Berhasil menghapus {$deleted} user yang berstatus expired.");

@@ -75,7 +75,6 @@
 
                             <!-- Area Tombol Kontrol -->
                             <div class="flex items-center gap-2 flex-wrap">
-
                                 <!-- Tombol Hapus Semua Expired-->
                                 <button type="button" id="btnHapusExpired" form="hapusExpiredForm"
                                     onclick="confirmDeleteExpired()"
@@ -83,7 +82,7 @@
                                     Hapus Semua Expired
                                 </button>
 
-                                <!-- Tombol Konfirmasi Hapus Massal (Pilihan Checkbox) -->
+                                <!-- Tombol Konfirmasi Hapus Massal -->
                                 <button type="submit" form="deleteUserForm" id="btnConfirmDeleteUser"
                                     onclick="return confirm('Yakin ingin menghapus user yang dipilih?')"
                                     class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
@@ -108,14 +107,15 @@
                             <table class="min-w-full text-left border-collapse border border-white/40">
                                 <thead>
                                     <tr class="bg-[#004d40] text-white divide-x divide-white/40">
-                                        <th class="p-3 text-xs font-bold tracking-wider">Foto</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider text-center">Foto</th>
                                         <th class="p-3 text-xs font-bold tracking-wider">No. Induk (NISN/NIK)</th>
-                                        <th class="p-3 text-xs font-bold tracking-wider">Nama</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Nama & Alamat</th> <!-- HEADER DIGABUNG -->
                                         <th class="p-3 text-xs font-bold tracking-wider">Kelamin</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider">Kelas</th>
                                         <th class="p-3 text-xs font-bold tracking-wider">Peran</th>
                                         <th class="p-3 text-xs font-bold tracking-wider">Email</th>
                                         <th class="p-3 text-xs font-bold tracking-wider">Masa Berlaku</th>
-                                        <th class="p-3 text-xs font-bold tracking-wider">Status Kartu</th>
+                                        <th class="p-3 text-xs font-bold tracking-wider text-center">Status Kartu</th>
                                         <th class="p-3 text-xs font-bold tracking-wider text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -134,22 +134,35 @@
                                                     </div>
                                                 @endif
                                             </td>
+
                                             <!-- Kolom No Induk -->
                                             <td class="p-3 text-sm font-bold text-white/90">
                                                 {{ $student->nisn ?? ($student->nik ?? '-') }}
                                             </td>
-                                            <!-- Kolom Nama -->
-                                            <td class="p-3 text-sm font-bold text-white/90">{{ $student->name }}</td>
+
+                                            <!-- Kolom Nama & Alamat -->
+                                            <td class="p-3 text-sm text-white/90">
+                                                <div class="font-bold">{{ $student->name }}</div>
+                                                <div class="text-xs text-white/70 mt-0.5">Alamat: {{ $student->alamat ?? '-' }}</div>
+                                            </td>
+
                                             <!-- Kolom Jenis Kelamin -->
                                             <td class="p-3 text-sm font-bold text-white/90">
                                                 {{ $student->jenis_kelamin == 'L' ? 'Laki-laki' : ($student->jenis_kelamin == 'P' ? 'Perempuan' : '-') }}
                                             </td>
+
+                                            <!-- Kolom Kelas -->
+                                            <td class="p-3 text-sm font-bold text-white/90">
+                                                {{ $student->kelas ?? '-' }}
+                                            </td>
+
                                             <!-- Kolom Peran -->
                                             <td class="p-3 text-sm font-bold text-white/90">
                                                 <span class="px-2 py-1 rounded text-xs bg-[#003d30] uppercase">
                                                     {{ $student->role ?? 'Siswa' }}
                                                 </span>
                                             </td>
+
                                             <!-- Kolom Email -->
                                             <td class="p-3 text-sm font-medium text-white/90">{{ $student->email }}</td>
 
@@ -161,48 +174,45 @@
                                             <!-- Kolom Status Kartu -->
                                             <td class="p-3 text-sm text-center">
                                                 @if ($student->masa_berlaku_sampai && \Carbon\Carbon::parse($student->masa_berlaku_sampai)->isFuture())
-                                                    <span
-                                                        class="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold">Aktif</span>
+                                                    <span class="bg-emerald-600 text-white px-2 py-1 rounded text-xs font-semibold">Aktif</span>
                                                 @else
-                                                    <span
-                                                        class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">Expired</span>
+                                                    <span class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">Expired</span>
                                                 @endif
                                             </td>
 
-                                            <!-- Tombol Aksi (Edit, Perpanjang, & Checkbox Mode Hapus) -->
-                                            <td class="p-3 text-sm text-center">
+                                            <!-- Tombol Aksi -->
+                                            <td class="p-2 text-sm text-center">
                                                 <!-- Mode Normal: Tombol Edit & Perpanjang -->
-                                                <div class="edit-mode-action space-y-1">
+                                                <div class="edit-mode-action flex flex-col items-center justify-center gap-1.5 mx-auto max-w-[110px]">
                                                     <button type="button"
                                                         onclick="openEditModal(
-                                            '{{ $student->id }}', 
-                                            '{{ $student->nisn ?? '' }}', 
-                                            '{{ $student->nik ?? '' }}', 
-                                            '{{ addslashes($student->name) }}', 
-                                            '{{ $student->email }}', 
-                                            '{{ $student->status ?? '' }}', 
-                                            '{{ $student->jenis_kelamin }}', 
-                                            '{{ addslashes($student->alamat) }}',
-                                            '{{ $student->jenjang }}', 
-                                            '{{ $student->kelas }}'
-                                        )"
-                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm inline-block w-full">
+                                                            '{{ $student->id }}', 
+                                                            '{{ $student->nisn ?? '' }}', 
+                                                            '{{ $student->nik ?? '' }}', 
+                                                            '{{ addslashes($student->name) }}', 
+                                                            '{{ $student->email }}', 
+                                                            '{{ $student->status ?? '' }}', 
+                                                            '{{ $student->jenis_kelamin }}', 
+                                                            '{{ addslashes($student->alamat) }}',
+                                                            '{{ $student->jenjang }}', 
+                                                            '{{ $student->kelas }}'
+                                                        )"
+                                                        class="bg-[#004d40] text-white px-2.5 py-1 rounded text-[11px] font-bold uppercase hover:bg-[#003d30] transition shadow-sm w-full">
                                                         Edit Data
                                                     </button>
 
-                                                    <!-- Tombol Perpanjang HANYA MUNCUL jika statusnya EXPIRED -->
+                                                    <!-- Tombol Perpanjang (Hanya Muncul jika Expired) -->
                                                     @if (!$student->masa_berlaku_sampai || \Carbon\Carbon::parse($student->masa_berlaku_sampai)->isPast())
                                                         <button type="button"
                                                             onclick="perpanjangKartu('{{ $student->id }}', '{{ addslashes($student->name) }}')"
-                                                            class="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-amber-700 transition shadow-sm inline-block w-full">
+                                                            class="bg-amber-600 text-white px-2.5 py-1 rounded text-[11px] font-bold uppercase hover:bg-amber-700 transition shadow-sm w-full">
                                                             Perpanjang
                                                         </button>
                                                     @endif
                                                 </div>
 
-                                                <!-- Mode Hapus: Checkbox (Tersembunyi secara default) -->
-                                                <div
-                                                    class="delete-mode-action hidden flex items-center justify-center gap-2 py-1">
+                                                <!-- Mode Hapus: Checkbox -->
+                                                <div class="delete-mode-action hidden flex items-center justify-center gap-2 py-1">
                                                     <input type="checkbox" name="ids[]" value="{{ $student->id }}"
                                                         class="user-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
                                                     <span class="text-xs font-semibold text-red-200 italic">Pilih</span>
@@ -211,9 +221,9 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9"
-                                                class="p-5 text-center text-sm font-semibold text-white/80">Data
-                                                user tidak ditemukan.</td>
+                                            <td colspan="10" class="p-5 text-center text-sm font-semibold text-white/80">
+                                                Data user tidak ditemukan.
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
