@@ -21,6 +21,9 @@ use App\Http\Controllers\UserEbookController;
 use App\Http\Controllers\AboutUserController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\PushNotificationController; 
+use App\Exports\MonthlyAttendanceExport;
+use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 // Halaman Awal (Public) - Langsung Mengarah ke Home User
 Route::get('/', function () {
@@ -146,6 +149,14 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
     Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
     Route::get('/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
+    Route::get('/test-export-bulanan', function () {
+        $startDate = Carbon::create(2026, 7, 1)->startOfMonth();
+        $endDate   = Carbon::create(2026, 7, 1)->endOfMonth();
+        return Excel::download(
+            new MonthlyAttendanceExport($startDate, $endDate),
+            'Laporan_Absensi_Juli_2026.xlsx'
+        );
+    });
     Route::get('/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
     
     // Laporan Keuangan

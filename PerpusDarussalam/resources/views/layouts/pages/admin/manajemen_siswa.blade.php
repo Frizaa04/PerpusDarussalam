@@ -229,38 +229,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <!-- Paginasi Selalu Tampil (Meskipun Hanya 1 Halaman) -->
-                        <div class="flex justify-center items-center gap-2 mt-6 text-gray-700 font-bold">
-
-                            {{-- Tombol Previous (<) --}}
-                            @if ($students->onFirstPage())
-                                <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
-                            @else
-                                <a href="{{ $students->previousPageUrl() }}"
-                                    class="px-2.5 py-1 hover:bg-[#004d40]/10 rounded text-sm transition">&lt;</a>
-                            @endif
-
-                            {{-- Nomor Halaman --}}
-                            @foreach ($students->getUrlRange(1, max($students->lastPage(), 1)) as $page => $url)
-                                @if ($page == $students->currentPage())
-                                    {{-- Halaman Aktif (Kotak Hijau Tua, Teks Putih) --}}
-                                    <span
-                                        class="px-2.5 py-1 bg-[#004d40] text-white rounded text-sm shadow">{{ $page }}</span>
-                                @else
-                                    {{-- Halaman Lain --}}
-                                    <a href="{{ $url }}"
-                                        class="px-2.5 py-1 hover:bg-[#004d40]/10 rounded text-sm transition">{{ $page }}</a>
-                                @endif
-                            @endforeach
-
-                            {{-- Tombol Next (>) --}}
-                            @if ($students->hasMorePages())
-                                <a href="{{ $students->nextPageUrl() }}"
-                                    class="px-2.5 py-1 hover:bg-[#004d40]/10 rounded text-sm transition">&gt;</a>
-                            @else
-                                <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
-                            @endif
-
+                        <div class="mt-4">
+                            {{ $students->links('vendor.pagination.custom') }}
                         </div>
                     </div>
                 </form>
