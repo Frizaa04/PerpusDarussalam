@@ -95,10 +95,10 @@ class LaporanController extends Controller
         ]);
 
         try {
-            $import = new KoleksiImport();
+            $import = app(KoleksiImport::class);  
             Excel::import($import, $request->file('file_excel'));
 
-            $imported = $import->importedCount;
+            $imported = $import->importedCount;    
             $duplicates = $import->duplicates;
 
             // Kasus 1: Semua data di Excel duplikat

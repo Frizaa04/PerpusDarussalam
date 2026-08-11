@@ -42,36 +42,7 @@ class BookController extends Controller
 
     public function store(Request $request, BookService $bookService)
     {
-        // 1. Cek jika admin ingin MENGHAPUS kategori
-        if ($request->filled('delete_category_id')) {
-            $category = Category::find($request->delete_category_id);
-            if ($category) {
-                // Opsional: Cek apakah kategori masih dipakai buku
-                // if ($category->books()->count() > 0) { ... }
-                $category->delete();
-            }
-            return redirect()
-                ->route('book.index')
-                ->with('success', 'Kategori berhasil dihapus!');
-        }
-
-        // 2. Cek jika admin melakukan Edit Nama Kategori yang ada
-        if ($request->filled('edit_category_id') && $request->filled('kategori_baru')) {
-            $category = Category::find($request->edit_category_id);
-            if ($category) {
-                $category->update(['nama' => $request->kategori_baru]);
-            }
-            $request->merge(['categories_id' => $request->edit_category_id]);
-        }
-        // 3. Cek jika admin mengetik Kategori Baru
-        elseif ($request->filled('kategori_baru')) {
-            $newCategory = Category::create([
-                'nama' => $request->kategori_baru
-            ]);
-            $request->merge(['categories_id' => $newCategory->id]);
-        }
-
-        // 4. Jalankan validasi buku
+        // Jalankan validasi buku
         $request->validateWithBag('bookStoreForm', [
             'categories_id'     => 'required|exists:categories,id',
             'judul'             => 'required|string|max:255',
@@ -86,7 +57,7 @@ class BookController extends Controller
             'rak'               => 'required|string|max:255',
         ]);
 
-        // 5. Simpan data buku lewat Service
+        // Simpan data buku lewat Service
         $bookService->createBook($request->all());
 
         return redirect()
@@ -138,5 +109,43 @@ class BookController extends Controller
         return redirect()
             ->route('book.index')
             ->with('success', 'Buku yang dipilih berhasil dihapus!');
+    }
+
+    // Tambah Kategori langsung dari tombol di halaman utama
+    public function storeCategory(Request $request)
+    {
+        $request->validateWithBag('categoryStoreForm', [
+            'nama_kategori' => 'required|string|max:255|unique:categories,nama',
+        ], [
+            'nama_kategori.unique' => 'Kategori dengan nama ini sudah ada.',
+        ]);
+
+        Category::create([
+            'nama'      => $request->nama_kategori,
+            'deskripsi' => '-',
+        ]);
+
+        return redirect()
+            ->route('book.index')
+            ->with('success', 'Kategori baru berhasil ditambahkan!');
+    }
+
+    public function destroyCategory($id)
+    {
+        $category = Category::find($id);
+
+        if (!$category) {
+            return redirect()->route('book.index')->with('error', 'Kategori tidak ditemukan.');
+        }
+
+        $jumlahBuku = Book::where('categories_id', $id)->count();
+
+        if ($jumlahBuku > 0) {
+            return redirect()->route('book.index')->with('error', "Kategori '{$category->nama}' masih dipakai oleh {$jumlahBuku} buku. Pindahkan atau hapus buku tersebut terlebih dahulu sebelum menghapus kategori ini.");
+        }
+
+        $category->delete();
+
+        return redirect()->route('book.index')->with('success', "Kategori '{$category->nama}' berhasil dihapus!");
     }
 }

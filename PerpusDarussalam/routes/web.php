@@ -102,6 +102,8 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
     Route::post('/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
     Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
+    Route::post('/katalog-buku/kategori/store', [BookController::class, 'storeCategory'])->name('book.category.store');
+    Route::delete('/katalog-buku/kategori/{id}', [BookController::class, 'destroyCategory'])->name('book.category.destroy');
 
     // Edit perbuku
     Route::get('/book/{id}/items', [BookItemController::class, 'getItems']);

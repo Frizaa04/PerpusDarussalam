@@ -11,12 +11,25 @@
             <!-- Area Konten -->
             <div class="p-8 space-y-6">
 
+                @if (session('success'))
+                    <div class="bg-emerald-600 text-white px-4 py-3 rounded shadow-md font-semibold text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="bg-red-600 text-white px-4 py-3 rounded shadow-md font-semibold text-sm">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <!-- Pencarian & Tombol Buku Baru -->
                 <div class="flex items-center gap-4">
                     <div class="max-w-md w-full">
                         <form action="{{ route('book.index') }}" method="GET"
                             class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Data Buku"
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                placeholder="Cari Data Buku"
                                 class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">
                             <button type="submit"
                                 class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
@@ -25,12 +38,20 @@
                         </form>
                     </div>
 
-                    <!-- Tombol dan Buku Baru -->
+                    <!-- Tombol Buku Baru -->
                     <button type="button" onclick="openAddModal()"
-                        class="border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded bg-white hover:bg-[#004d40] hover:text-white transition shadow-sm">
+                        class="border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded bg-white hover:bg-[#004d40] hover:text-white transition shadow-sm whitespace-nowrap">
                         + Buku Baru
                     </button>
+
+                    <!-- Tombol Kelola Kategori -->
+                    <button type="button" onclick="openAddCategoryModal()"
+                        class="border-2 border-[#004d40] text-[#004d40] font-bold px-4 py-2 rounded bg-white hover:bg-[#004d40] hover:text-white transition shadow-sm whitespace-nowrap">
+                        Kelola Kategori
+                    </button>
                 </div>
+
+
 
                 <!-- Form/Wrapper Tabel untuk Aksi Hapus Massal -->
                 <form id="deleteForm" action="{{ route('book.destroyMultiple') }}" method="POST">
@@ -79,17 +100,15 @@
                         <div class="overflow-x-auto rounded">
                             <table class="min-w-full text-left border-collapse border border-white/40">
                                 <thead>
-                                    <thead>
-                                        <tr class="bg-[#004d40] text-white divide-x divide-white/40">
-                                            <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
-                                            <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
-                                            <th class="p-3 text-sm font-bold tracking-wider">Penulis & ISBN</th>
-                                            <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
-                                            <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
-                                            <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
-                                            <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
+                                    <tr class="bg-[#004d40] text-white divide-x divide-white/40">
+                                        <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Penulis & ISBN</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
+                                    </tr>
                                 <tbody class="text-white divide-y divide-white/40">
                                     @forelse($books as $book)
                                         <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
@@ -234,42 +253,14 @@
 
                     <!-- Kategori -->
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-sm font-semibold">Kategori</label>
-                            <div class="space-x-1.5">
-                                <button type="button" onclick="hapusKategoriAktif()" id="btnHapusKategori"
-                                    class="text-xs underline text-red-300 hover:text-white hidden">
-                                    Hapus
-                                </button>
-                                <button type="button" onclick="editKategoriAktif()" id="btnEditKategori"
-                                    class="text-xs underline text-yellow-200 hover:text-white hidden">
-                                    Edit
-                                </button>
-                                <button type="button" onclick="toggleInputKategori()" id="btnToggleKategori"
-                                    class="text-xs underline text-emerald-200 hover:text-white">
-                                    + Kategori Baru
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Dropdown Kategori Lama -->
-                        <select name="categories_id" id="selectKategori" onchange="cekPilihKategori(this)"
+                        <label class="block text-sm font-semibold mb-1">Kategori</label>
+                        <select name="categories_id" id="selectKategori" required
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
-                            <option value="">...</option>
+                            <option value="">Pilih Kategori...</option>
                             @foreach ($allCategories as $cat)
-                                <option value="{{ $cat->id }}" data-nama="{{ $cat->nama }}">{{ $cat->nama }}
-                                </option>
+                                <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
                             @endforeach
                         </select>
-
-                        <!-- Input Text untuk Kategori Baru / Edit Kategori -->
-                        <input type="text" name="kategori_baru" id="inputKategoriBaru"
-                            placeholder="Ketik kategori baru..."
-                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white hidden">
-
-                        <!-- Input hidden untuk penanda mode edit & hapus -->
-                        <input type="hidden" name="edit_category_id" id="editCategoryId">
-                        <input type="hidden" name="delete_category_id" id="deleteCategoryId">
                     </div>
 
                     <div>
@@ -410,6 +401,71 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ====== POP-UP MODAL KELOLA KATEGORI ====== -->
+    <div id="addCategoryModal"
+        class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300">
+        <div
+            class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-md p-6 relative border border-emerald-400/30 max-h-[85vh] overflow-y-auto">
+            <!-- Tombol Close -->
+            <button type="button" onclick="closeAddCategoryModal()"
+                class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
+                &#10005;
+            </button>
+
+            <h3 class="text-xl font-bold mb-5 tracking-wide">Kelola Kategori</h3>
+
+            <!-- Kotak Error Tambah Kategori -->
+            <div
+                class="mb-3 p-2 bg-red-600 text-white rounded text-xs {{ $errors->categoryStoreForm->any() ? '' : 'hidden' }}">
+                @if ($errors->categoryStoreForm->any())
+                    @foreach ($errors->categoryStoreForm->all() as $error)
+                        <div>- {{ $error }}</div>
+                    @endforeach
+                @endif
+            </div>
+
+            <!-- Form Tambah Kategori -->
+            <form action="{{ route('book.category.store') }}" method="POST" class="space-y-3 mb-6">
+                @csrf
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Tambah Kategori Baru</label>
+                    <div class="flex gap-2">
+                        <input type="text" name="nama_kategori" placeholder="Contoh: Ensiklopedia" required
+                            value="{{ old('nama_kategori') }}"
+                            class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
+                        <button type="submit"
+                            class="bg-white text-[#004d40] hover:bg-emerald-50 px-4 py-1.5 rounded text-sm font-bold transition shadow whitespace-nowrap">
+                            Tambah
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Daftar Kategori yang Sudah Ada -->
+            <div class="border-t border-white/20 pt-4">
+                <label class="block text-sm font-semibold mb-2">Daftar Kategori</label>
+                <div class="space-y-1.5">
+                    @forelse ($allCategories as $cat)
+                        <div class="flex items-center justify-between bg-[#004d40] px-3 py-2 rounded text-sm">
+                            <span>{{ $cat->nama }}</span>
+                            <form action="{{ route('book.category.destroy', $cat->id) }}" method="POST"
+                                onsubmit="return confirm('Yakin ingin menghapus kategori \'{{ $cat->nama }}\'?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="text-red-300 hover:text-red-100 text-xs font-bold underline">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <p class="text-xs text-white/60 italic">Belum ada kategori.</p>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </div>
 
@@ -570,6 +626,16 @@
             // Otomatis membuka modal edit jika terjadi error pada update
             @if ($errors->bookUpdateForm->any())
             @endif
+
+            // Otomatis buka modal tambah kategori jika validasi gagal
+            @if ($errors->categoryStoreForm->any())
+                openAddCategoryModal();
+            @endif
+
+            // ✅ Otomatis buka modal Kelola Kategori jika ada error terkait kategori (misal gagal hapus)
+            @if (session('error') && str_contains(session('error'), 'kategori'))
+                openAddCategoryModal();
+            @endif
         });
 
         // Modal Tambah Buku
@@ -581,90 +647,14 @@
             document.getElementById('addModal').classList.add('hidden');
         }
 
-        // Munculkan tombol "Edit" dan "Hapus" hanya jika kategori di dropdown dipilih
-        function cekPilihKategori(select) {
-            const btnEdit = document.getElementById('btnEditKategori');
-            const btnHapus = document.getElementById('btnHapusKategori');
-            if (select.value) {
-                btnEdit.classList.remove('hidden');
-                btnHapus.classList.remove('hidden');
-            } else {
-                btnEdit.classList.add('hidden');
-                btnHapus.classList.add('hidden');
-            }
+        // Tambah Kategori (dari tombol header)
+        function openAddCategoryModal() {
+            document.getElementById('addCategoryModal').classList.remove('hidden');
         }
 
-        // Toggle untuk mode Tambah Kategori Baru
-        function toggleInputKategori() {
-            const selectBox = document.getElementById('selectKategori');
-            const inputBox = document.getElementById('inputKategoriBaru');
-            const editIdInput = document.getElementById('editCategoryId');
-            const deleteIdInput = document.getElementById('deleteCategoryId');
-            const btnToggle = document.getElementById('btnToggleKategori');
-            const btnEdit = document.getElementById('btnEditKategori');
-            const btnHapus = document.getElementById('btnHapusKategori');
-
-            // Reset mode
-            editIdInput.value = "";
-            deleteIdInput.value = "";
-
-            if (inputBox.classList.contains('hidden')) {
-                inputBox.classList.remove('hidden');
-                selectBox.classList.add('hidden');
-                selectBox.value = "";
-                btnEdit.classList.add('hidden');
-                btnHapus.classList.add('hidden');
-                btnToggle.textContent = "Pilih Kategori Eksisting";
-                inputBox.placeholder = "Ketik kategori baru...";
-            } else {
-                inputBox.classList.add('hidden');
-                selectBox.classList.remove('hidden');
-                inputBox.value = "";
-                btnToggle.textContent = "+ Kategori Baru";
-            }
+        function closeAddCategoryModal() {
+            document.getElementById('addCategoryModal').classList.add('hidden');
         }
-
-        // Toggle untuk mode Edit Kategori yang sedang dipilih
-        function editKategoriAktif() {
-            const selectBox = document.getElementById('selectKategori');
-            const selectedOption = selectBox.options[selectBox.selectedIndex];
-            const inputBox = document.getElementById('inputKategoriBaru');
-            const editIdInput = document.getElementById('editCategoryId');
-            const btnToggle = document.getElementById('btnToggleKategori');
-            const btnEdit = document.getElementById('btnEditKategori');
-            const btnHapus = document.getElementById('btnHapusKategori');
-
-            if (selectBox.value) {
-                editIdInput.value = selectBox.value;
-                inputBox.value = selectedOption.getAttribute('data-nama');
-
-                selectBox.classList.add('hidden');
-                inputBox.classList.remove('hidden');
-                btnEdit.classList.add('hidden');
-                btnHapus.classList.add('hidden');
-                btnToggle.textContent = "Batal Edit";
-                inputBox.placeholder = "Edit nama kategori...";
-            }
-        }
-
-        // Fungsi untuk menghapus kategori terpilih
-        function hapusKategoriAktif() {
-            const selectBox = document.getElementById('selectKategori');
-            const selectedOption = selectBox.options[selectBox.selectedIndex];
-            const deleteIdInput = document.getElementById('deleteCategoryId');
-
-            if (selectBox.value) {
-                const namaKategori = selectedOption.text;
-                if (confirm(`Apakah Anda yakin ingin menghapus kategori "${namaKategori}"?`)) {
-                    // Set ID kategori yang mau dihapus ke input hidden
-                    deleteIdInput.value = selectBox.value;
-
-                    // Submit form secara otomatis untuk memproses penghapusan
-                    selectBox.form.submit();
-                }
-            }
-        }
-
 
         // Modal Edit Data Buku
         function openEditModal(id, judul, penulis, penerbit, deskripsi, isbn, tglPembelian, catId, stok, rak, kodeBuku,
@@ -722,31 +712,31 @@
                         let printBarcodeUrl = `/book/item/${item.id}/print-barcode`;
 
                         tbody.innerHTML += `
-                    <tr class="hover:bg-white/10 transition-colors">
-                        <td class="p-2.5 text-center">
-                            <input type="checkbox" name="selected_items[]" value="${item.id}" onchange="updateSelectedCount()" class="item-checkbox cursor-pointer accent-blue-600 w-4 h-4 rounded">
-                        </td>
-                        <td class="p-2.5 font-bold">${item.nomor_inventaris}</td>
-                        <td class="p-2.5 capitalize">${kondisiFormatted}</td>
-                        <td class="p-2.5 uppercase"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} text-white">${item.status_pinjam}</span></td>
-                        <td class="p-2.5 text-center space-x-1">
-                            <a href="${printBarcodeUrl}" target="_blank" 
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow inline-block">
-                                Cetak Barcode
-                            </a>
-                            <button type="button" onclick="openEditItemModal(${item.id}, '${item.nomor_inventaris}', '${item.kondisi}', '${item.status_pinjam}')" 
-                                class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow">
-                                Edit Bagian Ini
+                <tr class="hover:bg-white/10 transition-colors">
+                    <td class="p-2.5 text-center">
+                        <input type="checkbox" name="selected_items[]" value="${item.id}" onchange="updateSelectedCount()" class="item-checkbox cursor-pointer accent-blue-600 w-4 h-4 rounded">
+                    </td>
+                    <td class="p-2.5 font-bold">${item.nomor_inventaris}</td>
+                    <td class="p-2.5 capitalize">${kondisiFormatted}</td>
+                    <td class="p-2.5 uppercase"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} text-white">${item.status_pinjam}</span></td>
+                    <td class="p-2.5 text-center space-x-1">
+                        <a href="${printBarcodeUrl}" target="_blank" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow inline-block">
+                            Cetak Barcode
+                        </a>
+                        <button type="button" onclick="openEditItemModal(${item.id}, '${item.nomor_inventaris}', '${item.kondisi}', '${item.status_pinjam}')" 
+                            class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow">
+                            Edit Bagian Ini
+                        </button>
+                        <form action="/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
+                            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow">
+                                Hapus
                             </button>
-                            <form action="/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
-                                <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'}">
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow">
-                                    Hapus
-                                </button>
-                            </form>
-                        </td>
-                    </tr>`;
+                        </form>
+                    </td>
+                </tr>`;
                     });
                     // Reset hitungan terpilih setiap kali modal dibuka ulang
                     updateSelectedCount();
@@ -780,8 +770,10 @@
         window.onclick = function(event) {
             const addModal = document.getElementById('addModal');
             const editModal = document.getElementById('editModal');
+            const addCategoryModal = document.getElementById('addCategoryModal');
             if (event.target === addModal) closeAddModal();
             if (event.target === editModal) closeEditModal();
+            if (event.target === addCategoryModal) closeAddCategoryModal();
         }
 
         // Mode Hapus Massal / Checkbox Aksi
