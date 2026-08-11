@@ -32,12 +32,12 @@
                     <!-- Form Cari Data -->
                     <form action="{{ route('transaction.index') }}" method="GET"
                         class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white w-full sm:w-80 shadow-sm">
-                        
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Data Transaksi"
+
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Cari Data Transaksi"
                             class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400">
 
-                        {{-- Sisipkan parameter filter lain di sini jika ada (seperti filter tanggal/jenis) --}}
-                        @if(request('jenis'))
+                        @if (request('jenis'))
                             <input type="hidden" name="jenis" value="{{ request('jenis') }}">
                         @endif
 
@@ -100,6 +100,7 @@
                                         <th class="p-3 text-sm font-bold tracking-wider">Nominal</th>
                                         <th class="p-3 text-sm font-bold tracking-wider">Tanggal</th>
                                         <th class="p-3 text-sm font-bold tracking-wider">Keterangan</th>
+                                        <th class="p-3 text-sm font-bold tracking-wider">Status Bayar</th>
                                         <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -123,6 +124,17 @@
                                             </td>
                                             <td class="p-3 text-sm font-medium text-white/90 italic">
                                                 {{ $transaction->keterangan ?? '...' }}
+                                            </td>
+                                            <td class="p-3 text-sm font-medium text-center">
+                                                @if ($transaction->status_bayar === 'sudah_bayar')
+                                                    <span
+                                                        class="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">Sudah
+                                                        Bayar</span>
+                                                @else
+                                                    <span
+                                                        class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">Belum
+                                                        Bayar</span>
+                                                @endif
                                             </td>
                                             <td class="p-3 text-sm font-medium text-center">
                                                 <div class="flex items-center justify-center gap-3">
@@ -220,6 +232,15 @@
                         </select>
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Status Bayar</label>
+                        <select name="status_bayar"
+                            class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white cursor-pointer">
+                            <option value="belum_bayar" selected>Belum Bayar</option>
+                            <option value="sudah_bayar">Sudah Bayar</option>
+                        </select>
+                    </div>
+
                     <!-- Kolom Kanan 3: Tanggal Transaksi -->
                     <div>
                         <label class="block text-sm font-medium mb-1">Tanggal Transaksi</label>
@@ -254,7 +275,7 @@
                 </button>
             </div>
 
-            <!-- Form Edit Transaksi (Action akan diubah otomatis via JavaScript) -->
+            <!-- Form Edit Transaksi -->
             <form id="form-edit-transaction" method="POST">
                 @csrf
                 @method('PUT')
@@ -295,6 +316,15 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium mb-1">Status Bayar</label>
+                    <select id="edit-status-bayar" name="status_bayar"
+                        class="w-full bg-[#b0bec5] text-gray-800 rounded px-3 py-2 outline-none font-medium focus:ring-2 focus:ring-white cursor-pointer">
+                        <option value="belum_bayar">Belum Bayar</option>
+                        <option value="sudah_bayar">Sudah Bayar</option>
+                    </select>
+                </div>
+
                 <!-- Tombol Konfirmasi Modal -->
                 <div class="mt-8 flex justify-center">
                     <button type="submit"
@@ -329,7 +359,7 @@
                 btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnToggle.classList.add('bg-gray-700', 'hover:bg-gray-800');
                 textBtn.innerText = 'Batal';
-                btnIcon.innerText = 'close'; 
+                btnIcon.innerText = 'close';
 
                 btnSubmit.classList.remove('hidden');
                 labelCheckAll.classList.remove('hidden');
@@ -358,29 +388,31 @@
 
         // Fungsi untuk membuka modal edit dan mengambil data transaksi
         function openEditModal(id) {
-        fetch(`/transaksi/${id}/edit`)
-            .then(response => response.json())
-            .then(res => {
-                if (res.success) {
-                    let data = res.data;
-                    
-                    document.getElementById('form-edit-transaction').action = `/transaksi/${id}`;
-                    
-                    // Masukkan data hanya untuk input yang tersisa
-                    document.getElementById('edit-nominal').value = data.nominal || '';
-                    document.getElementById('edit-keterangan').value = data.keterangan || '';
-                    document.getElementById('edit-jenis').value = data.jenis || '';
-                    document.getElementById('edit-tanggal').value = data.tanggal || '';
-                    
-                    document.getElementById('modal-edit-transaction').classList.remove('hidden');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
+            fetch(`/transaksi/${id}/edit`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.success) {
+                        let data = res.data;
 
-    function closeEditModal() {
-        document.getElementById('modal-edit-transaction').classList.add('hidden');
-    }
+                        document.getElementById('form-edit-transaction').action = `/transaksi/${id}`;
+
+                        // Masukkan data hanya untuk input yang tersisa
+                        document.getElementById('edit-nominal').value = data.nominal || '';
+                        document.getElementById('edit-keterangan').value = data.keterangan || '';
+                        document.getElementById('edit-jenis').value = data.jenis || '';
+                        document.getElementById('edit-tanggal').value = data.tanggal || '';
+                        document.getElementById('edit-status-bayar').value = data.status_bayar ||
+                        'belum_bayar'; // [BARU]
+
+                        document.getElementById('modal-edit-transaction').classList.remove('hidden');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function closeEditModal() {
+            document.getElementById('modal-edit-transaction').classList.add('hidden');
+        }
 
         function submitDeleteForm() {
             const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
@@ -416,7 +448,6 @@
         const inputNoIdentitas = document.getElementById('input-no-identitas');
         const inputNamaUser = document.getElementById('input-nama-user');
 
-        // Cegah enter men-submit form saat scanning barcode
         if (inputNoIdentitas) {
             inputNoIdentitas.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
@@ -425,7 +456,6 @@
             });
         }
 
-        // Event listener saat user mengetik atau scan di kolom No Identitas
         let timeout = null;
         inputNoIdentitas.addEventListener('keyup', function() {
             clearTimeout(timeout);
@@ -436,7 +466,6 @@
                 return;
             }
 
-            // Delay sedikit (debounce) agar tidak terlalu sering menembak server saat mengetik
             timeout = setTimeout(() => {
                 fetch(`/transaksi/cari-user/${encodeURIComponent(identitas)}`)
                     .then(response => response.json())
@@ -449,6 +478,31 @@
                     })
                     .catch(err => console.error('Error:', err));
             }, 300);
+        });
+
+        // Auto-isi nominal berdasarkan jenis, di modal Tambah Transaksi
+        const selectJenisTambah = document.querySelector('#modal-transaction select[name="jenis"]');
+        const inputNominalTambah = document.querySelector('#modal-transaction input[name="nominal"]');
+
+        if (selectJenisTambah) {
+            selectJenisTambah.addEventListener('change', function() {
+                fetch(`/transaksi/tarif/${this.value}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) inputNominalTambah.value = data.nominal;
+                    })
+                    .catch(err => console.error('Error:', err));
+            });
+        }
+
+        // [BARU] Auto-isi nominal berdasarkan jenis, di modal Edit Transaksi
+        document.getElementById('edit-jenis').addEventListener('change', function() {
+            fetch(`/transaksi/tarif/${this.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) document.getElementById('edit-nominal').value = data.nominal;
+                })
+                .catch(err => console.error('Error:', err));
         });
     </script>
 @endsection

@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('cards:update-expired')->daily();
 Schedule::command('laporan:pengunjung-bulanan')
     ->monthlyOn(1, '00:00');
+Schedule::command('borrowings:generate-late-fees')->dailyAt('00:00');

@@ -39,7 +39,7 @@ class CirculationController extends Controller
             });
         }
 
-        // 2. Filter Status 
+        // 2. Filter Status     
         if ($status) {
             if ($status === 'dipinjam') {
                 $queryBuilder->where('status', 'dipinjam')
@@ -49,20 +49,22 @@ class CirculationController extends Controller
                             ->whereDate('tanggal_jatuh_tempo', '<', today());
             } elseif ($status === 'selesai') {
                 $queryBuilder->whereIn('status', ['selesai', 'dikembalikan']);
+            } elseif ($status === 'hilang') {
+                $queryBuilder->where('status', 'hilang');
             }
         }
+        
 
         // 3. Mapping Data untuk View
         $circulations = $queryBuilder->latest()->paginate(10)->through(function ($item) {
             $isLate = $item->status === 'dipinjam' && Carbon::parse($item->tanggal_jatuh_tempo)->isPast();
 
-            if ($isLate) {
-                $statusText = 'Telat';
-            } elseif (in_array($item->status, ['dikembalikan', 'selesai'])) {
-                $statusText = 'Selesai';
-            } else {
-                $statusText = 'Peminjaman';
-            }
+            $statusText = match(true) {
+                $item->status === 'terlambat' => 'Telat',
+                $item->status === 'hilang' => 'Hilang',
+                in_array($item->status, ['dikembalikan', 'selesai']) => 'Selesai',
+                default => 'Peminjaman',
+            };
 
             return (object)[
                 'id'          => $item->id,
@@ -162,5 +164,19 @@ class CirculationController extends Controller
             'success',
             'Peminjaman dibatalkan.'
         );
+    }
+
+    public function loseBook($id, BorrowingService $service)
+    {
+        try {
+            $service->reportLost($id);
+
+            return redirect()
+                ->route('circulation.index')
+                ->with('success', 'Buku ditandai hilang, transaksi ganti rugi otomatis dibuat.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

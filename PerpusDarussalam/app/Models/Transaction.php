@@ -7,13 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
-    // Agar bisa tambah data massal nanti
+    // Agar bisa tambah data massal 
     protected $fillable = [
         'user_id',
+        'borrowing_id',
         'jenis',
         'nominal',
         'keterangan',
         'tanggal',
+        'status_bayar'
     ];
 
     // Relasi ke User
@@ -30,6 +32,11 @@ class Transaction extends Model
             'denda_keterlambatan'=> 'Denda Keterlambatan',
             default              => ucwords(str_replace('_', ' ', $this->jenis ?? '-')),
         };
+    }
+
+    public function borrowing(): BelongsTo
+    {
+        return $this->belongsTo(Borrowing::class);
     }
 
     public function getFormattedNominalAttribute()
