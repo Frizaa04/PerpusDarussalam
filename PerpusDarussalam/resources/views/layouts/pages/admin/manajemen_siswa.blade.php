@@ -66,17 +66,19 @@
                     @method('DELETE')
 
                     <!-- Box Tabel -->
-                    <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
-                        
+                    <div
+                        class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30 table-manage">
+
                         <!-- Header Tabel & Tombol Kontrol -->
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                             <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar User</h2>
 
                             <!-- Area Tombol Kontrol -->
                             <div class="flex items-center gap-2 flex-wrap">
-                                
+
                                 <!-- Tombol Hapus Semua Expired-->
-                                <button type="button" id="btnHapusExpired" form="hapusExpiredForm" onclick="confirmDeleteExpired()"
+                                <button type="button" id="btnHapusExpired" form="hapusExpiredForm"
+                                    onclick="confirmDeleteExpired()"
                                     class="hidden bg-red-900 hover:bg-red-950 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
                                     Hapus Semua Expired
                                 </button>
@@ -217,10 +219,44 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Paginasi Selalu Tampil (Meskipun Hanya 1 Halaman) -->
+                        <div class="flex justify-center items-center gap-2 mt-6 text-gray-700 font-bold">
+
+                            {{-- Tombol Previous (<) --}}
+                            @if ($students->onFirstPage())
+                                <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&lt;</span>
+                            @else
+                                <a href="{{ $students->previousPageUrl() }}"
+                                    class="px-2.5 py-1 hover:bg-[#004d40]/10 rounded text-sm transition">&lt;</a>
+                            @endif
+
+                            {{-- Nomor Halaman --}}
+                            @foreach ($students->getUrlRange(1, max($students->lastPage(), 1)) as $page => $url)
+                                @if ($page == $students->currentPage())
+                                    {{-- Halaman Aktif (Kotak Hijau Tua, Teks Putih) --}}
+                                    <span
+                                        class="px-2.5 py-1 bg-[#004d40] text-white rounded text-sm shadow">{{ $page }}</span>
+                                @else
+                                    {{-- Halaman Lain --}}
+                                    <a href="{{ $url }}"
+                                        class="px-2.5 py-1 hover:bg-[#004d40]/10 rounded text-sm transition">{{ $page }}</a>
+                                @endif
+                            @endforeach
+
+                            {{-- Tombol Next (>) --}}
+                            @if ($students->hasMorePages())
+                                <a href="{{ $students->nextPageUrl() }}"
+                                    class="px-2.5 py-1 hover:bg-[#004d40]/10 rounded text-sm transition">&gt;</a>
+                            @else
+                                <span class="px-2.5 py-1 rounded text-sm opacity-50 cursor-not-allowed">&gt;</span>
+                            @endif
+
+                        </div>
                     </div>
                 </form>
 
-                <form id="hapusExpiredForm" action="{{ route('member.destroyExpired') }}" method="POST" class="hidden">
+                <form id="hapusExpiredForm" action="{{ route('member.destroyExpired') }}" method="POST"
+                    class="hidden">
                     @csrf
                     @method('DELETE')
                 </form>
@@ -882,25 +918,26 @@
             }
 
             fetch(`/manajemen-siswa/perpanjang/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(async response => {
-                const text = await response.text();
-                console.log('STATUS:', response.status, 'BODY:', text); 
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('Gagal memperpanjang kartu. Status: ' + response.status);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan pada jaringan atau server.');
-            });
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                            '',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(async response => {
+                    const text = await response.text();
+                    console.log('STATUS:', response.status, 'BODY:', text);
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Gagal memperpanjang kartu. Status: ' + response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan pada jaringan atau server.');
+                });
         }
 
         // --- Fungsi Modal Cetak ---
@@ -964,11 +1001,11 @@
 
         function toggleUserDeleteMode() {
             const btnConfirmDelete = document.getElementById('btnConfirmDeleteUser');
-            const btnHapusExpired = document.getElementById('btnHapusExpired'); 
+            const btnHapusExpired = document.getElementById('btnHapusExpired');
             const btnToggleDelete = document.getElementById('btnToggleDeleteUser');
             const btnText = document.getElementById('btnTextUser');
             const trashIcon = document.getElementById('trashIconUser');
-            
+
             const editActions = document.querySelectorAll('.edit-mode-action');
             const deleteActions = document.querySelectorAll('.delete-mode-action');
 
@@ -976,8 +1013,8 @@
 
             if (isHidden) {
                 btnConfirmDelete.classList.remove('hidden');
-                btnHapusExpired.classList.remove('hidden'); 
-                
+                btnHapusExpired.classList.remove('hidden');
+
                 btnToggleDelete.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnToggleDelete.classList.add('bg-gray-600', 'hover:bg-gray-700');
                 btnText.textContent = 'Batal';
@@ -987,15 +1024,15 @@
                 deleteActions.forEach(el => el.classList.remove('hidden'));
             } else {
                 btnConfirmDelete.classList.add('hidden');
-                btnHapusExpired.classList.add('hidden'); 
-                
+                btnHapusExpired.classList.add('hidden');
+
                 btnToggleDelete.classList.remove('bg-gray-600', 'hover:bg-gray-700');
                 btnToggleDelete.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
                 btnText.textContent = 'Hapus User';
                 trashIcon.classList.remove('rotate-45');
 
                 editActions.forEach(el => el.classList.remove('hidden'));
-                deleteActions.forEach(el => el.classList.add('hidden')); 
+                deleteActions.forEach(el => el.classList.add('hidden'));
             }
         }
 
@@ -1004,6 +1041,5 @@
                 document.getElementById('hapusExpiredForm').submit();
             }
         }
-
     </script>
 @endsection

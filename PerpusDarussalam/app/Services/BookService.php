@@ -177,7 +177,7 @@ class BookService
         );
     }
 
-    private function generateBookCode($category, $tahun, $categoryId)
+    public function generateBookCode($category, $tahun, $categoryId)
     {
         $kategoriSingkatan = $category
             ? strtoupper(substr($category->nama, 0, 3))
