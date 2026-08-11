@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('cards:update-expired')->daily();
+Schedule::command('laporan:pengunjung-bulanan')
+    ->monthlyOn(1, '00:00');

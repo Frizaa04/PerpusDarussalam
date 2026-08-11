@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Visit;
+use App\Models\visits;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -30,7 +30,7 @@ class AttendanceExport implements FromArray, WithStyles, ShouldAutoSize
         $data[] = ['No', 'Waktu Kunjungan', 'No Identitas / ID', 'Nama Pengunjung', 'Kategori / Role'];
 
         // Ambil data kunjungan berdasarkan tanggal 
-        $visits = Visit::with('user')
+        $visits = visits::with('user')
             ->whereDate('visited_at', $this->selectedDate->format('Y-m-d'))
             ->get();
             
