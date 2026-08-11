@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Tarif;
 
 class TransaksiController extends Controller
 {
@@ -49,9 +50,10 @@ class TransaksiController extends Controller
         $request->validate([
             'no_identitas' => 'nullable|string|max:255',
             'nominal'      => 'required|numeric|min:0',
-            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan',
+            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan,kehilangan_buku',
             'tanggal'      => 'required|date',
             'keterangan'   => 'nullable|string|max:255',
+            'status_bayar' => 'required|in:belum_bayar,sudah_bayar',
         ]);
 
         $userId = null;
@@ -82,6 +84,7 @@ class TransaksiController extends Controller
             'nominal'    => $request->nominal,
             'tanggal'    => $request->tanggal,
             'keterangan' => $request->keterangan,
+            'status_bayar' => $request->status_bayar,
         ]);
 
         return redirect()->route('transaction.index')->with('success', 'Transaksi berhasil ditambahkan!');
@@ -98,39 +101,39 @@ class TransaksiController extends Controller
         $request->validate([
             'no_identitas' => 'nullable|string|max:255',
             'nominal'      => 'required|numeric|min:0',
-            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan',
+            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan,kehilangan_buku',
             'tanggal'      => 'required|date',
             'keterangan'   => 'nullable|string|max:255',
+            'status_bayar' => 'required|in:belum_bayar,sudah_bayar',
         ]);
 
-        $userId = null;
-        $namaUser = 'Non-Anggota'; // Default jika tidak ditemukan
+        // AMBIL DATA LAMA: Default pakai user_id yang sudah ada sebelumnya
+        $userId = $transaction->user_id; 
 
         if ($request->filled('no_identitas')) {
             $identitas = trim($request->no_identitas);
 
-            // Pencarian user
+            // Pencarian user baru jika input no_identitas diisi
             $user = User::where(function($query) use ($identitas) {
                 $query->where('id', $identitas)
-                      ->orWhere('email', $identitas)
-                      ->orWhere('nisn', $identitas)
-                      ->orWhere('nik', $identitas);
+                    ->orWhere('email', $identitas)
+                    ->orWhere('nisn', $identitas)
+                    ->orWhere('nik', $identitas);
             })->first();
 
             if ($user) {
-                $userId = $user->id;
-                $namaUser = $user->name; // Ambil nama asli dari tabel user
+                $userId = $user->id; // Timpa dengan user baru jika ditemukan
             }
         }
 
         // Update Data Transaksi
         $transaction->update([
-            'user_id'    => $userId,
-            'name'       => $namaUser,
-            'jenis'      => $request->jenis,
-            'nominal'    => $request->nominal,
-            'tanggal'    => $request->tanggal,
-            'keterangan' => $request->keterangan,
+            'user_id'      => $userId, 
+            'jenis'        => $request->jenis,
+            'nominal'      => $request->nominal,
+            'tanggal'      => $request->tanggal,
+            'keterangan'   => $request->keterangan,
+            'status_bayar' => $request->status_bayar,
         ]);
 
         return redirect()->route('transaction.index')->with('success', 'Data transaksi berhasil diperbarui!');
@@ -167,6 +170,16 @@ class TransaksiController extends Controller
         return response()->json([
             'success' => false,
             'name'    => ''
+        ]);
+    }
+
+    public function getTarif($jenis)
+    {
+        $tarif = Tarif::where('jenis', $jenis)->first();
+
+        return response()->json([
+            'success' => (bool) $tarif,
+            'nominal' => $tarif->nominal ?? 0,
         ]);
     }
 

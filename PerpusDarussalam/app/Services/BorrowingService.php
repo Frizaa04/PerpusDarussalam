@@ -7,9 +7,13 @@ use App\Models\BookItem;
 use App\Models\Borrowing;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Transaction;
+use App\Models\Tarif;
 
 class BorrowingService
 {
+    protected const ACTIVE_STATUSES = ['dipinjam', 'terlambat'];
+
     public function borrow(array $data)
     {
         return DB::transaction(function () use ($data) {
@@ -63,49 +67,107 @@ class BorrowingService
     {
         return DB::transaction(function () use ($id) {
 
-            $borrowing = Borrowing::with('bookItem')->findOrFail($id);
+            $borrowing = Borrowing::with(['bookItem', 'user'])->findOrFail($id);
 
-            if ($borrowing->status === 'dipinjam') {
-
-                $borrowing->update([
-                    'status'=>'dikembalikan',
-                    'tanggal_kembali'=>now()
-                ]);
-
-                if($borrowing->bookItem){
-
-                    $borrowing->bookItem->update([
-                        'status_pinjam'=>'tersedia'
-                    ]);
-
-                }
-
+            // Status bisa 'dipinjam' ATAU 'terlambat'
+            if (!in_array($borrowing->status, self::ACTIVE_STATUSES, true)) {
+                throw new \Exception('Peminjaman ini sudah tidak aktif, tidak bisa dikembalikan.');
             }
 
+            $tanggalKembali = now();
+
+            $borrowing->update([
+                'status' => 'dikembalikan',
+                'tanggal_kembali' => $tanggalKembali
+            ]);
+
+            if ($borrowing->bookItem) {
+                $borrowing->bookItem->update([
+                    'status_pinjam' => 'tersedia'
+                ]);
+            }
+
+            // Cek keterlambatan, buat transaksi denda otomatis
+            $jatuhTempo = Carbon::parse($borrowing->tanggal_jatuh_tempo)->startOfDay();
+            $kembali = $tanggalKembali->copy()->startOfDay();
+
+            if ($kembali->greaterThan($jatuhTempo)) {
+                $hariTelat = $jatuhTempo->diffInDays($kembali);
+
+                $tarifPerHari = Tarif::where('jenis', 'denda_keterlambatan')->value('nominal') ?? 0;
+                $nominalDenda = $hariTelat * $tarifPerHari;
+
+                Transaction::create([
+                    'user_id'      => $borrowing->user_id,
+                    'name'         => $borrowing->user->name ?? 'Non-Anggota',
+                    'jenis'        => 'denda_keterlambatan',
+                    'nominal'      => $nominalDenda,
+                    'tanggal'      => $tanggalKembali->toDateString(),
+                    'keterangan'   => "Denda keterlambatan {$hariTelat} hari (Peminjaman #{$borrowing->id})",
+                    'status_bayar' => 'belum_bayar',
+                ]);
+            }
         });
     }
 
     public function cancelBorrow($id)
     {
-        return DB::transaction(function () use ($id){
+        return DB::transaction(function () use ($id) {
 
             $borrowing = Borrowing::with('bookItem')->findOrFail($id);
 
-            if($borrowing->status=="dipinjam"){
+            // Status bisa 'dipinjam' ATAU 'terlambat'
+            if (in_array($borrowing->status, self::ACTIVE_STATUSES, true)) {
 
-                if($borrowing->bookItem){
-
+                if ($borrowing->bookItem) {
                     $borrowing->bookItem->update([
-                        'status_pinjam'=>'tersedia'
+                        'status_pinjam' => 'tersedia'
                     ]);
-
                 }
 
                 $borrowing->delete();
+            }
+        });
+    }
 
+    // Tandai buku hilang + buat transaksi ganti rugi otomatis
+    public function reportLost($id)
+    {
+        return DB::transaction(function () use ($id) {
+
+            $borrowing = Borrowing::with(['bookItem.book', 'user'])->findOrFail($id);
+
+            // Status bisa 'dipinjam' ATAU 'terlambat'
+            if (!in_array($borrowing->status, self::ACTIVE_STATUSES, true)) {
+                throw new \Exception('Peminjaman ini sudah tidak aktif, tidak bisa ditandai hilang.');
             }
 
-        });
+            $borrowing->update([
+                'status'         => 'hilang',
+                'tanggal_kembali' => now(),
+            ]);
 
+            if ($borrowing->bookItem) {
+                $borrowing->bookItem->update([
+                    'status_pinjam' => 'hilang'
+                ]);
+            }
+
+            $tarifHilang = Tarif::where('jenis', 'kehilangan_buku')->value('nominal') ?? 0;
+            $judulBuku   = $borrowing->bookItem->book->judul ?? 'Buku';
+
+            Transaction::create([
+                'user_id'      => $borrowing->user_id,
+                'name'         => $borrowing->user->name ?? 'Non-Anggota',
+                'jenis'        => 'kehilangan_buku',
+                'nominal'      => $tarifHilang,
+                'tanggal'      => now()->toDateString(),
+                'keterangan'   => "Kehilangan buku: {$judulBuku} (Peminjaman #{$borrowing->id})",
+                'status_bayar' => 'belum_bayar',
+            ]);
+
+            return $borrowing;
+        });
     }
+
 }

@@ -123,6 +123,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::post('/sirkulasi', [CirculationController::class, 'store'])->name('circulation.store');
     Route::post('/sirkulasi/return/{id}', [CirculationController::class, 'returnBook'])->name('circulation.return');
     Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
+    Route::post('/sirkulasi/{id}/hilang', [CirculationController::class, 'loseBook'])->name('circulation.lose');
 
     // API Cek Anggota Otomatis
     Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisn']);
@@ -135,6 +136,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaction.update');
     Route::delete('/transaksi/bulk-delete', [TransaksiController::class, 'bulkDestroy'])->name('transaction.destroy.bulk');
     Route::get('/transaksi/cari-user/{identitas}', [TransaksiController::class, 'cariUser'])->name('transaction.cariUser');
+    Route::get('/transaksi/tarif/{jenis}', [TransaksiController::class, 'getTarif'])->name('transaction.tarif');
 
     // E-Book
     Route::get('/e-book', [EbookController::class, 'index'])->name('admin.ebook.index');
