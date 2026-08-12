@@ -253,93 +253,88 @@
 
     <!-- SCRIPT JS MODAL -->
     <script>
+        // 1. Fungsi Toggle Modal
         function openBorrowModal() {
-            const modal = document.getElementById('borrowModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                // Fokus otomatis ke input pertama saat modal terbuka 
-                const inputIdentitas = document.getElementById('inputScanKartu');
-                if (inputIdentitas) inputIdentitas.focus();
+            let $modal = $('#borrowModal');
+            if ($modal.length) {
+                $modal.removeClass('hidden');
+                // Fokus otomatis ke input scan kartu saat modal terbuka
+                $('#inputScanKartu').focus();
             }
         }
 
-        // Fungsi untuk menutup modal
         function closeBorrowModal() {
-            const modal = document.getElementById('borrowModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
+            $('#borrowModal').addClass('hidden');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputIdentitas = document.getElementById('inputScanKartu');
-            const inputNama = document.getElementById('inputNama');
-            const inputBookItem = document.getElementById('inputScanBuku');
-            const inputJudulBuku = document.getElementById('inputJudulBuku');
+        // 2. Event Listener Utama
+        $(document).ready(function() {
 
-            // --- 1. OTOMATIS BUKA MODAL JIKA ADA ERROR DARI SERVER ---
+            // --- OTOMATIS BUKA MODAL JIKA ADA ERROR DARI SERVER ---
             @if ($errors->borrowForm->any())
                 openBorrowModal();
             @endif
 
-            // --- 2. LISTENER SCAN KARTU ANGGOTA ---
-            if (inputIdentitas) {
-                inputIdentitas.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        let nomor = this.value.trim();
+            // --- LISTENER SCAN KARTU ANGGOTA ---
+            $('#inputScanKartu').on('keypress', function(e) {
+                if (e.which === 13) { // 13 adalah keycode untuk 'Enter'
+                    e.preventDefault();
+                    let nomor = $(this).val().trim();
 
-                        if (nomor.length > 0) {
-                            fetch(`/api/check-member/${nomor}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        inputNama.value = data.name;
-                                        if (inputBookItem) {
-                                            inputBookItem.focus();
-                                        }
-                                    } else {
-                                        inputNama.value = 'Anggota tidak ditemukan';
-                                        inputIdentitas.value = '';
-                                        inputIdentitas.focus();
-                                    }
-                                })
-                                .catch(error => console.error('Error:', error));
-                        }
+                    if (nomor.length > 0) {
+                        $.ajax({
+                            url: `/api/check-member/${nomor}`,
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(data) {
+                                if (data.success) {
+                                    $('#inputNama').val(data.name);
+                                    $('#inputScanBuku').focus();
+                                } else {
+                                    $('#inputNama').val('Anggota tidak ditemukan');
+                                    $('#inputScanKartu').val('').focus();
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', error);
+                            }
+                        });
                     }
-                });
-            }
+                }
+            });
 
-            // --- 3. LISTENER SCAN BUKU (NOMOR INVENTARIS) ---
-            if (inputBookItem) {
-                inputBookItem.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e
-                            .preventDefault(); // Mencegah form tersubmit otomatis saat menekan Enter pada barcode scanner
-                        let nomorInv = this.value.trim();
+            // --- LISTENER SCAN BUKU (NOMOR INVENTARIS) ---
+            $('#inputScanBuku').on('keypress', function(e) {
+                if (e.which === 13) { // Prevent form submit otomatis dari scanner barcode
+                    e.preventDefault();
+                    let nomorInv = $(this).val().trim();
 
-                        if (nomorInv.length > 0) {
-                            fetch(`/api/check-book/${nomorInv}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        inputJudulBuku.value = data.title;
+                    if (nomorInv.length > 0) {
+                        $.ajax({
+                            url: `/api/check-book/${nomorInv}`,
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(data) {
+                                if (data.success) {
+                                    $('#inputJudulBuku').val(data.title);
 
-                                        // Validasi status langsung di sisi client jika buku sedang dipinjam
-                                        if (data.status === 'dipinjam') {
-                                            alert('Peringatan: Buku ini sedang dalam status dipinjam!');
-                                        }
-                                    } else {
-                                        inputJudulBuku.value = 'Buku tidak ditemukan';
-                                        inputBookItem.value = '';
-                                        inputBookItem.focus();
+                                    // Validasi status jika buku sedang dipinjam
+                                    if (data.status === 'dipinjam') {
+                                        alert('Peringatan: Buku ini sedang dalam status dipinjam!');
                                     }
-                                })
-                                .catch(error => console.error('Error:', error));
-                        }
+                                } else {
+                                    $('#inputJudulBuku').val('Buku tidak ditemukan');
+                                    $('#inputScanBuku').val('').focus();
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', error);
+                            }
+                        });
                     }
-                });
-            }
+                }
+            });
+
         });
     </script>
 @endsection

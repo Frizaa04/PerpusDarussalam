@@ -363,101 +363,99 @@
             </form>
         </div>
     </div>
-
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- OTOMATIS BUKA MODAL TAMBAH EBOOK JIKA ADA ERROR DARI SERVER ---
+        // Variable Global State
+        let isDeleteModeActive = false;
+
+        // 1. Event Listener Utama (DOMContentLoaded versi jQuery)
+        $(document).ready(function() {
+
+            // Otomatis buka modal tambah e-book jika ada error dari server
             @if ($errors->ebookStoreForm->any())
                 openAddEbookModal();
             @endif
+
+            // Event submit form hapus massal
+            $('#deleteForm').on('submit', function(e) {
+                let checkedBoxes = $('.ebook-checkbox:checked');
+                if (checkedBoxes.length === 0) {
+                    alert('Pilih minimal satu e-book yang ingin dihapus!');
+                    e.preventDefault();
+                } else {
+                    if (!confirm('Yakin ingin menghapus e-book yang dipilih?')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+
         });
 
-        function openAddEbookModal() {
-            document.getElementById('addEbookModal').classList.remove('hidden');
+        // 2. Modal Functions (Tambah & Edit E-Book)
+        function openAddEbookModal() { 
+            $('#addEbookModal').removeClass('hidden'); 
         }
 
-        function closeAddEbookModal() {
-            document.getElementById('addEbookModal').classList.add('hidden');
+        function closeAddEbookModal() { 
+            $('#addEbookModal').addClass('hidden'); 
         }
 
         function openEditEbookModal(id, kodeEbook, judul, categoriesId, penulis, penerbit, tahunTerbit, isbn) {
-            document.getElementById('editEbookKode').value = kodeEbook;
-            document.getElementById('editEbookJudul').value = judul;
-            document.getElementById('editEbookKategori').value = categoriesId;
-            document.getElementById('editEbookPenulis').value = penulis;
-            document.getElementById('editEbookPenerbit').value = penerbit;
-            document.getElementById('editEbookTahun').value = tahunTerbit;
-            document.getElementById('editEbookIsbn').value = (isbn !== 'null' && isbn !== 'undefined') ? isbn : '';
+            $('#editEbookKode').val(kodeEbook);
+            $('#editEbookJudul').val(judul);
+            $('#editEbookKategori').val(categoriesId);
+            $('#editEbookPenulis').val(penulis);
+            $('#editEbookPenerbit').val(penerbit);
+            $('#editEbookTahun').val(tahunTerbit);
+            $('#editEbookIsbn').val((isbn !== 'null' && isbn !== 'undefined') ? isbn : '');
 
-            // Disesuaikan agar cocok dengan Route::put('/e-book/update/{id}')
-            document.getElementById('formEditEbook').action = '/e-book/update/' + id;
-            document.getElementById('editEbookModal').classList.remove('hidden');
+            // Form action di-update sesuai Route::put('/e-book/update/{id}')
+            $('#formEditEbook').attr('action', '/e-book/update/' + id);
+            $('#editEbookModal').removeClass('hidden');
         }
 
-        function closeEditEbookModal() {
-            document.getElementById('editEbookModal').classList.add('hidden');
+        function closeEditEbookModal() { 
+            $('#editEbookModal').addClass('hidden'); 
         }
 
-        let isDeleteModeActive = false;
-
+        // 3. Mode Hapus Massal & Checkbox Actions
         function toggleDeleteMode() {
             isDeleteModeActive = !isDeleteModeActive;
 
-            let btnToggle = document.getElementById('btnToggleDelete');
-            let btnConfirm = document.getElementById('btnConfirmDelete');
-            let selectAllContainer = document.getElementById('selectAllContainer');
-            let btnText = document.getElementById('btnText');
-            let btnIcon = document.getElementById('btnIcon');
-            let editActions = document.querySelectorAll('.edit-mode-action');
-            let deleteActions = document.querySelectorAll('.delete-mode-action');
+            let $btnToggle = $('#btnToggleDelete');
+            let $btnConfirm = $('#btnConfirmDelete');
+            let $selectAllContainer = $('#selectAllContainer');
+            let $btnText = $('#btnText');
+            let $btnIcon = $('#btnIcon');
 
             if (isDeleteModeActive) {
-                btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
-                btnToggle.classList.add('bg-gray-600', 'hover:bg-gray-700');
-                btnText.textContent = "Batal";
-                btnIcon.innerHTML =
-                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
+                $btnToggle.removeClass('bg-[#004d40] hover:bg-[#003d30]').addClass('bg-gray-600 hover:bg-gray-700');
+                $btnText.text('Batal');
+                $btnIcon.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />');
 
-                btnConfirm.classList.remove('hidden');
-                selectAllContainer.classList.remove('hidden');
+                $btnConfirm.removeClass('hidden');
+                $selectAllContainer.removeClass('hidden');
 
-                editActions.forEach(el => el.classList.add('hidden'));
-                deleteActions.forEach(el => el.classList.remove('hidden'));
+                $('.edit-mode-action').addClass('hidden');
+                $('.delete-mode-action').removeClass('hidden');
             } else {
-                btnToggle.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
-                btnText.textContent = "Hapus E-Book";
-                btnIcon.innerHTML =
-                    `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />`;
+                $btnToggle.removeClass('bg-gray-600 hover:bg-gray-700').addClass('bg-[#004d40] hover:bg-[#003d30]');
+                $btnText.text('Hapus E-Book');
+                $btnIcon.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />');
 
-                btnConfirm.classList.add('hidden');
-                selectAllContainer.classList.add('hidden');
+                $btnConfirm.addClass('hidden');
+                $selectAllContainer.addClass('hidden');
 
-                editActions.forEach(el => el.classList.remove('hidden'));
-                deleteActions.forEach(el => el.classList.add('hidden'));
+                $('.edit-mode-action').removeClass('hidden');
+                $('.delete-mode-action').addClass('hidden');
 
-                document.getElementById('selectAllCheckbox').checked = false;
-                document.querySelectorAll('.ebook-checkbox').forEach(cb => cb.checked = false);
+                $('#selectAllCheckbox').prop('checked', false);
+                $('.ebook-checkbox').prop('checked', false);
             }
         }
 
         function toggleSelectAll(source) {
-            let checkboxes = document.querySelectorAll('.ebook-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = source.checked;
-            });
+            $('.ebook-checkbox').prop('checked', source.checked);
         }
-
-        document.getElementById('deleteForm').addEventListener('submit', function(e) {
-            let checkedBoxes = document.querySelectorAll('.ebook-checkbox:checked');
-            if (checkedBoxes.length === 0) {
-                alert('Pilih minimal satu e-book yang ingin dihapus!');
-                e.preventDefault();
-            } else {
-                if (!confirm('Yakin ingin menghapus e-book yang dipilih?')) {
-                    e.preventDefault();
-                }
-            }
-        });
     </script>
 @endsection
