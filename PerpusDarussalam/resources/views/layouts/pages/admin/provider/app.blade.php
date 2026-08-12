@@ -11,6 +11,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
+    <!-- 1. CDN JQUERY DITAMBAHKAN DI SINI -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,6 +39,9 @@
             backdrop.classList.toggle('hidden');
         }
     </script>
+
+    <!-- 2. STACK SCRIPTS DITAMBAHKAN DI SINI -->
+    @stack('scripts')
 
 </body>
 </html>

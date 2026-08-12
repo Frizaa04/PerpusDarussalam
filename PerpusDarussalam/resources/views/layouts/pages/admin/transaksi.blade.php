@@ -337,172 +337,173 @@
         </div>
     </div>
 
-
     <!-- Script Modal & Toggle Delete Mode -->
-    <script>
-        let isDeleteActive = false;
+<script>
+    let isDeleteActive = false;
 
-        function toggleDeleteMode() {
-            const btnToggle = document.getElementById('btn-toggle-delete');
-            const textBtn = document.getElementById('text-btn-toggle');
-            const btnIcon = document.getElementById('btn-icon');
-            const btnSubmit = document.getElementById('btn-submit-delete');
-            const editActions = document.querySelectorAll('.edit-mode-action');
-            const deleteActions = document.querySelectorAll('.delete-mode-action');
-            const labelCheckAll = document.getElementById('label-check-all');
-            const checkAll = document.getElementById('check-all');
+    function toggleDeleteMode() {
+        isDeleteActive = !isDeleteActive;
 
-            isDeleteActive = !isDeleteActive;
+        let $btnToggle = $('#btn-toggle-delete');
+        let $textBtn = $('#text-btn-toggle');
+        let $btnIcon = $('#btn-icon');
+        let $btnSubmit = $('#btn-submit-delete');
+        let $labelCheckAll = $('#label-check-all');
+        let $editActions = $('.edit-mode-action');
+        let $deleteActions = $('.delete-mode-action');
 
-            if (isDeleteActive) {
-                // Mode Hapus Aktif
-                btnToggle.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
-                btnToggle.classList.add('bg-gray-700', 'hover:bg-gray-800');
-                textBtn.innerText = 'Batal';
-                btnIcon.innerText = 'close';
+        if (isDeleteActive) {
+            // Mode Hapus Aktif
+            $btnToggle.removeClass('bg-[#004d40] hover:bg-[#003d30]').addClass('bg-gray-700 hover:bg-gray-800');
+            $textBtn.text('Batal');
+            $btnIcon.text('close');
 
-                btnSubmit.classList.remove('hidden');
-                labelCheckAll.classList.remove('hidden');
-                deleteActions.forEach(el => el.classList.remove('hidden'));
+            $btnSubmit.removeClass('hidden');
+            $labelCheckAll.removeClass('hidden');
+            $deleteActions.removeClass('hidden');
+            $editActions.addClass('hidden');
+        } else {
+            // Mode Batal/Normal
+            $btnToggle.removeClass('bg-gray-700 hover:bg-gray-800').addClass('bg-[#004d40] hover:bg-[#003d30]');
+            $textBtn.text('Hapus Data');
+            $btnIcon.text('delete');
 
-                editActions.forEach(el => el.classList.add('hidden'));
+            $btnSubmit.addClass('hidden');
+            $labelCheckAll.addClass('hidden');
 
-            } else {
-                // Mode Batal/Normal
-                btnToggle.classList.remove('bg-gray-700', 'hover:bg-gray-800');
-                btnToggle.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
-                textBtn.innerText = 'Hapus Data';
-                btnIcon.innerText = 'delete';
-                btnSubmit.classList.add('hidden');
-                labelCheckAll.classList.add('hidden');
-                deleteActions.forEach(el => {
-                    el.classList.add('hidden');
-                    if (el.type === 'checkbox') el.checked = false;
-                });
+            $deleteActions.each(function() {
+                $(this).addClass('hidden');
+                if (this.type === 'checkbox') this.checked = false;
+            });
 
-                editActions.forEach(el => el.classList.remove('hidden'));
+            $editActions.removeClass('hidden');
+            $('#check-all').prop('checked', false);
+        }
+    }
 
-                if (checkAll) checkAll.checked = false;
+    // 2. Fungsi Modal Tambah & Edit Transaksi
+    function openModal() {
+        $('#modal-transaction').removeClass('hidden');
+    }
+
+    function closeModal() {
+        $('#modal-transaction').addClass('hidden');
+    }
+
+    function openEditModal(id) {
+        $.ajax({
+            url: `/transaksi/${id}/edit`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    let data = res.data;
+
+                    $('#form-edit-transaction').attr('action', `/transaksi/${id}`);
+                    $('#edit-nominal').val(data.nominal || '');
+                    $('#edit-keterangan').val(data.keterangan || '');
+                    $('#edit-jenis').val(data.jenis || '');
+                    $('#edit-tanggal').val(data.tanggal || '');
+                    $('#edit-status-bayar').val(data.status_bayar || 'belum_bayar');
+
+                    $('#modal-edit-transaction').removeClass('hidden');
+                }
+            },
+            error: function(err) {
+                console.error('Error:', err);
             }
+        });
+    }
+
+    function closeEditModal() {
+        $('#modal-edit-transaction').addClass('hidden');
+    }
+
+    // 3. Submit Hapus Massal
+    function submitDeleteForm() {
+        let $checkedBoxes = $('.item-checkbox:checked');
+
+        if ($checkedBoxes.length === 0) {
+            alert('Silakan pilih minimal satu data transaksi yang ingin dihapus.');
+            return;
         }
 
-        // Fungsi untuk membuka modal edit dan mengambil data transaksi
-        function openEditModal(id) {
-            fetch(`/transaksi/${id}/edit`)
-                .then(response => response.json())
-                .then(res => {
-                    if (res.success) {
-                        let data = res.data;
-
-                        document.getElementById('form-edit-transaction').action = `/transaksi/${id}`;
-
-                        // Masukkan data hanya untuk input yang tersisa
-                        document.getElementById('edit-nominal').value = data.nominal || '';
-                        document.getElementById('edit-keterangan').value = data.keterangan || '';
-                        document.getElementById('edit-jenis').value = data.jenis || '';
-                        document.getElementById('edit-tanggal').value = data.tanggal || '';
-                        document.getElementById('edit-status-bayar').value = data.status_bayar ||
-                        'belum_bayar'; // [BARU]
-
-                        document.getElementById('modal-edit-transaction').classList.remove('hidden');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+        if (confirm(`Apakah Anda yakin ingin menghapus ${$checkedBoxes.length} data transaksi yang dipilih?`)) {
+            $('#form-delete-bulk').submit();
         }
+    }
 
-        function closeEditModal() {
-            document.getElementById('modal-edit-transaction').classList.add('hidden');
-        }
+    // 4. Event Listener Utama (Document Ready)
+    $(document).ready(function() {
 
-        function submitDeleteForm() {
-            const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
-            const form = document.getElementById('form-delete-bulk');
+        // Check All Checkbox
+        $('#check-all').on('change', function() {
+            $('.item-checkbox').prop('checked', this.checked);
+        });
 
-            if (checkedBoxes.length === 0) {
-                alert('Silakan pilih minimal satu data transaksi yang ingin dihapus.');
-                return;
-            }
+        // Live Search User berdasarkan No Identitas (dengan Debounce)
+        let timeout = null;
+        let $inputNoIdentitas = $('#input-no-identitas');
+        let $inputNamaUser = $('#input-nama-user');
 
-            if (confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} data transaksi yang dipilih?`)) {
-                form.submit();
-            }
-        }
-
-        function openModal() {
-            document.getElementById('modal-transaction').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal-transaction').classList.add('hidden');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const checkAll = document.getElementById('check-all');
-            if (checkAll) {
-                checkAll.addEventListener('change', function() {
-                    document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = this.checked);
-                });
+        $inputNoIdentitas.on('keydown', function(e) {
+            if (e.which === 13) {
+                e.preventDefault(); // Mencegah form tersubmit saat tekan Enter
             }
         });
 
-        const inputNoIdentitas = document.getElementById('input-no-identitas');
-        const inputNamaUser = document.getElementById('input-nama-user');
-
-        if (inputNoIdentitas) {
-            inputNoIdentitas.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Mencegah halaman merefresh
-                }
-            });
-        }
-
-        let timeout = null;
-        inputNoIdentitas.addEventListener('keyup', function() {
+        $inputNoIdentitas.on('keyup', function() {
             clearTimeout(timeout);
-            let identitas = this.value.trim();
+            let identitas = $(this).val().trim();
 
             if (identitas === '') {
-                inputNamaUser.value = '';
+                $inputNamaUser.val('');
                 return;
             }
 
             timeout = setTimeout(() => {
-                fetch(`/transaksi/cari-user/${encodeURIComponent(identitas)}`)
-                    .then(response => response.json())
-                    .then(res => {
+                $.ajax({
+                    url: `/transaksi/cari-user/${encodeURIComponent(identitas)}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(res) {
                         if (res.success) {
-                            inputNamaUser.value = res.name;
+                            $inputNamaUser.val(res.name);
                         } else {
-                            inputNamaUser.value = 'Tidak ditemukan';
+                            $inputNamaUser.val('Tidak ditemukan');
                         }
-                    })
-                    .catch(err => console.error('Error:', err));
+                    },
+                    error: function(err) {
+                        console.error('Error:', err);
+                    }
+                });
             }, 300);
         });
 
-        // Auto-isi nominal berdasarkan jenis, di modal Tambah Transaksi
-        const selectJenisTambah = document.querySelector('#modal-transaction select[name="jenis"]');
-        const inputNominalTambah = document.querySelector('#modal-transaction input[name="nominal"]');
-
-        if (selectJenisTambah) {
-            selectJenisTambah.addEventListener('change', function() {
-                fetch(`/transaksi/tarif/${this.value}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) inputNominalTambah.value = data.nominal;
-                    })
-                    .catch(err => console.error('Error:', err));
+        // Auto-isi nominal berdasarkan jenis (Modal Tambah Transaksi)
+        $('#modal-transaction select[name="jenis"]').on('change', function() {
+            let jenis = $(this).val();
+            $.getJSON(`/transaksi/tarif/${jenis}`, function(data) {
+                if (data.success) {
+                    $('#modal-transaction input[name="nominal"]').val(data.nominal);
+                }
+            }).fail(function(err) {
+                console.error('Error:', err);
             });
-        }
-
-        // [BARU] Auto-isi nominal berdasarkan jenis, di modal Edit Transaksi
-        document.getElementById('edit-jenis').addEventListener('change', function() {
-            fetch(`/transaksi/tarif/${this.value}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) document.getElementById('edit-nominal').value = data.nominal;
-                })
-                .catch(err => console.error('Error:', err));
         });
-    </script>
+
+        // Auto-isi nominal berdasarkan jenis (Modal Edit Transaksi)
+        $('#edit-jenis').on('change', function() {
+            let jenis = $(this).val();
+            $.getJSON(`/transaksi/tarif/${jenis}`, function(data) {
+                if (data.success) {
+                    $('#edit-nominal').val(data.nominal);
+                }
+            }).fail(function(err) {
+                console.error('Error:', err);
+            });
+        });
+
+    });
+</script>
 @endsection

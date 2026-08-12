@@ -579,446 +579,244 @@
             </form>
         </div>
     </div>
+    <!-- Pastikan CDN jQuery sudah dipasang di Master Layout kamu -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <script>
-        // --- Fungsi Bantuan untuk Mengubah Label & Placeholder Nomor Induk ---
-        function updateNomorField(roleValue, labelElementId, inputElement) {
-            const labelNomor = document.getElementById(labelElementId);
-            if (!labelNomor || !inputElement) return;
+        // Variable Global
+        window.isOpeningModal = false;
+        window.currentEditData = {};
 
-            let peran = roleValue ? roleValue.toLowerCase() : '';
+        // 1. Fungsi Helper Update Nomor Induk
+        function updateNomorField(roleValue, labelId, $input) {
+            let peran = (roleValue || '').toLowerCase();
+            let $label = $('#' + labelId);
 
             if (peran === 'siswa') {
-                labelNomor.innerText = 'NISN (Nomor Induk Siswa)';
-                inputElement.placeholder = 'Masukkan NISN...';
+                $label.text('NISN (Nomor Induk Siswa)');
+                $input.attr('placeholder', 'Masukkan NISN...');
             } else if (peran === 'guru' || peran === 'umum') {
-                labelNomor.innerText = 'NIK (Nomor Induk Kependudukan)';
-                inputElement.placeholder = 'Masukkan NIK...';
+                $label.text('NIK (Nomor Induk Kependudukan)');
+                $input.attr('placeholder', 'Masukkan NIK...');
             } else {
-                labelNomor.innerText = 'No. Induk (NISN / NIK)';
-                inputElement.placeholder = '...';
+                $label.text('No. Induk (NISN / NIK)');
+                $input.attr('placeholder', '...');
             }
         }
 
-        // Variabel global aman dari duplikasi
-        if (typeof window.isOpeningModal === 'undefined') {
-            window.isOpeningModal = false;
-        }
-        if (typeof window.currentEditData === 'undefined') {
-            window.currentEditData = {};
-        }
+        // 2. Event Listener Utama (setara DOMContentLoaded)
+        $(document).ready(function() {
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- 1. OTOMATIS BUKA MODAL TAMBAH USER JIKA ADA ERROR DARI SERVER ---
+            // Auto Open Modal Tambah jika Server Error
             @if ($errors->addUserForm->any())
                 openAddUserModal();
             @endif
 
-            // --- 2. Event Listener Saat Dropdown Peran (Add) Berubah ---
-            const addRoleSelect = document.getElementById('peranAdd');
-            const addNomorInput = document.getElementById('inputNomorAdd');
+            // Change Event: Dropdown Peran (Add)
+            $('#peranAdd').on('change', function() {
+                updateNomorField($(this).val(), 'labelNomorAdd', $('#inputNomorAdd'));
+            });
 
-            if (addRoleSelect && addNomorInput) {
-                addRoleSelect.addEventListener('change', function() {
-                    updateNomorField(this.value, 'labelNomorAdd', addNomorInput);
+            // Change Event: Dropdown Peran (Edit)
+            $('#modalRole').on('change', function() {
+                if (window.isOpeningModal) return;
+
+                let selectedRole = $(this).val().toLowerCase();
+                let $modalInput = $('#modalInputNomor');
+
+                updateNomorField(selectedRole, 'modalLabelNomor', $modalInput);
+
+                if (selectedRole === 'siswa') {
+                    $modalInput.val(window.currentEditData.nisn || '');
+                } else if (selectedRole === 'guru' || selectedRole === 'umum') {
+                    $modalInput.val(window.currentEditData.nik || '');
+                } else {
+                    $modalInput.val('');
+                }
+            });
+
+            // Form Submit: Cetak Kartu Validation
+            $('#cetakModal form').on('submit', function(e) {
+                if ($('.user-checkbox:checked').length === 0) {
+                    alert('Pilih minimal satu kartu anggota yang ingin dicetak terlebih dahulu!');
+                    e.preventDefault();
+                }
+            });
+
+            // Live Search di Modal Cetak
+            $('#searchCetakInput').on('keyup', function() {
+                let keyword = $(this).val().toLowerCase();
+
+                $('#cetakModal tbody tr').each(function() {
+                    if ($(this).find('td[colspan]').length) return;
+                    $(this).toggle($(this).text().toLowerCase().indexOf(keyword) > -1);
                 });
-            }
+            });
 
-            // --- 3. Event Listener Saat Dropdown Peran (Edit) Berubah ---
-            const modalRole = document.getElementById('modalRole');
-            const modalInputNomor = document.getElementById('modalInputNomor');
-
-            if (modalRole && modalInputNomor) {
-                modalRole.addEventListener('change', function() {
-                    if (window.isOpeningModal) return;
-
-                    let selectedRole = this.value.toLowerCase();
-                    updateNomorField(selectedRole, 'modalLabelNomor', modalInputNomor);
-
-                    if (selectedRole === 'siswa') {
-                        modalInputNomor.value = window.currentEditData.nisn || '';
-                    } else if (selectedRole === 'guru' || selectedRole === 'umum') {
-                        modalInputNomor.value = window.currentEditData.nik || '';
-                    } else {
-                        modalInputNomor.value = '';
-                    }
-                });
-            }
-
-            // --- 4. Validasi Form Cetak Kartu ---
-            const cetakForm = document.querySelector('#cetakModal form');
-            if (cetakForm) {
-                cetakForm.addEventListener('submit', function(e) {
-                    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
-
-                    if (checkedBoxes.length === 0) {
-                        alert('Pilih minimal satu kartu anggota yang ingin dicetak terlebih dahulu!');
-                        e.preventDefault();
-                    }
-                });
-            }
+            // Event Modal Close saat Klik Backdrop (Luar Modal)
+            $(window).on('click', function(e) {
+                if ($(e.target).is('#addUserModal')) closeAddUserModal();
+                if ($(e.target).is('#editModal')) closeEditModal();
+                if ($(e.target).is('#cetakModal')) closeCetakModal();
+            });
         });
 
-        // --- Fungsi Modal Tambah User Baru ---
-        function openAddUserModal() {
-            const modal = document.getElementById('addUserModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-            }
-        }
+        // 3. Modal Functions
+        function openAddUserModal() { $('#addUserModal').removeClass('hidden'); }
+        function closeAddUserModal() { $('#addUserModal').addClass('hidden'); }
+        function openCetakModal() { $('#cetakModal').removeClass('hidden'); }
+        function closeCetakModal() { $('#cetakModal').addClass('hidden'); }
+        function closeEditModal() { $('#editModal').addClass('hidden'); }
 
-        function closeAddUserModal() {
-            const modal = document.getElementById('addUserModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        // Munculkan tombol "Edit" dan "Hapus" hanya jika kelas di dropdown dipilih
+        // 4. Pengelolaan Dropdown & Input Kelas
         function cekPilihKelas(select) {
-            const btnEdit = document.getElementById('btnEditKelas');
-            const btnHapus = document.getElementById('btnHapusKelas');
-            if (select.value) {
-                btnEdit.classList.remove('hidden');
-                btnHapus.classList.remove('hidden');
-            } else {
-                btnEdit.classList.add('hidden');
-                btnHapus.classList.add('hidden');
-            }
+            let hasValue = $(select).val();
+            $('#btnEditKelas, #btnHapusKelas').toggleClass('hidden', !hasValue);
         }
 
-        // Toggle untuk mode Tambah Kelas Baru
         function toggleInputKelas() {
-            const selectBox = document.getElementById('selectKelas');
-            const inputBox = document.getElementById('inputKelasBaru');
-            const editKelasLama = document.getElementById('editKelasLama');
-            const deleteKelasVal = document.getElementById('deleteKelasVal');
-            const btnToggle = document.getElementById('btnToggleKelas');
-            const btnEdit = document.getElementById('btnEditKelas');
-            const btnHapus = document.getElementById('btnHapusKelas');
+            $('#editKelasLama, #deleteKelasVal').val('');
+            let $inputBox = $('#inputKelasBaru');
 
-            editKelasLama.value = "";
-            deleteKelasVal.value = "";
-
-            if (inputBox.classList.contains('hidden')) {
-                inputBox.classList.remove('hidden');
-                selectBox.classList.add('hidden');
-                selectBox.value = "";
-                btnEdit.classList.add('hidden');
-                btnHapus.classList.add('hidden');
-                btnToggle.textContent = "Pilih Kelas Eksisting";
-                inputBox.placeholder = "Ketik kelas baru...";
+            if ($inputBox.hasClass('hidden')) {
+                $inputBox.removeClass('hidden').attr('placeholder', 'Ketik kelas baru...');
+                $('#selectKelas').addClass('hidden').val('');
+                $('#btnEditKelas, #btnHapusKelas').addClass('hidden');
+                $('#btnToggleKelas').text('Pilih Kelas Eksisting');
             } else {
-                inputBox.classList.add('hidden');
-                selectBox.classList.remove('hidden');
-                inputBox.value = "";
-                btnToggle.textContent = "+ Kelas Baru";
+                $inputBox.addClass('hidden').val('');
+                $('#selectKelas').removeClass('hidden');
+                $('#btnToggleKelas').text('+ Kelas Baru');
             }
         }
 
-        // Toggle untuk mode Edit Kelas yang sedang dipilih
         function editKelasAktif() {
-            const selectBox = document.getElementById('selectKelas');
-            const selectedOption = selectBox.options[selectBox.selectedIndex];
-            const inputBox = document.getElementById('inputKelasBaru');
-            const editKelasLama = document.getElementById('editKelasLama');
-            const btnToggle = document.getElementById('btnToggleKelas');
-            const btnEdit = document.getElementById('btnEditKelas');
-            const btnHapus = document.getElementById('btnHapusKelas');
-
-            if (selectBox.value) {
-                editKelasLama.value = selectBox.value;
-                inputBox.value = selectedOption.getAttribute('data-nama');
-
-                selectBox.classList.add('hidden');
-                inputBox.classList.remove('hidden');
-                btnEdit.classList.add('hidden');
-                btnHapus.classList.add('hidden');
-                btnToggle.textContent = "Batal Edit";
-                inputBox.placeholder = "Edit nama kelas...";
+            let $select = $('#selectKelas');
+            let val = $select.val();
+            if (val) {
+                let nama = $select.find(':selected').data('nama');
+                $('#editKelasLama').val(val);
+                $('#inputKelasBaru').val(nama).removeClass('hidden').attr('placeholder', 'Edit nama kelas...');
+                $select.addClass('hidden');
+                $('#btnEditKelas, #btnHapusKelas').addClass('hidden');
+                $('#btnToggleKelas').text('Batal Edit');
             }
         }
 
-        // Fungsi untuk menghapus kelas terpilih
         function hapusKelasAktif() {
-            const selectBox = document.getElementById('selectKelas');
-            const selectedOption = selectBox.options[selectBox.selectedIndex];
-            const deleteKelasVal = document.getElementById('deleteKelasVal');
-
-            if (selectBox.value) {
-                const namaKelas = selectedOption.text;
+            let $select = $('#selectKelas');
+            if ($select.val()) {
+                let namaKelas = $select.find(':selected').text();
                 if (confirm(`Apakah Anda yakin ingin menghapus kelas "${namaKelas}" dari daftar?`)) {
-                    deleteKelasVal.value = selectBox.value;
-                    selectBox.form.submit();
+                    $('#deleteKelasVal').val($select.val());
+                    $select.closest('form').submit();
                 }
             }
         }
 
-        // --- Fungsi Modal Edit User ---
+        // 5. Open Modal Edit User
         function openEditModal(id, nisn, nik, name, email, role, jenis_kelamin, alamat, jenjang, kelas) {
             window.isOpeningModal = true;
 
-            // 1. Simpan data mentah ke objek global
             window.currentEditData = {
-                nisn: (nisn && nisn !== 'null' && nisn !== 'undefined') ? nisn : '',
-                nik: (nik && nik !== 'null' && nik !== 'undefined') ? nik : ''
+                nisn: (nisn && nisn !== 'null') ? nisn : '',
+                nik: (nik && nik !== 'null') ? nik : ''
             };
 
-            // 2. Isi field dasar
-            document.getElementById('editUserId').value = id;
-            document.getElementById('modalName').value = (name && name !== 'null') ? name : '';
-            document.getElementById('modalEmail').value = (email && email !== 'null') ? email : '';
-            document.getElementById('modalAlamat').value = (alamat && alamat !== 'null') ? alamat : '';
+            $('#editUserId').val(id);
+            $('#modalName').val((name && name !== 'null') ? name : '');
+            $('#modalEmail').val((email && email !== 'null') ? email : '');
+            $('#modalAlamat').val((alamat && alamat !== 'null') ? alamat : '');
+            $('#editForm').attr('action', '/manajemen-siswa/update/' + id);
 
-            // Mengatur URL action form secara dinamis membawa ID user
-            const editForm = document.getElementById('editForm');
-            if (editForm) {
-                editForm.action = "/manajemen-siswa/update/" + id;
-            }
+            // Auto Match Dropdown (Role, Gender, Jenjang)
+            let activeRole = (role || '').toLowerCase().trim();
+            $('#modalRole').val(activeRole);
 
-            // 3. Atur Dropdown Role secara case-insensitive
-            const roleSelect = document.getElementById('modalRole');
-            let activeRole = role ? role.toLowerCase().trim() : '';
-            if (roleSelect) {
-                let foundMatch = false;
-                for (let option of roleSelect.options) {
-                    if (option.value.toLowerCase() === activeRole) {
-                        roleSelect.value = option.value;
-                        foundMatch = true;
-                        break;
-                    }
-                }
-                if (!foundMatch) roleSelect.value = '';
-            }
+            let $modalInput = $('#modalInputNomor');
+            updateNomorField(activeRole, 'modalLabelNomor', $modalInput);
+            $modalInput.val(activeRole === 'siswa' ? window.currentEditData.nisn : (activeRole === 'guru' || activeRole === 'umum' ? window.currentEditData.nik : ''));
 
-            // 4. Masukkan nomor induk yang sesuai ke input form edit
-            const modalInputNomor = document.getElementById('modalInputNomor');
-            if (modalInputNomor) {
-                updateNomorField(activeRole, 'modalLabelNomor', modalInputNomor);
+            $('#modalJenisKelamin').val((jenis_kelamin || '').toLowerCase().trim());
+            $('#modalJenjang').val((jenjang || '').toLowerCase().trim());
+            $('#modalKelas').val((kelas && kelas !== 'null') ? kelas : '');
 
-                if (activeRole === 'siswa') {
-                    modalInputNomor.value = window.currentEditData.nisn;
-                } else if (activeRole === 'guru' || activeRole === 'umum') {
-                    modalInputNomor.value = window.currentEditData.nik;
-                } else {
-                    modalInputNomor.value = '';
-                }
-            }
+            $('#editModal').removeClass('hidden');
 
-            // 5. Atur Dropdown Jenis Kelamin
-            const jkSelect = document.getElementById('modalJenisKelamin');
-            if (jkSelect) {
-                let activeJk = jenis_kelamin ? jenis_kelamin.toLowerCase().trim() : '';
-                let jkFound = false;
-                for (let option of jkSelect.options) {
-                    if (option.value.toLowerCase() === activeJk) {
-                        jkSelect.value = option.value;
-                        jkFound = true;
-                        break;
-                    }
-                }
-                if (!jkFound) jkSelect.value = '';
-            }
-
-            // 6. Atur Dropdown Jenjang & Input Kelas
-            const jenjangSelect = document.getElementById('modalJenjang');
-            if (jenjangSelect) {
-                let activeJenjang = (jenjang && jenjang !== 'null' && jenjang !== 'undefined') ? jenjang.toLowerCase()
-                    .trim() : '';
-                let jenjangFound = false;
-                for (let option of jenjangSelect.options) {
-                    if (option.value.toLowerCase() === activeJenjang) {
-                        jenjangSelect.value = option.value;
-                        jenjangFound = true;
-                        break;
-                    }
-                }
-                if (!jenjangFound) jenjangSelect.value = '';
-            }
-
-            const kelasInput = document.getElementById('modalKelas');
-            if (kelasInput) {
-                kelasInput.value = (kelas && kelas !== 'null' && kelas !== 'undefined') ? kelas : '';
-            }
-
-            // 7. Tampilkan Modal Edit
-            const editModal = document.getElementById('editModal');
-            if (editModal) {
-                editModal.classList.remove('hidden');
-            }
-
-            setTimeout(() => {
-                window.isOpeningModal = false;
-            }, 100);
+            setTimeout(() => { window.isOpeningModal = false; }, 100);
         }
 
-        function closeEditModal() {
-            const modal = document.getElementById('editModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
+        // 6. AJAX Submit Form Edit via jQuery (Lebih singkat dari Fetch API)
         function submitEditForm() {
-            const form = document.getElementById('editForm');
-            const id = document.getElementById('editUserId').value;
-            const formData = new FormData(form);
+            let id = $('#editUserId').val();
+            let formData = new FormData($('#editForm')[0]);
 
-            fetch("/manajemen-siswa/update/" + id, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-                            '',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // Tutup modal edit jika ada fungsi penutupnya
-                        closeEditModal();
-                        // Otomatis muat ulang halaman untuk melihat perubahan data terbaru
-                        location.reload();
-                    } else {
-                        return response.text().then(text => {
-                            console.error('Respon Error Server:', text);
-                            alert('Gagal memperbarui data. Periksa kembali inputan Anda.');
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan pada jaringan atau server.');
-                });
+            $.ajax({
+                url: '/manajemen-siswa/update/' + id,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function() {
+                    closeEditModal();
+                    location.reload();
+                },
+                error: function(xhr) {
+                    console.error('Server Error:', xhr.responseText);
+                    alert('Gagal memperbarui data. Periksa kembali inputan Anda.');
+                }
+            });
         }
 
+        // 7. AJAX Perpanjang Kartu
         function perpanjangKartu(id, name) {
-            if (!confirm(`Perpanjang masa berlaku kartu untuk ${name} hingga 30 Juni tahun depan?`)) {
-                return;
-            }
+            if (!confirm(`Perpanjang masa berlaku kartu untuk ${name} hingga 30 Juni tahun depan?`)) return;
 
-            fetch(`/manajemen-siswa/perpanjang/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-                            '',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(async response => {
-                    const text = await response.text();
-                    console.log('STATUS:', response.status, 'BODY:', text);
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert('Gagal memperpanjang kartu. Status: ' + response.status);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan pada jaringan atau server.');
-                });
-        }
-
-        // --- Fungsi Modal Cetak ---
-        function openCetakModal() {
-            const modal = document.getElementById('cetakModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-            }
-        }
-
-        // --- Filter Pencarian di Modal Cetak Kartu ---
-        const searchCetakInput = document.getElementById('searchCetakInput');
-        if (searchCetakInput) {
-            searchCetakInput.addEventListener('keyup', function() {
-                let keyword = this.value.toLowerCase();
-                let rows = document.querySelectorAll('#cetakModal tbody tr');
-
-                rows.forEach(row => {
-                    if (row.querySelector('td').getAttribute('colspan')) return;
-
-                    let textRow = row.innerText.toLowerCase();
-                    if (textRow.includes(keyword)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+            $.ajax({
+                url: `/manajemen-siswa/perpanjang/${id}`,
+                type: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function() {
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert('Gagal memperpanjang kartu. Status: ' + xhr.status);
+                }
             });
         }
 
-        function closeCetakModal() {
-            const modal = document.getElementById('cetakModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        // --- Tutup Modal jika Klik di Luar Kotak ---
-        window.onclick = function(event) {
-            const addUserModal = document.getElementById('addUserModal');
-            const editModal = document.getElementById('editModal');
-            const cetakModal = document.getElementById('cetakModal');
-
-            if (event.target === addUserModal) {
-                closeAddUserModal();
-            }
-            if (event.target === editModal) {
-                closeEditModal();
-            }
-            if (event.target === cetakModal) {
-                closeCetakModal();
-            }
-        }
-
+        // 8. Toggles & Multi-Select
         function toggleSelectAll(source) {
-            const checkboxes = document.querySelectorAll('.user-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = source.checked;
-            });
+            $('.user-checkbox').prop('checked', source.checked);
         }
 
         function toggleUserDeleteMode() {
-            const btnConfirmDelete = document.getElementById('btnConfirmDeleteUser');
-            const btnHapusExpired = document.getElementById('btnHapusExpired');
-            const btnToggleDelete = document.getElementById('btnToggleDeleteUser');
-            const btnText = document.getElementById('btnTextUser');
-            const trashIcon = document.getElementById('trashIconUser');
+            let $btnConfirm = $('#btnConfirmDeleteUser');
+            let isHidden = $btnConfirm.hasClass('hidden');
 
-            const editActions = document.querySelectorAll('.edit-mode-action');
-            const deleteActions = document.querySelectorAll('.delete-mode-action');
-
-            const isHidden = btnConfirmDelete.classList.contains('hidden');
+            $('#btnConfirmDeleteUser, #btnHapusExpired').toggleClass('hidden', !isHidden);
+            $('.edit-mode-action').toggleClass('hidden', isHidden);
+            $('.delete-mode-action').toggleClass('hidden', !isHidden);
 
             if (isHidden) {
-                btnConfirmDelete.classList.remove('hidden');
-                btnHapusExpired.classList.remove('hidden');
-
-                btnToggleDelete.classList.remove('bg-[#004d40]', 'hover:bg-[#003d30]');
-                btnToggleDelete.classList.add('bg-gray-600', 'hover:bg-gray-700');
-                btnText.textContent = 'Batal';
-                trashIcon.classList.add('rotate-45');
-
-                editActions.forEach(el => el.classList.add('hidden'));
-                deleteActions.forEach(el => el.classList.remove('hidden'));
+                $('#btnToggleDeleteUser').removeClass('bg-[#004d40] hover:bg-[#003d30]').addClass('bg-gray-600 hover:bg-gray-700');
+                $('#btnTextUser').text('Batal');
+                $('#trashIconUser').addClass('rotate-45');
             } else {
-                btnConfirmDelete.classList.add('hidden');
-                btnHapusExpired.classList.add('hidden');
-
-                btnToggleDelete.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                btnToggleDelete.classList.add('bg-[#004d40]', 'hover:bg-[#003d30]');
-                btnText.textContent = 'Hapus User';
-                trashIcon.classList.remove('rotate-45');
-
-                editActions.forEach(el => el.classList.remove('hidden'));
-                deleteActions.forEach(el => el.classList.add('hidden'));
+                $('#btnToggleDeleteUser').removeClass('bg-gray-600 hover:bg-gray-700').addClass('bg-[#004d40] hover:bg-[#003d30]');
+                $('#btnTextUser').text('Hapus User');
+                $('#trashIconUser').removeClass('rotate-45');
             }
         }
 
         function confirmDeleteExpired() {
             if (confirm('Yakin ingin menghapus SEMUA user yang berstatus expired (kecuali admin)?')) {
-                document.getElementById('hapusExpiredForm').submit();
+                $('#hapusExpiredForm').submit();
             }
         }
     </script>
