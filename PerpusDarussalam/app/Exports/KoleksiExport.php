@@ -57,7 +57,7 @@ class DaftarBukuSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitl
         $this->jumlahBuku = $books->count();
 
         foreach ($books as $book) {
-            $categories = $book->categories->pluck('nama')->implode(', ');
+            $categoryName = $book->categories->nama ?? '-';
             
             $data[] = [
                 $book->id,
@@ -69,7 +69,7 @@ class DaftarBukuSheet implements FromArray, WithStyles, ShouldAutoSize, WithTitl
                 $book->isbn,
                 $book->tanggal_pembelian,
                 $book->stok,
-                $categories ?: '-',
+                $categoryName,
                 $book->rak,
                 $book->deskripsi,
                 $book->cover ?? '-',

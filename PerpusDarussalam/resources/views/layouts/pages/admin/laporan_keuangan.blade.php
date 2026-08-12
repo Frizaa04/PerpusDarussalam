@@ -96,8 +96,8 @@
                             @endif
 
                             <!-- Tombol Unduh Excel -->
-                            <a href="{{ route('laporan.transaksi.export', ['date' => $selectedDate->format('Y-m-d')]) }}"
-                                class="inline-flex items-center justify-center gap-2 bg-[#004d40] text-white px-4 py-2.5 rounded font-bold hover:bg-[#003d30] transition shadow text-sm">
+                            <a href="{{ route('laporan.transaksi.export', request()->all()) }}" 
+                            class="inline-flex items-center justify-center gap-2 bg-[#004d40] text-white px-4 py-2.5 rounded font-bold hover:bg-[#003d30] transition shadow text-sm">
                                 <span class="material-icons text-xl">file_download</span>
                                 <span>Unduh Excel</span>
                             </a>
@@ -109,7 +109,7 @@
                     <hr class="border-t-2 border-[#004d40]">
 
                     <!-- Grid Card Ringkasan -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
                         <!-- Card 1: Pembuatan Kartu -->
                         <a href="{{ route('laporan.keuangan', ['date' => $selectedDate, 'mode' => $mode, 'category' => 'pembuatan_kartu']) }}"
@@ -130,6 +130,12 @@
                             class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                             <h3 class="text-sm font-bold text-white/90 tracking-wide">Keterlambatan Buku</h3>
                             <p class="text-4xl font-extrabold mt-4">{{ $keterlambatanBukuCount }}</p>
+                        </a>
+
+                        <a href="{{ route('laporan.keuangan', ['date' => $selectedDate, 'mode' => $mode, 'category' => 'kehilangan_buku']) }}"
+                            class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
+                            <h3 class="text-sm font-bold text-white/90 tracking-wide">Kehilangan Buku</h3>
+                            <p class="text-4xl font-extrabold mt-4">{{ $kehilanganBukuCount }}</p>
                         </a>
 
                     </div>
@@ -229,6 +235,8 @@
                                 Tabel Daftar Transaksi Pembuatan Kartu
                             @elseif($category === 'kehilangan_kartu')
                                 Tabel Daftar Transaksi Kehilangan Kartu
+                            @elseif($category === 'kehilangan_buku')
+                                Tabel Daftar Transaksi Kehilangan Buku
                             @else
                                 Tabel Daftar Transaksi Keterlambatan Buku
                             @endif

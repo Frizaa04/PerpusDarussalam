@@ -14,24 +14,28 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
 {
-    protected $selectedDate;
+    protected $startDate;
+    protected $endDate;
     protected $jumlahData = 0;
 
-    public function __construct($date)
+    public function __construct($startDate, $endDate = null)
     {
-        $this->selectedDate = $date ? Carbon::parse($date) : today();
+        // Jika hanya dikirim satu tanggal
+        $this->startDate = $startDate ? Carbon::parse($startDate) : today();
+        $this->endDate = $endDate ? Carbon::parse($endDate) : $this->startDate;
     }
     
     public function array(): array
     {
         $data = [];
-
-        // Header Tabel Transaksi 
         $data[] = ['No', 'Nama', 'Jenis Transaksi', 'Nominal', 'Tanggal', 'Keterangan'];
 
-        // Ambil data transaksi berdasarkan tanggal yang dipilih
+        // Gunakan whereBetween untuk mengambil data dalam rentang tanggal
         $transactions = Transaction::with('user')
-            ->whereDate('tanggal', $this->selectedDate->format('Y-m-d'))
+            ->whereBetween('tanggal', [
+                $this->startDate->format('Y-m-d 00:00:00'), 
+                $this->endDate->format('Y-m-d 23:59:59')
+            ])
             ->get();
             
         $this->jumlahData = $transactions->count();
@@ -42,6 +46,7 @@ class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
             'pembuatan_kartu'     => 'Pembuatan Kartu',
             'kehilangan_kartu'    => 'Kehilangan Kartu',
             'denda_keterlambatan' => 'Denda Keterlambatan Buku',
+            'kehilangan_buku'     => 'Kehilangan Buku',
         ];
 
         foreach ($transactions as $trx) {

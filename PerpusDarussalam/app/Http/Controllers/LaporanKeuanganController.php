@@ -57,12 +57,14 @@ class LaporanKeuanganController extends Controller
         $pembuatanKartuCount    = $applyDateFilter(Transaction::where('jenis', 'pembuatan_kartu'))->count();
         $kehilanganKartuCount   = $applyDateFilter(Transaction::where('jenis', 'kehilangan_kartu'))->count();
         $keterlambatanBukuCount = $applyDateFilter(Transaction::where('jenis', 'denda_keterlambatan'))->count();
+        $kehilanganBukuCount    = $applyDateFilter(Transaction::where('jenis', 'kehilangan_buku'))->count();
         
         // Hitung Total Seluruh Nominal dari Ketiga Kategori Berdasarkan Filter Tanggal/Mode
         $totalSemua = $applyDateFilter(Transaction::whereIn('jenis', [
             'pembuatan_kartu', 
             'kehilangan_kartu', 
-            'denda_keterlambatan'
+            'denda_keterlambatan',
+            'kehilangan_buku'
         ]))->sum('nominal');
 
         // 5. Data Detail & Total Uang 
@@ -95,6 +97,7 @@ class LaporanKeuanganController extends Controller
             'pembuatanKartuCount',
             'kehilanganKartuCount',
             'keterlambatanBukuCount',
+            'kehilanganBukuCount',
             'totalSemua',     
             'totalCategory',
             'dataList'
@@ -103,7 +106,25 @@ class LaporanKeuanganController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $tanggal = $request->query('date', today()->format('Y-m-d'));
-        return Excel::download(new TransactionExport($tanggal), 'Laporan_Transaksi_' . $tanggal . '.xlsx');
+        $tanggalInput = $request->query('date', today()->format('Y-m-d'));
+        $mode = $request->query('mode', 'harian');
+
+        $carbonDate = Carbon::parse($tanggalInput);
+
+        if ($mode === 'mingguan') {
+            // Jika mode mingguan, ambil dari Senin sampai Minggu 
+            $startDate = $carbonDate->copy()->startOfWeek()->format('Y-m-d');
+            $endDate = $carbonDate->copy()->endOfWeek()->format('Y-m-d');
+        } elseif ($mode === 'bulanan') {
+            // Jika mode bulanan, ambil dari tanggal 1 sampai akhir bulan
+            $startDate = $carbonDate->copy()->startOfMonth()->format('Y-m-d');
+            $endDate = $carbonDate->copy()->endOfMonth()->format('Y-m-d');
+        } else {
+            // Mode harian
+            $startDate = $tanggalInput;
+            $endDate = $tanggalInput;
+        }
+
+        return Excel::download(new TransactionExport($startDate, $endDate), 'laporan-transaksi.xlsx');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,24 +18,48 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class AnggotaExport implements WithMultipleSheets
 {
+    protected $startDate;
+    protected $endDate;
+
+    // Terima parameter tanggal dari Controller
+    public function __construct($startDate, $endDate)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+    }
+
     public function sheets(): array
     {
         return [
-            'Data_Siswa'   => new AnggotaSiswaSheet(),
-            'Data_Guru'    => new AnggotaGuruSheet(),
-            'Data_Umum'    => new AnggotaUmumSheet(),
+            'Data_Siswa'   => new AnggotaSiswaSheet($this->startDate, $this->endDate),
+            'Data_Guru'    => new AnggotaGuruSheet($this->startDate, $this->endDate),
+            'Data_Umum'    => new AnggotaUmumSheet($this->startDate, $this->endDate),
         ];
     }
 }
 
 /**
- * Sheet 1: Data Siswa (Berdasarkan NISN)
+ * Sheet 1: Data Siswa
  */
 class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
+    protected $startDate;
+    protected $endDate;
+
+    public function __construct($startDate, $endDate)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+    }
+
     public function collection()
     {
-        return User::where('status', 'siswa')->get(); 
+        return User::where('status', 'siswa')
+            ->whereBetween('created_at', [
+                Carbon::parse($this->startDate)->format('Y-m-d 00:00:00'), 
+                Carbon::parse($this->endDate)->format('Y-m-d 23:59:59')
+            ])
+            ->get(); 
     }
 
     public function headings(): array
@@ -86,13 +111,27 @@ class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, Wi
 }
 
 /**
- * Sheet 2: Data Guru (Berdasarkan NIK, filter dari kolom status)
+ * Sheet 2: Data Guru
  */
 class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
+    protected $startDate;
+    protected $endDate;
+
+    public function __construct($startDate, $endDate)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+    }
+
     public function collection()
     {
-        return User::where('status', 'guru')->get(); 
+        return User::where('status', 'guru')
+            ->whereBetween('created_at', [
+                Carbon::parse($this->startDate)->format('Y-m-d 00:00:00'), 
+                Carbon::parse($this->endDate)->format('Y-m-d 23:59:59')
+            ])
+            ->get(); 
     }
 
     public function headings(): array
@@ -144,13 +183,27 @@ class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, Wit
 }
 
 /**
- * Sheet 3: Data Umum (Berdasarkan NIK, filter dari kolom status)
+ * Sheet 3: Data Umum
  */
 class AnggotaUmumSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
+    protected $startDate;
+    protected $endDate;
+
+    public function __construct($startDate, $endDate)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+    }
+
     public function collection()
     {
-        return User::where('status', 'umum')->get(); 
+        return User::where('status', 'umum')
+            ->whereBetween('created_at', [
+                Carbon::parse($this->startDate)->format('Y-m-d 00:00:00'), 
+                Carbon::parse($this->endDate)->format('Y-m-d 23:59:59')
+            ])
+            ->get(); 
     }
 
     public function headings(): array
