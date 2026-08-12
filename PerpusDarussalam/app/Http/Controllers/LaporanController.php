@@ -121,9 +121,27 @@ class LaporanController extends Controller
         }
     }
 
-    public function exportAnggotaExcel()
+    public function exportAnggotaExcel(Request $request)
     {
-        return Excel::download(new AnggotaExport, 'Laporan_Anggota_' . date('Y-m-d') . '.xlsx');
+        $params = $this->getCommonParams($request);
+        $selectedDate = $params['selectedDate'];
+        $mode = $params['mode'];
+
+        if ($mode === 'mingguan') {
+            $startDate = $params['startOfWeekDate'];
+            $endDate = $params['endOfWeekDate'];
+            $namaFile = 'Laporan_Anggota_Mingguan_' . $startDate . '_hingga_' . $endDate . '.xlsx';
+        } elseif ($mode === 'bulanan') {
+            $startDate = $selectedDate->copy()->startOfMonth()->format('Y-m-d');
+            $endDate = $selectedDate->copy()->endOfMonth()->format('Y-m-d');
+            $namaFile = 'Laporan_Anggota_Bulanan_' . $selectedDate->format('F_Y') . '.xlsx';
+        } else {
+            $startDate = $selectedDate->format('Y-m-d');
+            $endDate = $startDate;
+            $namaFile = 'Laporan_Anggota_' . $startDate . '.xlsx';
+        }
+
+        return Excel::download(new AnggotaExport($startDate, $endDate), $namaFile);
     }
 
     // Fungsi Import Anggota Baru (Sudah Diperbarui)
@@ -168,9 +186,26 @@ class LaporanController extends Controller
 
     public function exportAttendanceExcel(Request $request)
     {
-        $tanggal = $request->query('date', today()->format('Y-m-d'));
-        $namaFile = 'Laporan_Absensi_' . $tanggal . '.xlsx';
+        // Ambil parameter umum (termasuk mode harian/mingguan/bulanan)
+        $params = $this->getCommonParams($request);
+        $selectedDate = $params['selectedDate'];
+        $mode = $params['mode'];
 
-        return Excel::download(new AttendanceExport($tanggal), $namaFile);
+        // Tentukan rentang tanggal berdasarkan mode yang sedang aktif di web
+        if ($mode === 'mingguan') {
+            $startDate = $params['startOfWeekDate'];
+            $endDate = $params['endOfWeekDate'];
+            $namaFile = 'Laporan_Absensi_Mingguan_' . $startDate . '_hingga_' . $endDate . '.xlsx';
+        } elseif ($mode === 'bulanan') {
+            $startDate = $selectedDate->copy()->startOfMonth()->format('Y-m-d');
+            $endDate = $selectedDate->copy()->endOfMonth()->format('Y-m-d');
+            $namaFile = 'Laporan_Absensi_Bulanan_' . $selectedDate->format('F_Y') . '.xlsx';
+        } else {
+            $startDate = $selectedDate->format('Y-m-d');
+            $endDate = $startDate;
+            $namaFile = 'Laporan_Absensi_' . $startDate . '.xlsx';
+        }
+
+        return Excel::download(new AttendanceExport($startDate, $endDate), $namaFile);
     }
 }

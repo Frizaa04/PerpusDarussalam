@@ -85,7 +85,9 @@
                     </button>
 
                     <!-- Tombol Unduh Excel -->
-                    <a href="{{ route('laporan.anggota.export', ['date' => $selectedDate->format('Y-m-d')]) }}" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Unduh Laporan Excel">
+                    <a href="{{ route('laporan.anggota.export', ['date' => $selectedDate->format('Y-m-d'), 'mode' => $mode]) }}" 
+                    class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" 
+                    title="Unduh Laporan Excel">
                         <span class="material-icons text-xl">file_download</span>
                         <span>Unduh Excel</span>
                     </a>

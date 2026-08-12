@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('borrowings', function (Blueprint $table) {
             $table->id();
             
-            // Relasi ke tabel users & book_items 
             $table->foreignId('user_id')
                   ->constrained('users')
                   ->cascadeOnDelete();
@@ -26,7 +25,8 @@ return new class extends Migration
             $table->enum('status', [
                 'dipinjam',
                 'dikembalikan',
-                'terlambat'
+                'terlambat',
+                'hilang'
             ])->default('dipinjam')->index();
             
             $table->timestamps();

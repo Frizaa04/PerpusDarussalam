@@ -14,24 +14,29 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class AttendanceExport implements FromArray, WithStyles, ShouldAutoSize
 {
-    protected $selectedDate;
+    protected $startDate;
+    protected $endDate;
     protected $jumlahData = 0;
 
-    public function __construct($date)
+    // Terima rentang tanggal dari Controller
+    public function __construct($startDate, $endDate)
     {
-        $this->selectedDate = $date ? Carbon::parse($date) : today();
+        $this->startDate = Carbon::parse($startDate);
+        $this->endDate = Carbon::parse($endDate);
     }
     
     public function array(): array
     {
         $data = [];
 
-        // Header Tabel Laporan Kunjungan / Absensi
         $data[] = ['No', 'Waktu Kunjungan', 'No Identitas / ID', 'Nama Pengunjung', 'Kategori / Role'];
 
-        // Ambil data kunjungan berdasarkan tanggal 
+        // whereBetween untuk mengambil data sesuai rentang (Harian/Mingguan/Bulanan)
         $visits = visits::with('user')
-            ->whereDate('visited_at', $this->selectedDate->format('Y-m-d'))
+            ->whereBetween('visited_at', [
+                $this->startDate->format('Y-m-d 00:00:00'), 
+                $this->endDate->format('Y-m-d 23:59:59')
+            ])
             ->get();
             
         $this->jumlahData = $visits->count();
