@@ -69,17 +69,11 @@
 
         <!-- LAPORAN -->
         <a href="{{ route('laporan.index') }}" 
-           class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.koleksi') || request()->routeIs('laporan.anggota') || request()->routeIs('laporan.pengunjung') ? 'bg-[#003d30] border-l-4 border-white' : 'hover:bg-white/10 opacity-90 hover:opacity-100' }}">
+        class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all {{ request()->routeIs('laporan.*') ? 'bg-[#003d30] border-l-4 border-white' : 'hover:bg-white/10 opacity-90 hover:opacity-100' }}">
             <span class="material-icons text-xl mr-4 min-w-[24px]">description</span>
             <span class="whitespace-nowrap uppercase">LAPORAN</span>
         </a>
 
-        <!-- LAPORAN KEUANGAN -->
-        <a href="{{ route('laporan.keuangan') }}" 
-           class="flex items-center px-6 py-3.5 text-sm font-bold tracking-wider transition-all {{ request()->routeIs('laporan.keuangan') ? 'bg-[#003d30] border-l-4 border-white' : 'hover:bg-white/10 opacity-90 hover:opacity-100' }}">
-            <span class="material-icons text-xl mr-4 min-w-[24px]">assignment</span>
-            <span class="whitespace-nowrap uppercase">LAPORAN KEUANGAN</span>
-        </a>
 
     </nav>
 </aside>
