@@ -32,7 +32,6 @@ class AreaAnggotaUserController extends Controller
 
     public function updatePassword(Request $request)
     {
-        // 1. Matikan semua aturan rumit, buat seminimal mungkin dulu untuk tes
         $request->validate([
             'current_password' => ['required'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
@@ -46,15 +45,13 @@ class AreaAnggotaUserController extends Controller
         $userId = auth()->guard('web')->id();
         $user = \App\Models\User::find($userId);
 
-        if (!$user) {
+        if (!$user) {   
             return back()->with('error', 'Sesi tidak ditemukan.');
         }
 
-        // 2. Jika lolos pengecekan, eksekusi ganti password
         $user->password = $request->password;
         $user->save();
 
-        // 3. Kick Session
         auth()->guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

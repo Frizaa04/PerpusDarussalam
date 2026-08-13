@@ -90,27 +90,28 @@ class BookController extends Controller
             ->with('success', 'Data buku dan inventaris berhasil diperbarui!');
     }
 
-    public function destroyMultiple(Request $request, BookService $bookService)
+    public function destroyMultiple(Request $request)
     {
-        $ids = $request->ids;
+        // 1. Ambil array ID yang dikirim dari AJAX
+        $ids = $request->input('ids', []);
 
-        if (!$ids || !is_array($ids)) {
-            return redirect()->back()->with('error', 'Tidak ada buku yang dipilih untuk dihapus.');
-        }
-
-        // Ambil semua buku berdasarkan ID yang dicentang
-        $books = Book::whereIn('id', $ids)->get();
-
-        foreach ($books as $book) {
+        if (!empty($ids)) {
+            // 2. Proses hapus data buku berdasarkan array ID
+            \App\Models\Book::whereIn('id', $ids)->delete();
             
-            $bookService->deleteBook($book);
+            // 3. WAJIB RETURN JSON (Ini yang bikin AJAX sukses dan gak masuk blok error lagi)
+            return response()->json([
+                'success' => true,
+                'message' => 'Data buku berhasil dihapus lintas halaman!'
+            ], 200);
         }
 
-        return redirect()
-            ->route('book.index')
-            ->with('success', 'Buku yang dipilih berhasil dihapus!');
+        // Jika array ID kosong
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada data buku yang dipilih.'
+        ], 400);
     }
-
     // Tambah Kategori langsung dari tombol di halaman utama
     public function storeCategory(Request $request)
     {

@@ -100,13 +100,13 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::put('/manajemen-siswa/perpanjang/{id}', [MemberController::class, 'perpanjang'])->name('member.perpanjang');
     Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
-    // Katalog Buku
-    Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
-    Route::post('/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
-    Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
-    Route::post('/katalog-buku/kategori/store', [BookController::class, 'storeCategory'])->name('book.category.store');
-    Route::delete('/katalog-buku/kategori/{id}', [BookController::class, 'destroyCategory'])->name('book.category.destroy');
-
+        // Katalog Buku
+        Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
+        Route::post('/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
+        Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
+        Route::post('/katalog-buku/kategori/store', [BookController::class, 'storeCategory'])->name('book.category.store');
+        Route::delete('/katalog-buku/kategori/{id}', [BookController::class, 'destroyCategory'])->name('book.category.destroy');
+        Route::post('/katalog-buku/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
     // Edit perbuku
     Route::get('/book/{id}/items', [BookItemController::class, 'getItems']);
     Route::post('/book/item/store', [BookItemController::class, 'store'])->name('book.item.store');
