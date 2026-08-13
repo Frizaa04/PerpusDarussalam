@@ -54,140 +54,103 @@
 
 
                 <!-- Form/Wrapper Tabel untuk Aksi Hapus Massal -->
-                <form id="deleteForm" action="{{ route('book.destroyMultiple') }}" method="POST">
-                    @csrf
-                    @method('DELETE')
+            <div id="deleteFormContainer">
+                @csrf
+                <!-- Box Tabel -->
+                <div class="bg-[#a2b4ba] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar Buku</h2>
 
-                    <!-- Box Tabel -->
-                    <div class="bg-[#a2b4ba] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar Buku</h2>
-
-                            <!-- Tombol Aksi di Header (Hapus Buku & Konfirmasi Hapus Berdampingan) -->
-                            <div class="flex items-center gap-2">
-                                <!-- Pengecekan Select All (Hanya muncul saat mode hapus aktif) -->
-                                <div id="selectAllContainer"
-                                    class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
-                                    <input type="checkbox" id="selectAllCheckboxMain"
-                                        onclick="toggleSelectAll(this, 'book-checkbox')"
-                                        class="w-4 h-4 accent-red-600 cursor-pointer rounded">
-                                    <label for="selectAllCheckboxMain"
-                                        class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
-                                </div>
-
-                                <!-- Tombol Konfirmasi Hapus (Awalnya Tersembunyi) -->
-                                <button type="submit" id="btnConfirmDelete"
-                                    onclick="return confirm('Yakin ingin menghapus buku yang dipilih?')"
-                                    class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
-                                    Konfirmasi Hapus
-                                </button>
-
-                                <!-- Tombol Mode Hapus / Batal -->
-                                <button type="button" id="btnToggleDelete" onclick="toggleDeleteMode()"
-                                    class="bg-[#004d40] hover:bg-[#003d30] text-white font-bold px-3 py-1.5 rounded text-sm transition shadow flex items-center gap-1.5 select-none">
-                                    <svg id="trashIcon" xmlns="http://www.w3.org/2000/svg"
-                                        class="h-4 w-4 text-white transition-colors duration-200" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    <span id="btnText">Hapus Buku</span>
-                                </button>
+                        <!-- Tombol Aksi di Header -->
+                        <div class="flex items-center gap-2">
+                            <!-- Pengecekan Select All -->
+                            <div id="selectAllContainer" class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
+                                <input type="checkbox" id="selectAllCheckboxMain" class="w-4 h-4 accent-red-600 cursor-pointer rounded">
+                                <label for="selectAllCheckboxMain" class="text-xs font-semibold text-white cursor-pointer">Pilih Semua Halaman Ini</label>
                             </div>
-                        </div>
 
-                        <div class="overflow-x-auto rounded">
-                            <table class="min-w-full text-left border-collapse border border-white/40">
-                                <thead>
-                                    <tr class="bg-[#004d40] text-white divide-x divide-white/40">
-                                        <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
-                                        <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
-                                        <th class="p-3 text-sm font-bold tracking-wider">Penulis & ISBN</th>
-                                        <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
-                                        <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
-                                        <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
-                                        <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-white divide-y divide-white/40">
-                                    @forelse($books as $book)
-                                        <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
-                                            <td class="p-3 text-sm text-center w-20">
-                                                @if ($book->cover)
-                                                    <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover"
-                                                        class="w-14 h-20 object-cover rounded border border-white/30 mx-auto shadow-md">
-                                                @else
-                                                    <div
-                                                        class="w-14 h-20 bg-gray-400/50 text-[10px] text-white flex items-center justify-center rounded border border-white/30 mx-auto shadow-md">
-                                                        No Pic
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td class="p-3 text-sm font-bold text-white/90">{{ $book->judul }}</td>
-                                            <!-- KOLOM BARU: PENULIS & ISBN -->
-                                            <td class="p-3 text-sm text-white/90">
-                                                <div class="font-semibold">{{ $book->penulis }}</div>
-                                                <div class="text-xs text-white/70 mt-0.5">ISBN: {{ $book->isbn }}</div>
-                                            </td>
-
-                                            <!-- KATEGORI -->
-                                            <td class="p-3 text-sm text-white/90">
-                                                {{ $book->categories->nama ?? ($book->kategori ?? '-') }}
-                                            </td>
-
-                                            <!-- RAK -->
-                                            <td class="p-3 text-sm font-bold text-white/90">
-                                                {{ $book->rak ?? '-' }}
-                                            </td>
-
-                                            <!-- STOK -->
-                                            <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
-
-                                            <!-- AKSI -->
-                                            <td class="py-2 px-3 text-sm text-center">
-                                                <!-- Mode Normal: Tombol Edit Data & Kelola (Lebih compact & rapi) -->
-                                                <div class="edit-mode-action flex flex-col items-center justify-center gap-1">
-                                                    <button type="button"
-                                                        onclick="openEditModal('{{ $book->id }}', '{{ $book->judul }}', '{{ $book->penulis }}', '{{ $book->penerbit }}', '{{ $book->deskripsi ?? '' }}', '{{ $book->isbn }}', '{{ $book->tanggal_pembelian }}', '{{ $book->categories_id }}', '{{ $book->stok }}', '{{ $book->rak ?? '' }}', '{{ $book->kode_buku }}', '{{ $book->tahun_terbit }}')"
-                                                        class="w-32 bg-[#004d40] text-white px-2.5 py-1 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm text-center">
-                                                        Edit Data
-                                                    </button>
-
-                                                    <button type="button"
-                                                        onclick="openKelolaModal('{{ $book->id }}', '{{ $book->judul }}')"
-                                                        class="w-32 bg-[#004d40] text-white px-2.5 py-1 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm text-center">
-                                                        Kelola data buku
-                                                    </button>
-                                                </div>
-
-                                                <!-- Mode Hapus: Checkbox di Kolom Aksi -->
-                                                <div
-                                                    class="delete-mode-action hidden flex items-center justify-center gap-2">
-                                                    <input type="checkbox" name="ids[]" value="{{ $book->id }}"
-                                                        class="book-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
-                                                    <span class="text-xs font-semibold text-red-200 italic">Centang untuk
-                                                        hapus</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="p-5 text-center text-sm font-semibold text-white/80">
-                                                Data buku tidak ditemukan.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="mt-4">
-                            {{ $books->links('vendor.pagination.custom') }}
+                            <!-- Tombol Konfirmasi Hapus (Tipe diubah jadi button agar tidak submit form default) -->
+                            <button type="button" id="btnConfirmDelete"
+                                class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
+                                Konfirmasi Hapus (<span id="jumlahTerpilih">0</span>)
+                            </button>                      
+                            
+                            <!-- Tombol Mode Hapus / Batal -->
+                            <button type="button" id="btnToggleDelete" onclick="toggleDeleteMode()"
+                                class="bg-[#004d40] hover:bg-[#003d30] text-white font-bold px-3 py-1.5 rounded text-sm transition shadow flex items-center gap-1.5 select-none">
+                                <svg id="trashIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span id="btnText">Hapus Buku</span>
+                            </button>
                         </div>
                     </div>
-                </form>
+
+                    <div class="overflow-x-auto rounded">
+                        <table class="min-w-full text-left border-collapse border border-white/40">
+                            <thead>
+                                <tr class="bg-[#004d40] text-white divide-x divide-white/40">
+                                    <th class="p-3 text-sm font-bold tracking-wider">Cover</th>
+                                    <th class="p-3 text-sm font-bold tracking-wider">Judul</th>
+                                    <th class="p-3 text-sm font-bold tracking-wider">Penulis & ISBN</th>
+                                    <th class="p-3 text-sm font-bold tracking-wider">Kategori</th>
+                                    <th class="p-3 text-sm font-bold tracking-wider">Rak</th>
+                                    <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
+                                    <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-white divide-y divide-white/40">
+                                @forelse($books as $book)
+                                    <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
+                                        <td class="p-3 text-sm text-center w-20">
+                                            @if ($book->cover)
+                                                <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover" class="w-14 h-20 object-cover rounded border border-white/30 mx-auto shadow-md">
+                                            @else
+                                                <div class="w-14 h-20 bg-gray-400/50 text-[10px] text-white flex items-center justify-center rounded border border-white/30 mx-auto shadow-md">No Pic</div>
+                                            @endif
+                                        </td>
+                                        <td class="p-3 text-sm font-bold text-white/90">{{ $book->judul }}</td>
+                                        <td class="p-3 text-sm text-white/90">
+                                            <div class="font-semibold">{{ $book->penulis }}</div>
+                                            <div class="text-xs text-white/70 mt-0.5">ISBN: {{ $book->isbn }}</div>
+                                        </td>
+                                        <td class="p-3 text-sm text-white/90">{{ $book->categories->nama ?? ($book->kategori ?? '-') }}</td>
+                                        <td class="p-3 text-sm font-bold text-white/90">{{ $book->rak ?? '-' }}</td>
+                                        <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
+
+                                        <!-- KOLOM AKSI -->
+                                        <td class="p-3 text-sm text-center">
+                                            <!-- Mode Normal -->
+                                            <div class="edit-mode-action flex items-center justify-center gap-2">
+                                                <button type="button" onclick="openEditModal('{{ $book->id }}', '{{ $book->judul }}', '{{ $book->penulis }}', '{{ $book->penerbit }}', '{{ $book->deskripsi ?? '' }}', '{{ $book->isbn }}', '{{ $book->tanggal_pembelian }}', '{{ $book->categories_id }}', '{{ $book->stok }}', '{{ $book->rak ?? '' }}', '{{ $book->kode_buku }}', '{{ $book->tahun_terbit }}')" class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
+                                                    Edit Data
+                                                </button>
+                                                <button type="button" onclick="openKelolaModal('{{ $book->id }}', '{{ $book->judul }}')" class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
+                                                    Kelola data buku
+                                                </button>
+                                            </div>
+
+                                            <!-- Mode Hapus (Checkbox) -->
+                                            <div class="delete-mode-action hidden flex items-center justify-center gap-2">
+                                                <input type="checkbox" value="{{ $book->id }}" class="book-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
+                                                <span class="text-xs font-semibold text-red-200 italic">Centang untuk hapus</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="p-5 text-center text-sm font-semibold text-white/80">Data buku tidak ditemukan.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        {{ $books->links('vendor.pagination.custom') }}
+                    </div>
+                </div>
             </div>
-        </main>
-    </div>
 
     <!-- ====== POP-UP MODAL TAMBAH BUKU ====== -->
     <div id="addModal"
@@ -644,6 +607,73 @@
             if ($(e.target).is('#addCategoryModal')) closeAddCategoryModal();
         });
 
+        // ==========================================
+        // FITUR: INISIALISASI MEMORI HAPUS BUKU LINTAS HALAMAN
+        // ==========================================
+        let selectedBookIds = JSON.parse(sessionStorage.getItem('selected_book_ids')) || [];
+
+        // Jika sebelumnya user sedang dalam mode hapus di page lain, pertahankan modenya saat pindah page
+        if (sessionStorage.getItem('delete_mode_active') === 'true') {
+            setTimeout(function() {
+                isDeleteModeActive = false; // reset state sebentar agar fungsi toggle memicu mode aktif
+                toggleDeleteMode();
+            }, 150);
+        }
+
+        // Otomatis centang ulang buku yang ID-nya ada di memori browser
+        $('.book-checkbox').each(function() {
+            if (selectedBookIds.includes($(this).val())) {
+                $(this).prop('checked', true);
+            }
+        });
+
+        // Pantau klik checkbox buku secara individual
+        $(document).on('change', '.book-checkbox', function() {
+            let id = $(this).val();
+            if ($(this).is(':checked')) {
+                if (!selectedBookIds.includes(id)) selectedBookIds.push(id);
+            } else {
+                selectedBookIds = selectedBookIds.filter(item => item !== id);
+            }
+            sessionStorage.setItem('selected_book_ids', JSON.stringify(selectedBookIds));
+            updateConfirmDeleteButtonState();
+        });
+
+        // Event listener klik tombol Konfirmasi Hapus Buku Lintas Halaman
+        $('#btnConfirmDelete').on('click', function(e) {
+            e.preventDefault(); // Mencegah submit form bawaan browser
+            
+            let finalIds = JSON.parse(sessionStorage.getItem('selected_book_ids')) || [];
+            
+            if (finalIds.length === 0) {
+                alert('Silakan pilih minimal satu buku untuk dihapus!');
+                return;
+            }
+
+            if (confirm(`Yakin ingin menghapus ${finalIds.length} buku yang dipilih dari berbagai halaman?`)) {
+                $.ajax({
+                    url: "{{ route('book.destroyMultiple') }}",
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        ids: finalIds
+                    },
+                    success: function(response) {
+                        // Bersihkan memori setelah berhasil dihapus
+                        sessionStorage.removeItem('selected_book_ids');
+                        sessionStorage.removeItem('delete_mode_active');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Gagal menghapus data buku lintas halaman. Status: ' + xhr.status);
+                    }
+                });
+            }
+        });
+
+        // Sinkronisasi tombol konfirmasi saat page baru dimuat
+        updateConfirmDeleteButtonState();
     });
 
     // 2. Modal Functions (Tambah & Edit Utama)
@@ -684,7 +714,7 @@
         $('#kelolaModal').removeClass('hidden');
 
         let $tbody = $('#kelolaItemList');
-        $tbody.html('<tr><td colspan="4" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>');
+        $tbody.html('<tr><td colspan="5" class="p-4 text-center text-white/70">Memuat data eksemplar...</td></tr>');
 
         // Fetch Data Eksemplar via jQuery AJAX
         $.ajax({
@@ -695,7 +725,7 @@
                 $tbody.empty();
 
                 if (data.length === 0) {
-                    $tbody.html('<tr><td colspan="4" class="p-4 text-center text-white/70">Belum ada eksemplar terdaftar untuk buku ini.</td></tr>');
+                    $tbody.html('<tr><td colspan="5" class="p-4 text-center text-white/70">Belum ada eksemplar terdaftar untuk buku ini.</td></tr>');
                     $btnPrintAll.addClass('hidden');
                     return;
                 }
@@ -741,7 +771,7 @@
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
-                $tbody.html('<tr><td colspan="4" class="p-4 text-center text-red-300">Gagal memuat data eksemplar.</td></tr>');
+                $tbody.html('<tr><td colspan="5" class="p-4 text-center text-red-300">Gagal memuat data eksemplar.</td></tr>');
             }
         });
     }
@@ -775,8 +805,8 @@
             $btnText.text('Batal');
             $trashIcon.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />');
 
-            $btnConfirm.removeClass('hidden');
             $selectAllContainer.removeClass('hidden');
+            sessionStorage.setItem('delete_mode_active', 'true');
 
             $('.edit-mode-action').addClass('hidden');
             $('.delete-mode-action').removeClass('hidden');
@@ -787,20 +817,52 @@
 
             $btnConfirm.addClass('hidden');
             $selectAllContainer.addClass('hidden');
+            sessionStorage.setItem('delete_mode_active', 'false');
 
             $('.edit-mode-action').removeClass('hidden');
             $('.delete-mode-action').addClass('hidden');
 
-            $('#selectAllCheckbox').prop('checked', false);
+            // Reset ingatan & centangan saat user membatalkan mode hapus
+            sessionStorage.removeItem('selected_book_ids');
+            $('#selectAllCheckboxMain').prop('checked', false);
             $('.book-checkbox').prop('checked', false);
         }
+        updateConfirmDeleteButtonState();
     }
 
     function toggleSelectAll(master, targetClass = 'book-checkbox') {
-        $('.' + targetClass).prop('checked', master.checked);
-        updateSelectedCount();
+        let checkboxes = $('.' + targetClass);
+        checkboxes.prop('checked', master.checked);
+        
+        let selectedBookIds = JSON.parse(sessionStorage.getItem('selected_book_ids')) || [];
+
+        checkboxes.each(function() {
+            let id = $(this).val();
+            if (master.checked) {
+                if (!selectedBookIds.includes(id)) selectedBookIds.push(id);
+            } else {
+                selectedBookIds = selectedBookIds.filter(item => item !== id);
+            }
+        });
+
+        sessionStorage.setItem('selected_book_ids', JSON.stringify(selectedBookIds));
+        updateConfirmDeleteButtonState();
     }
 
+    function updateConfirmDeleteButtonState() {
+        let selectedBookIds = JSON.parse(sessionStorage.getItem('selected_book_ids')) || [];
+        let totalCount = selectedBookIds.length;
+
+        $('#jumlahTerpilih').text(totalCount);
+
+        if (isDeleteModeActive && totalCount > 0) {
+            $('#btnConfirmDelete').removeClass('hidden');
+        } else {
+            $('#btnConfirmDelete').addClass('hidden');
+        }
+    }
+
+    // Fungsi penghitung checkbox sub-modal eksemplar buku
     function updateSelectedCount() {
         let $checkboxes = $('.item-checkbox');
         let checkedCount = $('.item-checkbox:checked').length;
