@@ -39,42 +39,83 @@ class AdminDashboardController extends Controller
         // Ambil rentang 6 hari ke belakang sampai hari ini (total tepat 7 hari / 1 minggu penuh)
         $startDate = $now->copy()->subDays(6); 
 
-        $borrowingsData = Borrowing::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->whereBetween('created_at', [$startDate->copy()->startOfDay(), $now->copy()->endOfDay()])
-            ->groupBy('date')
-            ->pluck('count', 'date');
+        $borrowingsData = Borrowing::with(['user', 'bookItem.book'])
+            ->whereBetween('created_at', [
+                $startDate->copy()->startOfDay(),
+                $now->copy()->endOfDay()
+            ])
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->created_at->format('Y-m-d');
+            });
 
         $labels = [];
         $chartPeminjaman = [];
+        $chartDetails = [];
+        $chartDates = [];
 
         // Looping tepat 7 hari ke belakang hingga hari ini
         for ($i = 0; $i < 7; $i++) {
             $date = $startDate->copy()->addDays($i);
             $dateStr = $date->format('Y-m-d');
 
+            $chartDates[] = $dateStr;
             $labels[] = $date->translatedFormat('D, d M');
-            $chartPeminjaman[] = (int) ($borrowingsData[$dateStr] ?? 0);
+
+            // Ambil semua peminjaman pada tanggal tersebut
+            $dailyBorrowings = $borrowingsData->get($dateStr, collect());
+
+            // Jumlah peminjaman
+            $chartPeminjaman[] = $dailyBorrowings->count();
+
+            // Detail untuk tooltip (berisi nama peminjam dan judul buku)
+            $chartDetails[$dateStr] = $dailyBorrowings->map(function ($borrowing) {
+                return [
+                    'peminjam' => $borrowing->user->name ?? 'Tanpa Nama',
+                    'buku'     => $borrowing->bookItem->book->judul ?? 'Buku Terhapus',
+                ];
+            })->values()->toArray();
         }
 
         $chartLabels = $labels;
 
-        // Aktivitas Terbaru
-       $allActivities = Borrowing::with(['user', 'bookItem.book'])
+        // Aktivitas Terbaru (Diperbaiki agar log Peminjaman dan Pengembalian terpisah)
+        $borrowingsForActivity = Borrowing::with(['user', 'bookItem.book'])
             ->latest('updated_at')
             ->take(50)
-            ->get()
-            ->map(function ($item) {
-                $isReturn = $item->status === 'dikembalikan';
-                $time = $isReturn ? $item->updated_at : $item->created_at;
+            ->get();
 
-                return [
-                    'tanggal'     => Carbon::parse($time)->format('d M Y'),
-                    'waktu'       => Carbon::parse($time)->format('H:i'),
-                    'tindakan'    => $isReturn ? 'Pengembalian' : 'Peminjaman',
-                    'detail_buku' => $item->bookItem->book->judul ?? 'Buku Terhapus',
-                    'user'        => $item->user->name ?? 'Tanpa Nama',
-                ];
-            });
+        $allActivities = collect();
+
+        foreach ($borrowingsForActivity as $item) {
+            $namaBuku = $item->bookItem->book->judul ?? 'Buku Terhapus';
+            $namaUser = $item->user->name ?? 'Tanpa Nama';
+
+            // 1. Catat log Peminjaman (berdasarkan waktu created_at)
+            $allActivities->push([
+                'timestamp'   => Carbon::parse($item->created_at)->timestamp,
+                'tanggal'     => Carbon::parse($item->created_at)->format('d M Y'),
+                'waktu'       => Carbon::parse($item->created_at)->format('H:i'),
+                'tindakan'    => 'Peminjaman',
+                'detail_buku' => $namaBuku,
+                'user'        => $namaUser,
+            ]);
+
+            // 2. Jika statusnya sudah dikembalikan, buat catatan log Pengembalian terpisah (berdasarkan updated_at)
+            if ($item->status === 'dikembalikan') {
+                $allActivities->push([
+                    'timestamp'   => Carbon::parse($item->updated_at)->timestamp,
+                    'tanggal'     => Carbon::parse($item->updated_at)->format('d M Y'),
+                    'waktu'       => Carbon::parse($item->updated_at)->format('H:i'),
+                    'tindakan'    => 'Pengembalian',
+                    'detail_buku' => $namaBuku,
+                    'user'        => $namaUser,
+                ]);
+            }
+        }
+
+        // Urutkan ulang log berdasarkan waktu terbaru secara global
+        $allActivities = $allActivities->sortByDesc('timestamp')->values();
 
         $perPage = 5;
         $currentPage = LengthAwarePaginator::resolveCurrentPage('activity_page');
@@ -86,7 +127,7 @@ class AdminDashboardController extends Controller
             $perPage,
             $currentPage,
             [
-                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'path'     => LengthAwarePaginator::resolveCurrentPath(),
                 'pageName' => 'activity_page',
             ]
         );
@@ -106,6 +147,8 @@ class AdminDashboardController extends Controller
             'recentActivities',
             'chartPeminjaman',
             'chartLabels',
+            'chartDetails',
+            'chartDates',
             'recentTransactions',
             'totalNominalTransaksi'
         ));

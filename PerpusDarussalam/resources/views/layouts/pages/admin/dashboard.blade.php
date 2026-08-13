@@ -85,6 +85,12 @@
 
                         <!-- Container SVG Grafik -->
                         <div class="relative h-44 w-full py-2 px-4">
+                            <div 
+                                id="chartTooltip"
+                                class="hidden absolute z-50 bg-white text-gray-800 rounded-lg shadow-xl border border-gray-200 p-3 text-xs w-64 pointer-events-auto"
+                                style="transform: translateX(0);"
+                            >
+                            </div>
                             <!-- Garis Panduan Sumbu Y -->
                             <div class="absolute inset-x-4 inset-y-2 flex flex-col justify-between pointer-events-none opacity-20">
                                 <div class="border-b border-white w-full"></div>
@@ -94,7 +100,7 @@
 
                             @php
                                 // Sesuaikan skala tinggi SVG (viewBox 0 sampai 140) agar titik 0 tepat berada di garis paling bawah (Y=140)
-                                $getY = fn($val) => 140 - ($val / $maxVal) * 120;
+                                $getY = fn($val) => 140 - ($val / $maxVal) * 140;
                                 
                                 $pointsPeminjaman = [];
                                 $totalPoints = count($peminjaman);
@@ -132,8 +138,27 @@
 
                                 <!-- Titik-titik Indikator Peminjaman -->
                                 @foreach($peminjaman as $index => $val)
-                                    @php $cx = $totalPoints > 1 ? $paddingX + ($index * $stepX) : $svgWidth / 2; @endphp
-                                    <circle cx="{{ $cx }}" cy="{{ $getY($val) }}" r="4.5" fill="#ffffff" stroke="#004d40" stroke-width="2.5" />
+                                    @php
+                                        $cx = $totalPoints > 1
+                                            ? $paddingX + ($index * $stepX)
+                                            : $svgWidth / 2;
+
+                                        $date = $chartDates[$index] ?? null;
+                                        $details = $date ? ($chartDetails[$date] ?? []) : [];
+                                    @endphp
+
+                                    <circle 
+                                        cx="{{ $cx }}" 
+                                        cy="{{ $getY($val) }}" 
+                                        r="4.5" 
+                                        fill="#ffffff" 
+                                        stroke="#004d40" 
+                                        stroke-width="2.5"
+                                        class="chart-point cursor-pointer"
+                                        data-date="{{ $date }}"
+                                        data-count="{{ $val }}"
+                                        data-details='@json($details)'
+                                    />
                                 @endforeach
                             </svg>
                         </div>
@@ -263,12 +288,12 @@
                     </div>
                 </div>
 
-                <!-- 2. TABEL RINGKASAN TRANSAKSI (Data Dummy Pendamping) -->
+                <!-- 2. TABEL RINGKASAN TRANSAKSI -->
                 <div class="bg-[#b0bec5] p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-white/20 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="text-lg font-bold text-white tracking-wide">Transaksi Keuangan</h2>
-                            <span class="text-xs bg-[#003d30] text-white px-3 py-1 rounded-full font-semibold">
+                            <span class="text-xs bg-[#004d40] text-white px-3 py-1 rounded-full font-semibold">
                                 Total: Rp {{ number_format($totalNominalTransaksi ?? 0, 0, ',', '.') }}
                             </span>
                         </div>
@@ -277,7 +302,7 @@
                         <div class="overflow-x-auto rounded-lg">
                             <table class="min-w-full text-left border-collapse border border-white/30">
                                 <thead>
-                                    <tr class="bg-[#003d30] text-white divide-x divide-white/30">
+                                    <tr class="bg-[#004d40] text-white divide-x divide-white/30">
                                         <th class="p-3 text-xs font-bold tracking-wider">Jenis Transaksi</th>
                                         <th class="p-3 text-xs font-bold tracking-wider">Peminjam / User</th>
                                         <th class="p-3 text-xs font-bold tracking-wider">Nominal</th>
@@ -399,4 +424,257 @@
         </div>
     </main>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const points = document.querySelectorAll('.chart-point');
+    const tooltip = document.getElementById('chartTooltip');
+
+    let hideTimeout = setTimeout(() => {
+        tooltip.classList.add('hidden');
+    }, 200);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fungsi menampilkan tooltip
+    |--------------------------------------------------------------------------
+    */
+    function showTooltip(point) {
+
+        // Batalkan timer hide jika ada
+        clearTimeout(hideTimeout);
+
+        const count = parseInt(point.dataset.count || 0);
+        const details = JSON.parse(point.dataset.details || '[]');
+
+        let html = `
+            <div class="font-bold text-[#004d40] mb-1">
+                ${formatDate(point.dataset.date)}
+            </div>
+
+            <div class="font-semibold mb-2">
+                ${count} Peminjaman
+            </div>
+        `;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika ada peminjaman
+        |--------------------------------------------------------------------------
+        */
+        if (details.length > 0) {
+
+            html += `
+                <div class="border-t border-gray-200 pt-2 space-y-2 max-h-48 overflow-y-auto">
+            `;
+
+            details.forEach((item, index) => {
+
+                html += `
+                    <div>
+                        <div class="font-semibold text-gray-700">
+                            ${index + 1}. ${escapeHtml(item.peminjam)}
+                        </div>
+
+                        <div class="text-gray-500 text-[11px] mt-0.5">
+                            ${escapeHtml(item.buku)}
+                        </div>
+                    </div>
+                `;
+
+            });
+
+            html += `
+                </div>
+            `;
+
+        } else {
+
+            html += `
+                <div class="text-gray-400 italic">
+                    Tidak ada peminjaman.
+                </div>
+            `;
+        }
+
+        tooltip.innerHTML = html;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tampilkan tooltip terlebih dahulu agar ukuran bisa dihitung
+        |--------------------------------------------------------------------------
+        */
+        tooltip.classList.remove('hidden');
+
+        const pointRect = point.getBoundingClientRect();
+        const container = point.closest('.relative');
+        const containerRect = container.getBoundingClientRect();
+
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Posisi horizontal
+        |
+        | Bubble berada tepat di tengah titik.
+        |--------------------------------------------------------------------------
+        */
+        let left =
+            (pointRect.left - containerRect.left)
+            + (pointRect.width / 2)
+            - (tooltipWidth / 2);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Posisi vertikal
+        |
+        | Bubble berada DI ATAS titik.
+        |--------------------------------------------------------------------------
+        */
+        let top =
+            (pointRect.top - containerRect.top)
+            - tooltipHeight
+            - 12;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jangan sampai bubble keluar dari sisi kiri
+        |--------------------------------------------------------------------------
+        */
+        const padding = 8;
+
+        if (left < padding) {
+            left = padding;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jangan sampai bubble keluar dari sisi kanan
+        |--------------------------------------------------------------------------
+        */
+        if (left + tooltipWidth > containerRect.width - padding) {
+            left = containerRect.width - tooltipWidth - padding;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Terapkan posisi
+        |--------------------------------------------------------------------------
+        */
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fungsi menyembunyikan tooltip dengan delay
+    |--------------------------------------------------------------------------
+    */
+    function hideTooltip() {
+
+        clearTimeout(hideTimeout);
+
+        hideTimeout = setTimeout(() => {
+            tooltip.classList.add('hidden');
+        }, 200);
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mouse masuk ke titik
+    |--------------------------------------------------------------------------
+    */
+    points.forEach(point => {
+
+        point.addEventListener('mouseenter', function () {
+
+            showTooltip(this);
+
+        });
+
+        point.addEventListener('mouseleave', function () {
+
+            hideTooltip();
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mouse masuk ke tooltip
+    |
+    | Tooltip TIDAK akan hilang ketika cursor masuk ke bubble.
+    |--------------------------------------------------------------------------
+    */
+    tooltip.addEventListener('mouseenter', function () {
+
+        clearTimeout(hideTimeout);
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mouse keluar dari tooltip
+    |--------------------------------------------------------------------------
+    */
+    tooltip.addEventListener('mouseleave', function () {
+
+        hideTooltip();
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Format tanggal
+    |--------------------------------------------------------------------------
+    */
+    function formatDate(dateString) {
+
+        if (!dateString) {
+            return '';
+        }
+
+        const date = new Date(dateString + 'T00:00:00');
+
+        return date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mencegah HTML injection dari nama/buku
+    |--------------------------------------------------------------------------
+    */
+    function escapeHtml(text) {
+
+        if (!text) {
+            return '';
+
+        }
+
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+    }
+
+});
+</script>
 @endsection
