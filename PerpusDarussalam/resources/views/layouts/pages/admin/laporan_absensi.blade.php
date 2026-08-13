@@ -82,7 +82,8 @@
                             <span>&larr;</span> Kembali
                         </a>
 
-                        <a href="{{ route('laporan.absensi.export', ['date' => $selectedDate->format('Y-m-d')]) }}"
+                        <!-- Perbaikan ada di sini: Menambahkan 'mode' ke dalam parameter route -->
+                        <a href="{{ route('laporan.absensi.export', ['date' => $selectedDate->format('Y-m-d'), 'mode' => $mode]) }}"
                             class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold"
                             title="Unduh Laporan Excel">
                             <span class="material-icons text-xl">file_download</span>
@@ -95,51 +96,43 @@
                 <!-- Garis Pembatas Hijau -->
                 <hr class="border-t-2 border-[#004d40]">
 
-                <!-- Grid 6 Card Laporan Absensi (Format Foto 2) -->
+                <!-- Grid 6 Card Laporan Absensi -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
                     <!-- Card 1: Total Pengunjung -->
-                    <div
-                        class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Pengunjung</h3>
                         <p class="text-4xl font-extrabold mt-4">{{ $totalPengunjung }}</p>
                     </div>
 
                     <!-- Card 2: Laki - Laki -->
-                    <div
-                        class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Laki - Laki</h3>
                         <p class="text-4xl font-extrabold mt-4">{{ $lakiLaki }}</p>
                     </div>
 
                     <!-- Card 3: Perempuan -->
-                    <div
-                        class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Perempuan</h3>
                         <p class="text-4xl font-extrabold mt-4">{{ $perempuan }}</p>
                     </div>
 
                     <!-- Card 4: Siswa -->
-                    <div
-                        class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Siswa</h3>
                         <p class="text-4xl font-extrabold mt-4">{{ $siswa }}</p>
                     </div>
 
                     <!-- Card 5: Guru -->
-                    <div
-                        class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Guru</h3>
                         <p class="text-4xl font-extrabold mt-4">{{ $guru }}</p>
                     </div>
 
                     <!-- Card 6: Umum -->
-                    <div
-                        class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
+                    <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
                         <h3 class="text-sm font-bold text-white/90 tracking-wide">Umum</h3>
                         <p class="text-4xl font-extrabold mt-4">{{ $umum }}</p>
                     </div>
-
                 </div>
 
             </div>

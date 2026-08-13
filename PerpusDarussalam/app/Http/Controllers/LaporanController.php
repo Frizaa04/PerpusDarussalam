@@ -7,10 +7,12 @@ use App\Models\Book;
 use App\Models\User;
 use App\Models\visits;
 use App\Models\Borrowing;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use App\Exports\KoleksiExport;
 use App\Exports\AnggotaExport;
 use App\Exports\BorrowingExport;
+use App\Exports\TransactionExport;
 use App\Imports\AnggotaImport;
 use App\Imports\KoleksiImport;
 use App\Services\LaporanService;
@@ -28,32 +30,103 @@ class LaporanController extends Controller
         $selectedDate = $request->date ? Carbon::parse($request->date) : today();
         $mode = $request->get('mode', 'harian');
 
+        $startOfWeek = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
+        $endOfWeek   = $selectedDate->copy()->endOfWeek(Carbon::SUNDAY);
+
+        // Menyiapkan array tanggal untuk navigasi
+        $dates = [];
+        $tempDate = $startOfWeek->copy();
+        while ($tempDate->lte($endOfWeek)) {
+            $fullDate = $tempDate->format('Y-m-d');
+            $dates[] = [
+                'day'       => $tempDate->format('d'),
+                'full_date' => $fullDate,
+                'is_active' => ($mode === 'harian' && $fullDate === $selectedDate->format('Y-m-d'))
+            ];
+            $tempDate->addDay();
+        }
+
         return [
             'selectedDate'    => $selectedDate,
             'mode'            => $mode,
-            'dates'           => $this->laporanService->dates($selectedDate),
+            'dates'           => $dates,
             'monthYearLabel'  => $selectedDate->translatedFormat('F Y'),
-            'startOfWeekDate' => $selectedDate->copy()->startOfWeek(Carbon::MONDAY)->format('Y-m-d'),
-            'endOfWeekDate'   => $selectedDate->copy()->endOfWeek(Carbon::SUNDAY)->format('Y-m-d'),
+            'startOfWeekDate' => $startOfWeek->format('Y-m-d'),
+            'endOfWeekDate'   => $endOfWeek->format('Y-m-d'),
         ];
     }
 
     public function index(Request $request)
     {
         $params = $this->getCommonParams($request);
+        $category = $request->get('category');
+        $search = $request->get('search');
     
-        // Ambil data dashboard & data chart mingguan
+        // 1. Data Laporan Madrasah
         $dataDashboard = $this->laporanService->dashboard($params['selectedDate'], $params['mode']);
         $dataChart     = $this->laporanService->getChartSirkulasiMingguan($params['selectedDate']);
-        $data = array_merge($dataDashboard, $dataChart);
+        
+        // 2. Logika Query Keuangan
+        $applyDateFilter = function ($query) use ($params) {
+            if ($params['mode'] === 'mingguan') {
+                return $query->whereBetween('tanggal', [$params['startOfWeekDate'], $params['endOfWeekDate']]);
+            }
+            return $query->whereDate('tanggal', $params['selectedDate']);
+        };
+
+        // Hitung statistik keuangan
+        $pembuatanKartuCount    = $applyDateFilter(Transaction::where('jenis', 'pembuatan_kartu'))->count();
+        $kehilanganKartuCount   = $applyDateFilter(Transaction::where('jenis', 'kehilangan_kartu'))->count();
+        $keterlambatanBukuCount = $applyDateFilter(Transaction::where('jenis', 'denda_keterlambatan'))->count();
+        $kehilanganBukuCount    = $applyDateFilter(Transaction::where('jenis', 'kehilangan_buku'))->count();
+        
+        $totalSemua = $applyDateFilter(Transaction::whereIn('jenis', [
+            'pembuatan_kartu', 'kehilangan_kartu', 'denda_keterlambatan', 'kehilangan_buku'
+        ]))->sum('nominal');
+
+        $dataList = null;
+        $totalCategory = 0;
+
+        if ($category) {
+            $query = Transaction::with('user')->where('jenis', $category);
+            $query = $applyDateFilter($query);
+
+            if ($search) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%");
+                });
+            }
+
+            $totalCategory = (clone $query)->sum('nominal');
+            $dataList = $query
+                ->orderBy('tanggal', 'desc')
+                ->orderBy('id', 'desc')
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        // Gabungkan semua data
+        $data = array_merge($dataDashboard, $dataChart, [
+            'category'               => $category,
+            'search'                 => $search,
+            'pembuatanKartuCount'    => $pembuatanKartuCount,
+            'kehilanganKartuCount'   => $kehilanganKartuCount,
+            'keterlambatanBukuCount' => $keterlambatanBukuCount,
+            'kehilanganBukuCount'    => $kehilanganBukuCount,
+            'totalSemua'             => $totalSemua,
+            'totalCategory'          => $totalCategory,
+            'dataList'               => $dataList,
+        ]);
+
         return view('layouts.pages.admin.laporan', array_merge($data, $params));
     }
+
+    // --- Fungsi Laporan Lainnya ---
 
     public function koleksi(Request $request)
     {
         $params = $this->getCommonParams($request);
         $data = $this->laporanService->koleksi($params['selectedDate'], $params['mode']);
-
         return view('layouts.pages.admin.laporan_koleksi', array_merge($data, $params));
     }
 
@@ -61,7 +134,6 @@ class LaporanController extends Controller
     {
         $params = $this->getCommonParams($request);
         $data = $this->laporanService->anggota($params['selectedDate'], $params['mode']);
-
         return view('layouts.pages.admin.laporan_anggota', array_merge($data, $params));
     }
 
@@ -69,7 +141,6 @@ class LaporanController extends Controller
     {
         $params = $this->getCommonParams($request);
         $data = $this->laporanService->pengunjung($params['selectedDate'], $params['mode']);
-
         return view('layouts.pages.admin.laporan_absensi', array_merge($data, $params));
     }
 
@@ -77,9 +148,10 @@ class LaporanController extends Controller
     {
         $params = $this->getCommonParams($request);
         $data = $this->laporanService->getPeminjamanData($params['selectedDate'], $params['mode']);
-
         return view('layouts.pages.admin.laporan_peminjaman', array_merge($data, $params));
     }
+
+    // --- Fungsi Export & Import ---
 
     public function exportExcel(Request $request)
     {
@@ -87,94 +159,35 @@ class LaporanController extends Controller
         return Excel::download(new KoleksiExport($tanggal), 'Laporan_Koleksi_' . $tanggal . '.xlsx');
     }
 
-    // Fungsi Import Koleksi Buku Baru
     public function importKoleksi(Request $request)
     {
-        $request->validate([
-            'file_excel' => 'required|mimes:xlsx,xls,csv|max:5120',
-        ]);
-
+        $request->validate(['file_excel' => 'required|mimes:xlsx,xls,csv|max:5120']);
         try {
             $import = app(KoleksiImport::class);  
             Excel::import($import, $request->file('file_excel'));
-
-            $imported = $import->importedCount;    
-            $duplicates = $import->duplicates;
-
-            // Kasus 1: Semua data di Excel duplikat
-            if ($imported === 0 && !empty($duplicates)) {
-                $duplicateList = implode(', ', array_unique($duplicates));
-                return redirect()->back()->with('warning', "Import dibatalkan! Semua data dalam file Excel sudah ada di database: ($duplicateList).");
-            }
-
-            // Kasus 2: Sebagian berhasil, sebagian duplikat
-            if (!empty($duplicates)) {
-                $duplicateList = implode(', ', array_unique($duplicates));
-                return redirect()->back()->with('warning', "Berhasil meng-import $imported data buku baru. Namun terdapat " . count($duplicates) . " data yang dilewati karena duplikat: ($duplicateList).");
-            }
-
-            // Kasus 3: Semua data baru berhasil di-import
-            return redirect()->back()->with('success', "Berhasil meng-import $imported data koleksi buku baru!");
-
+            return redirect()->back()->with('success', "Berhasil meng-import " . $import->importedCount . " data koleksi buku baru!");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal meng-import data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal meng-import: ' . $e->getMessage());
         }
     }
 
     public function exportAnggotaExcel(Request $request)
     {
         $params = $this->getCommonParams($request);
-        $selectedDate = $params['selectedDate'];
-        $mode = $params['mode'];
-
-        if ($mode === 'mingguan') {
-            $startDate = $params['startOfWeekDate'];
-            $endDate = $params['endOfWeekDate'];
-            $namaFile = 'Laporan_Anggota_Mingguan_' . $startDate . '_hingga_' . $endDate . '.xlsx';
-        } elseif ($mode === 'bulanan') {
-            $startDate = $selectedDate->copy()->startOfMonth()->format('Y-m-d');
-            $endDate = $selectedDate->copy()->endOfMonth()->format('Y-m-d');
-            $namaFile = 'Laporan_Anggota_Bulanan_' . $selectedDate->format('F_Y') . '.xlsx';
-        } else {
-            $startDate = $selectedDate->format('Y-m-d');
-            $endDate = $startDate;
-            $namaFile = 'Laporan_Anggota_' . $startDate . '.xlsx';
-        }
-
-        return Excel::download(new AnggotaExport($startDate, $endDate), $namaFile);
+        $startDate = ($params['mode'] === 'mingguan') ? $params['startOfWeekDate'] : $params['selectedDate']->format('Y-m-d');
+        $endDate = ($params['mode'] === 'mingguan') ? $params['endOfWeekDate'] : $startDate;
+        return Excel::download(new AnggotaExport($startDate, $endDate), 'Laporan_Anggota_' . $startDate . '.xlsx');
     }
 
-    // Fungsi Import Anggota Baru (Sudah Diperbarui)
     public function importAnggota(Request $request)
     {
-        $request->validate([
-            'file_excel' => 'required|mimes:xlsx,xls,csv|max:2048',
-        ]);
-
+        $request->validate(['file_excel' => 'required|mimes:xlsx,xls,csv|max:2048']);
         try {
             $import = new AnggotaImport();
             Excel::import($import, $request->file('file_excel'));
-
-            $imported = $import->importedCount;
-            $duplicates = $import->duplicates;
-
-            // Kasus 1: Semua data di Excel duplikat / sudah ada
-            if ($imported === 0 && !empty($duplicates)) {
-                $duplicateList = implode(', ', array_unique($duplicates));
-                return redirect()->back()->with('warning', "Import dibatalkan! Semua data anggota dalam file Excel sudah ada di database: ($duplicateList).");
-            }
-
-            // Kasus 2: Sebagian berhasil, sebagian duplikat
-            if (!empty($duplicates)) {
-                $duplicateList = implode(', ', array_unique($duplicates));
-                return redirect()->back()->with('warning', "Berhasil meng-import $imported data anggota baru. Namun terdapat " . count($duplicates) . " data yang dilewati karena duplikat: ($duplicateList).");
-            }
-
-            // Kasus 3: Semua data berhasil di-import tanpa ada duplikat
-            return redirect()->back()->with('success', "Berhasil meng-import $imported data anggota baru!");
-
+            return redirect()->back()->with('success', "Berhasil meng-import " . $import->importedCount . " data anggota baru!");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal meng-import data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal meng-import: ' . $e->getMessage());
         }
     }
 
@@ -186,26 +199,22 @@ class LaporanController extends Controller
 
     public function exportAttendanceExcel(Request $request)
     {
-        // Ambil parameter umum (termasuk mode harian/mingguan/bulanan)
-        $params = $this->getCommonParams($request);
-        $selectedDate = $params['selectedDate'];
-        $mode = $params['mode'];
+        $mode = $request->get('mode', 'harian');
+        $date = $request->date ? Carbon::parse($request->date) : today();
+        $startDate = ($mode === 'mingguan') ? $date->copy()->startOfWeek() : $date;
+        $endDate = ($mode === 'mingguan') ? $date->copy()->endOfWeek() : $date;
+        return Excel::download(new AttendanceExport($startDate, $endDate), 'Laporan_Absensi.xlsx');
+    }
 
-        // Tentukan rentang tanggal berdasarkan mode yang sedang aktif di web
-        if ($mode === 'mingguan') {
-            $startDate = $params['startOfWeekDate'];
-            $endDate = $params['endOfWeekDate'];
-            $namaFile = 'Laporan_Absensi_Mingguan_' . $startDate . '_hingga_' . $endDate . '.xlsx';
-        } elseif ($mode === 'bulanan') {
-            $startDate = $selectedDate->copy()->startOfMonth()->format('Y-m-d');
-            $endDate = $selectedDate->copy()->endOfMonth()->format('Y-m-d');
-            $namaFile = 'Laporan_Absensi_Bulanan_' . $selectedDate->format('F_Y') . '.xlsx';
-        } else {
-            $startDate = $selectedDate->format('Y-m-d');
-            $endDate = $startDate;
-            $namaFile = 'Laporan_Absensi_' . $startDate . '.xlsx';
-        }
+    public function exportKeuanganExcel(Request $request)
+    {
+        $tanggalInput = $request->query('date', today()->format('Y-m-d'));
+        $mode = $request->query('mode', 'harian');
+        $carbonDate = Carbon::parse($tanggalInput);
 
-        return Excel::download(new AttendanceExport($startDate, $endDate), $namaFile);
+        $startDate = ($mode === 'mingguan') ? $carbonDate->copy()->startOfWeek()->format('Y-m-d') : $tanggalInput;
+        $endDate = ($mode === 'mingguan') ? $carbonDate->copy()->endOfWeek()->format('Y-m-d') : $tanggalInput;
+
+        return Excel::download(new TransactionExport($startDate, $endDate), 'laporan-transaksi.xlsx');
     }
 }

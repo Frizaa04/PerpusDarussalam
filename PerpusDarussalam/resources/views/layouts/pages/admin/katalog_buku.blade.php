@@ -63,7 +63,6 @@
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-bold text-white tracking-wide">Tabel Daftar Buku</h2>
 
-
                             <!-- Tombol Aksi di Header (Hapus Buku & Konfirmasi Hapus Berdampingan) -->
                             <div class="flex items-center gap-2">
                                 <!-- Pengecekan Select All (Hanya muncul saat mode hapus aktif) -->
@@ -109,6 +108,7 @@
                                         <th class="p-3 text-sm font-bold tracking-wider">Stok</th>
                                         <th class="p-3 text-sm font-bold tracking-wider text-center">Aksi</th>
                                     </tr>
+                                </thead>
                                 <tbody class="text-white divide-y divide-white/40">
                                     @forelse($books as $book)
                                         <tr class="divide-x divide-white/40 hover:bg-white/10 transition-colors">
@@ -144,18 +144,18 @@
                                             <td class="p-3 text-sm font-bold text-white/90">{{ $book->stok }}</td>
 
                                             <!-- AKSI -->
-                                            <td class="p-3 text-sm text-center">
-                                                <!-- Mode Normal: Tombol Edit Data & Kelola -->
-                                                <div class="edit-mode-action flex items-center justify-center gap-2">
+                                            <td class="py-2 px-3 text-sm text-center">
+                                                <!-- Mode Normal: Tombol Edit Data & Kelola (Lebih compact & rapi) -->
+                                                <div class="edit-mode-action flex flex-col items-center justify-center gap-1">
                                                     <button type="button"
                                                         onclick="openEditModal('{{ $book->id }}', '{{ $book->judul }}', '{{ $book->penulis }}', '{{ $book->penerbit }}', '{{ $book->deskripsi ?? '' }}', '{{ $book->isbn }}', '{{ $book->tanggal_pembelian }}', '{{ $book->categories_id }}', '{{ $book->stok }}', '{{ $book->rak ?? '' }}', '{{ $book->kode_buku }}', '{{ $book->tahun_terbit }}')"
-                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
+                                                        class="w-32 bg-[#004d40] text-white px-2.5 py-1 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm text-center">
                                                         Edit Data
                                                     </button>
 
                                                     <button type="button"
                                                         onclick="openKelolaModal('{{ $book->id }}', '{{ $book->judul }}')"
-                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm">
+                                                        class="w-32 bg-[#004d40] text-white px-2.5 py-1 rounded text-xs font-bold tracking-wider hover:bg-[#003d30] transition shadow-sm text-center">
                                                         Kelola data buku
                                                     </button>
                                                 </div>
@@ -172,7 +172,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="p-5 text-center text-sm font-semibold text-white/80">
+                                            <td colspan="7" class="p-5 text-center text-sm font-semibold text-white/80">
                                                 Data buku tidak ditemukan.</td>
                                         </tr>
                                     @endforelse
@@ -183,7 +183,6 @@
                         <div class="mt-4">
                             {{ $books->links('vendor.pagination.custom') }}
                         </div>
-
                     </div>
                 </form>
             </div>

@@ -8,7 +8,6 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CirculationController; 
 use App\Http\Controllers\AbsenController; 
 use App\Http\Controllers\LaporanController; 
-use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\EbookController; 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\UserAuthController;
@@ -162,7 +161,6 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::get('/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
     
     // Laporan Keuangan
-    Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
 
     // Route Export Excel
     Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
@@ -170,7 +168,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::get('/laporan/anggota/export', [LaporanController::class, 'exportAnggotaExcel'])->name('laporan.anggota.export');
     Route::get('/laporan/peminjaman/export', [LaporanController::class, 'exportPeminjamanExcel'])->name('laporan.peminjaman.export');
     Route::get('/laporan/absensi/export', [LaporanController::class, 'exportAttendanceExcel'])->name('laporan.absensi.export');
-    Route::get('/laporan/transaksi/export', [LaporanKeuanganController::class, 'exportExcel'])->name('laporan.transaksi.export');
+    Route::get('/laporan/transaksi/export', [LaporanController::class, 'exportKeuanganExcel'])->name('laporan.transaksi.export');
     
     // Route Import Excel
     Route::post('/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
