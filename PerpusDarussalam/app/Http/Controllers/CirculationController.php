@@ -90,6 +90,23 @@ class CirculationController extends Controller
             'tanggal_pinjam' => 'nullable|date',
         ]);
 
+        // Cek status kartu anggota sebelum proses peminjaman
+        $user = User::where('nisn', $request->identitas)
+                    ->orWhere('nik', $request->identitas)
+                    ->first();
+
+        if (!$user) {
+            return back()
+                ->withErrors(['error' => 'Anggota dengan identitas tersebut tidak ditemukan.'], 'borrowForm')
+                ->withInput();
+        }
+
+        if ($user->status_kartu === 'expired') {
+            return back()
+                ->withErrors(['error' => 'Peminjaman gagal: kartu anggota ' . $user->name . ' sudah kedaluwarsa. Silakan perpanjang kartu terlebih dahulu.'], 'borrowForm')
+                ->withInput();
+        }
+
         try {
             $service->borrow($request->all());
 
@@ -115,7 +132,8 @@ class CirculationController extends Controller
         if ($user) {
             return response()->json([
                 'success' => true,
-                'name' => $user->name
+                'name' => $user->name,
+                'expired' => $user->status_kartu === 'expired',
             ]);
         }
 

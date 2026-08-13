@@ -71,4 +71,9 @@ class User extends Authenticatable
         
         return 'aktif';
     }
+
+    public function isKartuExpired(): bool
+    {
+        return $this->status_kartu === 'expired';
+    }
 }

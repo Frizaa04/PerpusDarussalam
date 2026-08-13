@@ -258,7 +258,6 @@
             let $modal = $('#borrowModal');
             if ($modal.length) {
                 $modal.removeClass('hidden');
-                // Fokus otomatis ke input scan kartu saat modal terbuka
                 $('#inputScanKartu').focus();
             }
         }
@@ -275,9 +274,9 @@
                 openBorrowModal();
             @endif
 
-            // --- LISTENER SCAN KARTU ANGGOTA ---
+            // --- LISTENER SCAN KARTU ANGGOTA (satu-satunya, sudah termasuk cek expired) ---
             $('#inputScanKartu').on('keypress', function(e) {
-                if (e.which === 13) { // 13 adalah keycode untuk 'Enter'
+                if (e.which === 13) {
                     e.preventDefault();
                     let nomor = $(this).val().trim();
 
@@ -288,8 +287,19 @@
                             dataType: 'json',
                             success: function(data) {
                                 if (data.success) {
-                                    $('#inputNama').val(data.name);
-                                    $('#inputScanBuku').focus();
+                                    if (data.expired) {
+                                        $('#inputNama').val(data.name + ' — KARTU EXPIRED!');
+                                        $('#inputNama').removeClass('bg-gray-300 text-gray-700')
+                                            .addClass('bg-red-200 text-red-800 font-bold');
+                                        alert('Peminjaman tidak bisa dilanjutkan: kartu ' + data.name +
+                                            ' sudah kedaluwarsa. Silakan perpanjang kartu terlebih dahulu.');
+                                        $('#inputScanKartu').val('').focus();
+                                    } else {
+                                        $('#inputNama').val(data.name);
+                                        $('#inputNama').removeClass('bg-red-200 text-red-800 font-bold')
+                                            .addClass('bg-gray-300 text-gray-700');
+                                        $('#inputScanBuku').focus();
+                                    }
                                 } else {
                                     $('#inputNama').val('Anggota tidak ditemukan');
                                     $('#inputScanKartu').val('').focus();
@@ -305,7 +315,7 @@
 
             // --- LISTENER SCAN BUKU (NOMOR INVENTARIS) ---
             $('#inputScanBuku').on('keypress', function(e) {
-                if (e.which === 13) { // Prevent form submit otomatis dari scanner barcode
+                if (e.which === 13) {
                     e.preventDefault();
                     let nomorInv = $(this).val().trim();
 
@@ -318,7 +328,6 @@
                                 if (data.success) {
                                     $('#inputJudulBuku').val(data.title);
 
-                                    // Validasi status jika buku sedang dipinjam
                                     if (data.status === 'dipinjam') {
                                         alert('Peringatan: Buku ini sedang dalam status dipinjam!');
                                     }

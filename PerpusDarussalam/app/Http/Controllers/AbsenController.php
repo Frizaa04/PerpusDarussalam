@@ -44,6 +44,11 @@ class AbsenController extends Controller
             return back()->with('error', 'Identitas tidak ditemukan di database!');
         }
 
+        // Cek status kartu 
+        if ($user->status_kartu === 'expired') {
+            return back()->with('error', 'Absen gagal: kartu ' . $user->name . ' sudah kedaluwarsa. Silakan perpanjang kartu terlebih dahulu.');
+        }
+
         // Cek apakah user sudah pernah melakukan absen pada hari ini
         $sudahAbsen = Visits::where('user_id', $user->id)
             ->whereDate('visited_at', Carbon::today())

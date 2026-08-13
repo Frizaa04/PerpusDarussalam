@@ -24,13 +24,12 @@
             justify-content: center;
         }
 
-        /* Desain Ukuran Kartu Standar ID Card (CR-80) */
         .card {
             width: 85.6mm;
             height: 54mm;
             border: 1px solid #d1d5db; 
             box-sizing: border-box;
-            padding: 6px 8mm 0 8mm; /* Padding kiri-kanan disamakan agar seimbang */
+            padding: 6px 5mm 0 5mm; 
             background: #ffffff;
             position: relative;
             page-break-inside: avoid;
@@ -81,18 +80,17 @@
             padding-bottom: 3px;
         }
 
-        /* Layout Body dibuat Sejajar di Tengah Secara Vertikal */
         .card-body {
             display: flex;
-            gap: 12px;
-            align-items: center; /* Membuat logo dan tabel pas di tengah secara vertikal */
+            gap: 8px; 
+            align-items: center; 
             position: relative;
             z-index: 1;
         }
         
         .logo-box {
-            width: 22mm; /* Sedikit diperlebar agar seimbang */
-            height: 22mm;
+            width: 27mm;
+            height: 27mm;
             background: #ffffff;
             display: flex;
             align-items: center;
@@ -104,6 +102,8 @@
             border-radius: 3px;
             overflow: hidden;
             text-align: center;
+            margin-top: 12px; 
+            margin-left: 20px;
         }
         .logo-box img {
             width: 100%;
@@ -115,6 +115,7 @@
             font-size: 7.8px; 
             width: 100%;
             border-collapse: collapse;
+            margin-left: 20px;
         }
         .info-table td {
             padding: 0.8px 0; 
@@ -127,7 +128,6 @@
             color: #374151;
         }
         
-        /* Barcode dirapikan agar berada tepat di tengah bawah */
         .barcode-section {
             background-color: #ffffff;
             text-align: center;
@@ -139,7 +139,7 @@
             z-index: 1;
         }
         .barcode-section img {
-            width: 85%; /* Sedikit dikurangi dari 100% agar ada ruang kosong di kiri-kanan (lebih rapi) */
+            width: 85%; 
             height: 9.5mm; 
             object-fit: contain;
             display: block;

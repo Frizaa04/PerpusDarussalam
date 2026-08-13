@@ -26,6 +26,11 @@ class BorrowingService
                 throw new \Exception('Anggota tidak ditemukan');
             }
 
+            // Cek status kartu anggota — accessor otomatis hitung dari tanggal
+            if ($user->status_kartu === 'expired') {
+                throw new \Exception('Peminjaman gagal: kartu anggota ' . $user->name . ' sudah kedaluwarsa. Silakan perpanjang kartu terlebih dahulu.');
+            }
+
             $bookItem = BookItem::where('nomor_inventaris', $data['book_item_id'])
                 ->orWhere('id', $data['book_item_id'])
                 ->lockForUpdate()

@@ -65,8 +65,10 @@
                         <div class="flex items-center gap-2">
                             <!-- Pengecekan Select All -->
                             <div id="selectAllContainer" class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
-                                <input type="checkbox" id="selectAllCheckboxMain" class="w-4 h-4 accent-red-600 cursor-pointer rounded">
-                                <label for="selectAllCheckboxMain" class="text-xs font-semibold text-white cursor-pointer">Pilih Semua Halaman Ini</label>
+                                <input type="checkbox" id="selectAllCheckboxMain"
+                                        onclick="toggleSelectAll(this, 'book-checkbox')"
+                                        class="w-4 h-4 accent-red-600 cursor-pointer rounded">
+                                <label for="selectAllCheckboxMain" class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
                             </div>
 
                             <!-- Tombol Konfirmasi Hapus (Tipe diubah jadi button agar tidak submit form default) -->
