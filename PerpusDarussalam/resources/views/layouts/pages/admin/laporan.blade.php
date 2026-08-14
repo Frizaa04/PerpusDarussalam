@@ -36,6 +36,15 @@
                             Per Minggu
                         </a>
 
+                        <a href="{{ route('laporan.index', [
+                            'date' => $selectedDate->format('Y-m-d'),
+                            'mode' => 'bulanan',
+                            'category' => $category
+                        ]) }}"
+                        class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'bulanan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                            Bulanan
+                        </a>
+
                     </div>
 
                     {{-- Nama Bulan dan Tahun --}}
@@ -44,68 +53,74 @@
                     </div>
 
                     @if($mode === 'harian')
-
                         {{-- Pilihan Tanggal --}}
                         <div class="inline-flex bg-[#004d40] rounded border border-[#004d40] overflow-hidden shadow-sm">
-
                             @foreach($dates as $d)
-
                                 <a href="{{ route('laporan.index', [
                                     'date' => $d['full_date'],
                                     'mode' => 'harian',
                                     'category' => $category
                                 ]) }}"
-                                class="px-3 py-2 text-sm font-bold border-r border-white/30 last:border-r-0 transition-colors duration-150 {{ $d['is_active'] ? 'bg-[#003d30] text-amber-300' : 'text-white hover:bg-white/10' }}">
-
+                                class="px-3 py-2 text-sm font-bold border-r border-white/30 last:border-r-0 transition-colors duration-150 {{ 
+                                    $d['is_active']
+                                        ? 'bg-[#003d30] text-amber-300'
+                                        : 'text-white hover:bg-white/10'
+                                }}">
                                     {{ $d['day'] }}
-
                                 </a>
-
                             @endforeach
-
                         </div>
-
-                    @else
-
+                    @elseif($mode === 'mingguan')
                         {{-- Rentang Minggu --}}
                         <div class="bg-[#003d30] border border-amber-400/50 text-amber-300 px-4 py-2 rounded text-sm font-bold shadow-sm">
                             Rentang:
-                            {{ \Carbon\Carbon::parse($startOfWeekDate)->format('d M') }}
+                            {{ \Carbon\Carbon::parse($startDate)->format('d M') }}
                             -
-                            {{ \Carbon\Carbon::parse($endOfWeekDate)->format('d M Y') }}
+                            {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
                         </div>
-
+                    @elseif($mode === 'bulanan')
+                        {{-- Rentang Bulan --}}
+                        <div class="bg-[#003d30] border border-amber-400/50 text-amber-300 px-4 py-2 rounded text-sm font-bold shadow-sm">
+                            Bulan:
+                            {{ $selectedDate->translatedFormat('F Y') }}
+                        </div>
                     @endif
 
                 </div>
             </div>
-
             <h2 class="text-2xl font-bold text-[#004d40] mt-6 mb-4">
                 Laporan Manajemen Perpustakaan
             </h2>
-
             <hr class="border-t-2 border-[#004d40]">
-
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <a href="{{ route('laporan.koleksi', [
-                'date' => $selectedDate->format('Y-m-d'),
-                'mode' => $mode
-            ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
-                <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Koleksi</h3>
-                <p class="text-4xl font-extrabold mt-4">{{ $totalKoleksi }}</p>
-            </a>
-            <a href="{{ route('laporan.anggota', [
-                'date' => $selectedDate->format('Y-m-d'),
-                'mode' => $mode
-            ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
-                <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Anggota</h3>
-                <p class="text-4xl font-extrabold mt-4">{{ $totalAnggota }}</p>
-            </a>
-                <a href="{{ route('laporan.pengunjung', ['date' => $selectedDate->format('Y-m-d')]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
+                <a href="{{ route('laporan.koleksi', [
+                    'date' => $selectedDate->format('Y-m-d'),
+                    'mode' => $mode
+                ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
+                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Koleksi</h3>
+                    <p class="text-4xl font-extrabold mt-4">{{ $totalKoleksi }}</p>
+                </a>
+
+                <a href="{{ route('laporan.anggota', [
+                    'date' => $selectedDate->format('Y-m-d'),
+                    'mode' => $mode
+                ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
+                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Total Anggota</h3>
+                    <p class="text-4xl font-extrabold mt-4">{{ $totalAnggota }}</p>
+                </a>
+
+                <a href="{{ route('laporan.pengunjung', [
+                    'date' => $selectedDate->format('Y-m-d'),
+                    'mode' => $mode
+                ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Absensi</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $pengunjung }}</p>
                 </a>
-                <a href="{{ route('laporan.peminjaman', ['date' => $selectedDate->format('Y-m-d')]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
+
+                <a href="{{ route('laporan.peminjaman', [
+                    'date' => $selectedDate->format('Y-m-d'),
+                    'mode' => $mode
+                ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Peminjaman</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $peminjaman }}</p>
                 </a>

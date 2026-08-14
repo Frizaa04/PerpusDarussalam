@@ -14,24 +14,59 @@ class LaporanService
     public function dashboard(Carbon $tanggal, string $mode = 'harian')
     {
         if ($mode === 'mingguan') {
-            $startOfWeek = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
-            $endOfWeek   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
-
-            $pengunjungCount   = Visits::whereBetween('visited_at', [$startOfWeek, $endOfWeek])->count();
-            $bukuBaruCount     = Book::whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
-            $peminjamanCount   = Borrowing::whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
+            $start = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
+            $end   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
+            $pengunjungCount = Visits::whereBetween(
+                'visited_at',
+                [$start, $end]
+            )->count();
+            $bukuBaruCount = Book::whereBetween(
+                'created_at',
+                [$start, $end]
+            )->count();
+            $peminjamanCount = Borrowing::whereBetween(
+                'created_at',
+                [$start, $end]
+            )->count();
             $pengembalianCount = Borrowing::where('status', 'dikembalikan')
-                ->whereBetween('updated_at', [$startOfWeek, $endOfWeek])
+                ->whereBetween('updated_at', [$start, $end])
                 ->count();
+        } elseif ($mode === 'bulanan') {
+            $start = $tanggal->copy()->startOfMonth();
+            $end   = $tanggal->copy()->endOfMonth();
+            $pengunjungCount = Visits::whereBetween(
+                'visited_at',
+                [$start, $end]
+            )->count();
+            $bukuBaruCount = Book::whereBetween(
+                'created_at',
+                [$start, $end]
+            )->count();
+            $peminjamanCount = Borrowing::whereBetween(
+                'created_at',
+                [$start, $end]
+            )->count();
+            $pengembalianCount = Borrowing::where('status', 'dikembalikan')
+                ->whereBetween('updated_at', [$start, $end])
+                ->count();
+
         } else {
-            $pengunjungCount   = Visits::whereDate('visited_at', $tanggal)->count();
-            $bukuBaruCount     = Book::whereDate('created_at', $tanggal)->count();
-            $peminjamanCount   = Borrowing::whereDate('created_at', $tanggal)->count();
+            $pengunjungCount = Visits::whereDate(
+                'visited_at',
+                $tanggal
+            )->count();
+            $bukuBaruCount = Book::whereDate(
+                'created_at',
+                $tanggal
+            )->count();
+            $peminjamanCount = Borrowing::whereDate(
+                'created_at',
+                $tanggal
+            )->count();
             $pengembalianCount = Borrowing::where('status', 'dikembalikan')
                 ->whereDate('updated_at', $tanggal)
                 ->count();
         }
-
         return [
             'totalKoleksi' => Book::sum('stok'),
             'totalAnggota' => User::count(),
@@ -75,39 +110,85 @@ class LaporanService
         if ($mode === 'mingguan') {
             $start = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
             $end   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
+            $baseQuery = Visits::whereBetween(
+                'visited_at',
+                [$start, $end]
+            );
 
-            $baseQuery = Visits::whereBetween('visited_at', [$start, $end]);
+        } elseif ($mode === 'bulanan') {
+            $start = $tanggal->copy()->startOfMonth();
+            $end   = $tanggal->copy()->endOfMonth();
+            $baseQuery = Visits::whereBetween(
+                'visited_at',
+                [$start, $end]
+            );
         } else {
-            $baseQuery = Visits::whereDate('visited_at', $tanggal);
+            $baseQuery = Visits::whereDate(
+                'visited_at',
+                $tanggal
+            );
         }
 
         return [
             'totalPengunjung' => (clone $baseQuery)->count(),
-            'lakiLaki'        => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('jenis_kelamin', 'L'))->count(),
-            'perempuan'       => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('jenis_kelamin', 'P'))->count(),
-            'siswa'           => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('status', 'siswa'))->count(),
-            'guru'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('status', 'guru'))->count(),
-            'umum'            => (clone $baseQuery)->whereHas('user', fn($q) => $q->where('status', 'umum'))->count(),
+            'lakiLaki' => (clone $baseQuery)
+                ->whereHas('user', fn($q) =>
+                    $q->where('jenis_kelamin', 'L')
+                )->count(),
+            'perempuan' => (clone $baseQuery)
+                ->whereHas('user', fn($q) =>
+                    $q->where('jenis_kelamin', 'P')
+                )->count(),
+            'siswa' => (clone $baseQuery)
+                ->whereHas('user', fn($q) =>
+                    $q->where('status', 'siswa')
+                )->count(),
+            'guru' => (clone $baseQuery)
+                ->whereHas('user', fn($q) =>
+                    $q->where('status', 'guru')
+                )->count(),
+            'umum' => (clone $baseQuery)
+                ->whereHas('user', fn($q) =>
+                    $q->where('status', 'umum')
+                )->count(),
         ];
     }
 
-    public function getPeminjamanData(Carbon $tanggal, string $mode = 'harian'): array
-    {
+    public function getPeminjamanData(
+        Carbon $tanggal,
+        string $mode = 'harian'
+    ): array {
         if ($mode === 'mingguan') {
             $start = $tanggal->copy()->startOfWeek(Carbon::MONDAY);
             $end   = $tanggal->copy()->endOfWeek(Carbon::SUNDAY);
-
-            $totalPeminjaman   = Borrowing::whereBetween('tanggal_pinjam', [$start, $end])->count();
-            $sedangDipinjam    = Borrowing::whereBetween('tanggal_pinjam', [$start, $end])->where('status', 'dipinjam')->count();
-            $sudahDikembalikan = Borrowing::whereBetween('tanggal_pinjam', [$start, $end])->where('status', 'dikembalikan')->count();
-            $terlambat         = Borrowing::whereBetween('tanggal_pinjam', [$start, $end])->where('status', 'terlambat')->count();
+            $baseQuery = Borrowing::whereBetween(
+                'tanggal_pinjam',
+                [$start, $end]
+            );
+        } elseif ($mode === 'bulanan') {
+            $start = $tanggal->copy()->startOfMonth();
+            $end   = $tanggal->copy()->endOfMonth();
+            $baseQuery = Borrowing::whereBetween(
+                'tanggal_pinjam',
+                [$start, $end]
+            );
         } else {
-            $totalPeminjaman   = Borrowing::whereDate('tanggal_pinjam', $tanggal)->count();
-            $sedangDipinjam    = Borrowing::whereDate('tanggal_pinjam', $tanggal)->where('status', 'dipinjam')->count();
-            $sudahDikembalikan = Borrowing::whereDate('tanggal_pinjam', $tanggal)->where('status', 'dikembalikan')->count();
-            $terlambat         = Borrowing::whereDate('tanggal_pinjam', $tanggal)->where('status', 'terlambat')->count();
+            $baseQuery = Borrowing::whereDate(
+                'tanggal_pinjam',
+                $tanggal
+            );
         }
 
+        $totalPeminjaman = (clone $baseQuery)->count();
+        $sedangDipinjam = (clone $baseQuery)
+            ->where('status', 'dipinjam')
+            ->count();
+        $sudahDikembalikan = (clone $baseQuery)
+            ->where('status', 'dikembalikan')
+            ->count();
+        $terlambat = (clone $baseQuery)
+            ->where('status', 'terlambat')
+            ->count();
         return compact(
             'totalPeminjaman',
             'sedangDipinjam',
