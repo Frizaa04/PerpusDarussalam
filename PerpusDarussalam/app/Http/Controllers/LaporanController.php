@@ -27,32 +27,65 @@ class LaporanController extends Controller
 
     private function getCommonParams(Request $request)
     {
-        $selectedDate = $request->date ? Carbon::parse($request->date) : today();
+        $selectedDate = $request->date
+            ? Carbon::parse($request->date)
+            : today();
+
         $mode = $request->get('mode', 'harian');
 
-        $startOfWeek = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
-        $endOfWeek   = $selectedDate->copy()->endOfWeek(Carbon::SUNDAY);
+        // Default
+        $startDate = $selectedDate->copy()->startOfDay();
+        $endDate   = $selectedDate->copy()->endOfDay();
 
-        // Menyiapkan array tanggal untuk navigasi
+        // Jika mingguan
+        if ($mode === 'mingguan') {
+            $startDate = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
+            $endDate   = $selectedDate->copy()->endOfWeek(Carbon::SUNDAY);
+        }
+
+        // Jika bulanan
+        if ($mode === 'bulanan') {
+            $startDate = $selectedDate->copy()->startOfMonth();
+            $endDate   = $selectedDate->copy()->endOfMonth();
+        }
+
+        // Navigasi tanggal hanya digunakan untuk mode harian
         $dates = [];
-        $tempDate = $startOfWeek->copy();
-        while ($tempDate->lte($endOfWeek)) {
-            $fullDate = $tempDate->format('Y-m-d');
-            $dates[] = [
-                'day'       => $tempDate->format('d'),
-                'full_date' => $fullDate,
-                'is_active' => ($mode === 'harian' && $fullDate === $selectedDate->format('Y-m-d'))
-            ];
-            $tempDate->addDay();
+
+        if ($mode === 'harian') {
+
+            $startOfWeek = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
+            $endOfWeek   = $selectedDate->copy()->endOfWeek(Carbon::SUNDAY);
+
+            $tempDate = $startOfWeek->copy();
+
+            while ($tempDate->lte($endOfWeek)) {
+
+                $fullDate = $tempDate->format('Y-m-d');
+
+                $dates[] = [
+                    'day'       => $tempDate->format('d'),
+                    'full_date' => $fullDate,
+                    'is_active' => $fullDate === $selectedDate->format('Y-m-d')
+                ];
+
+                $tempDate->addDay();
+            }
         }
 
         return [
             'selectedDate'    => $selectedDate,
             'mode'            => $mode,
             'dates'           => $dates,
+
             'monthYearLabel'  => $selectedDate->translatedFormat('F Y'),
-            'startOfWeekDate' => $startOfWeek->format('Y-m-d'),
-            'endOfWeekDate'   => $endOfWeek->format('Y-m-d'),
+
+            'startOfWeekDate' => $startDate->format('Y-m-d'),
+            'endOfWeekDate'   => $endDate->format('Y-m-d'),
+
+            // Tambahan yang lebih umum
+            'startDate'       => $startDate->format('Y-m-d'),
+            'endDate'         => $endDate->format('Y-m-d'),
         ];
     }
 
@@ -68,10 +101,19 @@ class LaporanController extends Controller
         
         // 2. Logika Query Keuangan
         $applyDateFilter = function ($query) use ($params) {
-            if ($params['mode'] === 'mingguan') {
-                return $query->whereBetween('tanggal', [$params['startOfWeekDate'], $params['endOfWeekDate']]);
+
+            if (in_array($params['mode'], ['mingguan', 'bulanan'])) {
+
+                return $query->whereBetween('tanggal', [
+                    $params['startDate'],
+                    $params['endDate']
+                ]);
             }
-            return $query->whereDate('tanggal', $params['selectedDate']);
+
+            return $query->whereDate(
+                'tanggal',
+                $params['selectedDate']
+            );
         };
 
         // Hitung statistik keuangan

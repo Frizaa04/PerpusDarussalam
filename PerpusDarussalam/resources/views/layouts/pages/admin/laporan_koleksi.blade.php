@@ -20,17 +20,32 @@
                 <!-- Kiri: Filter Mode & Tanggal -->
                 <div class="flex flex-wrap items-center gap-3">
                     
-                    <!-- Toggle Harian / Per Minggu -->
-                    <div class="inline-flex bg-[#004d40] p-1 rounded-lg border border-[#004d40] shadow-sm">
-                        <a href="{{ route('laporan.koleksi', ['date' => $selectedDate->format('Y-m-d'), 'mode' => 'harian']) }}" 
-                           class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'harian' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
-                            Harian
-                        </a>
-                        <a href="{{ route('laporan.koleksi', ['date' => $selectedDate->format('Y-m-d'), 'mode' => 'mingguan']) }}" 
-                           class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'mingguan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
-                            Per Minggu
-                        </a>
-                    </div>
+                        <!-- Toggle Tombol Harian / Mingguan -->
+                        <div class="inline-flex bg-[#004d40] p-1 rounded-lg border border-[#004d40] shadow-sm">
+                            <a href="{{ route('laporan.koleksi', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'harian'
+                            ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'harian' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                                Harian
+                            </a>
+
+                            <a href="{{ route('laporan.koleksi', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'mingguan'
+                                ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'mingguan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                                Per Minggu
+                            </a>
+
+                            <a href="{{ route('laporan.koleksi', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'bulanan',
+                            ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'bulanan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                                Bulanan
+                            </a>
+                        </div>
 
                     <!-- Label Bulan & Tahun -->
                     <div class="bg-[#004d40] text-amber-300 px-3.5 py-2 rounded text-sm font-bold shadow-sm">

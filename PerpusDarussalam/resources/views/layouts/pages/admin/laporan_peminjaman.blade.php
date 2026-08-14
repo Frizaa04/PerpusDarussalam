@@ -20,15 +20,30 @@
                     <!-- Kiri: Filter Mode & Tanggal -->
                     <div class="flex flex-wrap items-center gap-3">
 
-                        <!-- Toggle Harian / Per Minggu -->
+                        <!-- Toggle Tombol Harian / Mingguan -->
                         <div class="inline-flex bg-[#004d40] p-1 rounded-lg border border-[#004d40] shadow-sm">
-                            <a href="{{ route('laporan.peminjaman', ['date' => $selectedDate->format('Y-m-d'), 'mode' => 'harian']) }}"
-                                class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'harian' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                            <a href="{{ route('laporan.peminjaman', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'harian'
+                            ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'harian' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
                                 Harian
                             </a>
-                            <a href="{{ route('laporan.peminjaman', ['date' => $selectedDate->format('Y-m-d'), 'mode' => 'mingguan']) }}"
-                                class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'mingguan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+
+                            <a href="{{ route('laporan.peminjaman', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'mingguan'
+                                ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'mingguan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
                                 Per Minggu
+                            </a>
+
+                            <a href="{{ route('laporan.peminjaman', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'bulanan',
+                            ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'bulanan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                                Bulanan
                             </a>
                         </div>
 
