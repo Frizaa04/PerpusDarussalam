@@ -33,7 +33,6 @@ class AnggotaExport implements WithMultipleSheets
         return [
             'Data_Siswa'   => new AnggotaSiswaSheet($this->startDate, $this->endDate),
             'Data_Guru'    => new AnggotaGuruSheet($this->startDate, $this->endDate),
-            'Data_Umum'    => new AnggotaUmumSheet($this->startDate, $this->endDate),
         ];
     }
 }
@@ -182,74 +181,3 @@ class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, Wit
     }
 }
 
-/**
- * Sheet 3: Data Umum
- */
-class AnggotaUmumSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
-{
-    protected $startDate;
-    protected $endDate;
-
-    public function __construct($startDate, $endDate)
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-    }
-
-    public function collection()
-    {
-        return User::where('status', 'umum')
-            ->whereBetween('created_at', [
-                Carbon::parse($this->startDate)->format('Y-m-d 00:00:00'), 
-                Carbon::parse($this->endDate)->format('Y-m-d 23:59:59')
-            ])
-            ->get(); 
-    }
-
-    public function headings(): array
-    {
-        return ['ID Anggota', 'NIK', 'Nama Lengkap', 'Email', 'Jenis Kelamin', 'Alamat', 'Tanggal Terdaftar'];
-    }
-
-    public function map($user): array
-    {
-        $jk = match($user->jenis_kelamin) {
-            'L' => 'Laki-laki',
-            'P' => 'Perempuan',
-            default => '-'
-        };
-
-        return [
-            $user->id,
-            $user->nik ?? '-',
-            $user->name,
-            $user->email,
-            $jk,
-            $user->alamat ?? '-',
-            $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : '-',
-        ];
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        $sheet->getStyle('A1:G1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '00B050']],
-            'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
-        ]);
-
-        $highestRow = $sheet->getHighestRow();
-        if ($highestRow >= 1) {
-            $sheet->getStyle("A1:G{$highestRow}")->applyFromArray([
-                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
-            ]);
-        }
-
-        return [];
-    }
-
-    public function title(): string
-    {
-        return 'Data_Umum';
-    }
-}

@@ -17,7 +17,8 @@ return new class extends Migration
                 'pembuatan_kartu', 
                 'kehilangan_kartu', 
                 'denda_keterlambatan', 
-                'kehilangan_buku'
+                'kehilangan_buku',
+                'perpanjang_kartu'
             ]);
             
             $table->integer('nominal');

@@ -231,6 +231,8 @@
                                 {{ old('jenis') == 'denda_keterlambatan' ? 'selected' : '' }}>Denda Keterlambatan</option>
                             <option value="kehilangan_buku"
                                 {{ old('jenis') == 'kehilangan_buku' ? 'selected' : '' }}>Kehilangan Buku</option>
+                            <option value="perpanjang_kartu"
+                                {{ old('jenis') == 'perpanjang_kartu' ? 'selected' : '' }}>Perpanjang Kartu</option>
                         </select>
                     </div>
 
@@ -308,6 +310,7 @@
                             <option value="kehilangan_kartu">Kehilangan Kartu</option>
                             <option value="denda_keterlambatan">Denda Keterlambatan</option>
                             <option value="kehilangan_buku">Kehilangan Buku</option>
+                            <option value="perpanjang_kartu">Perpanjang Kartu</option>
                         </select>
                     </div>
 

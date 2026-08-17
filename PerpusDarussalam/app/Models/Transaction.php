@@ -30,6 +30,8 @@ class Transaction extends Model
             'pembuatan_kartu'    => 'Pembuatan Kartu',
             'kehilangan_kartu'   => 'Kehilangan Kartu',
             'denda_keterlambatan'=> 'Denda Keterlambatan',
+            'perpanjang_kartu'   => 'Perpanjang Kartu',
+            'kehilangan_buku'    => 'Kehilangan Buku',
             default              => ucwords(str_replace('_', ' ', $this->jenis ?? '-')),
         };
     }

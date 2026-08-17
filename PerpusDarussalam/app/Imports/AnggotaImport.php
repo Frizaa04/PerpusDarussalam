@@ -41,14 +41,14 @@ class AnggotaImport implements ToModel, WithHeadingRow
         // Pengecekan awal berdasarkan NIS / NIK jika diset di Excel
         $queryDuplicate = User::query();
 
-        if ($nis || $nik || $email) {
-            $queryDuplicate->where(function ($q) use ($nis, $nik, $email) {
-                if ($nis) $q->orWhere('nis', $nis);
+        if ($nisn || $nik || $email) {
+            $queryDuplicate->where(function ($q) use ($nisn, $nik, $email) {
+                if ($nisn) $q->orWhere('nisn', $nisn);
                 if ($nik) $q->orWhere('nik', $nik);
                 if ($email) $q->orWhere('email', $email);
             });
         } else {
-            // Jika email, nis, nik kosong, cek berdasarkan Nama
+            // Jika email, nisn, nik kosong, cek berdasarkan Nama
             $queryDuplicate->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($nama))]);
         }
 
@@ -68,7 +68,7 @@ class AnggotaImport implements ToModel, WithHeadingRow
         $inputRole = strtolower(trim($row['role'] ?? $row['kategori'] ?? ''));
 
         if ($inputRole) {
-            if (in_array($inputRole, ['siswa', 'guru', 'umum'])) {
+            if (in_array($inputRole, ['siswa', 'guru'])) {
                 $role = $inputRole;
             }
         } else {

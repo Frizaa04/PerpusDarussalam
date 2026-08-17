@@ -165,7 +165,7 @@
                     </li>
                     <li class="flex items-start gap-2.5">
                         <span class="bg-emerald-800 text-emerald-300 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
-                        <span>Batas waktu peminjaman buku fisik adalah <strong>7 Hari</strong> dari tanggal peminjaman.</span>
+                        <span>Batas waktu peminjaman buku fisik adalah <strong>3 Hari</strong> dari tanggal peminjaman.</span>
                     </li>
                 </ul>
             </div>
@@ -181,7 +181,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span>Jum'at</span>
-                        <span class="font-bold">08.00 - 15.30 WITA</span>
+                        <span class="font-bold">08.00 - 15.00 WITA</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Sabtu, Minggu & Hari Libur</span>

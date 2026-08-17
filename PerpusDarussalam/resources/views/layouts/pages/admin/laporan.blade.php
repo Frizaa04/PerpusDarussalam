@@ -138,7 +138,7 @@
                             <a href="{{ route('laporan.transaksi.export', request()->all()) }}" class="inline-flex items-center justify-center gap-2 bg-[#004d40] text-white px-4 py-2.5 rounded font-bold hover:bg-[#003d30] transition shadow text-sm">Unduh Excel</a>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
 
                         <a href="{{ route('laporan.index', [
                             'date' => $selectedDate->format('Y-m-d'),
@@ -174,6 +174,16 @@
                         ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
                             <h3 class="text-sm font-bold text-white/90 tracking-wide">Kehilangan Buku</h3>
                             <p class="text-4xl font-extrabold mt-4">{{ $kehilanganBukuCount }}</p>
+                        </a>
+
+                        <!-- 5. Perpanjang Kartu -->
+                        <a href="{{ route('laporan.index', [
+                            'date' => $selectedDate->format('Y-m-d'),
+                            'mode' => $mode,
+                            'category' => 'perpanjang_kartu'
+                        ]) }}" class="block bg-[#b0bec5] hover:bg-[#004d40] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30 hover:scale-105 transition-all duration-300 transform cursor-pointer">
+                            <h3 class="text-sm font-bold text-white/90 tracking-wide">Perpanjang Kartu</h3>
+                            <p class="text-4xl font-extrabold mt-4">{{ $perpanjangKartuCount ?? 0 }}</p>
                         </a>
 
                     </div>

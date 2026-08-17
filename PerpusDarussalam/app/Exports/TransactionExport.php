@@ -47,6 +47,7 @@ class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
             'kehilangan_kartu'    => 'Kehilangan Kartu',
             'denda_keterlambatan' => 'Denda Keterlambatan Buku',
             'kehilangan_buku'     => 'Kehilangan Buku',
+            'perpanjang_kartu'    => 'Perpanjang Kartu',
         ];
 
         foreach ($transactions as $trx) {

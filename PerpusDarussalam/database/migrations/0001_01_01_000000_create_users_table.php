@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('status', ['siswa', 'guru', 'umum'])
+            $table->enum('status', ['siswa', 'guru'])
                 ->default('siswa')
                 ->index();
             $table->enum('role', ['admin','user'])
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('alamat')->nullable();
             $table->string('foto')->nullable();
             $table->enum('jenjang', ['MA','MTS'])
-                ->default('MTS')
+                ->nullable()
                 ->index();
             $table->string('kelas')->nullable();
             $table->date('masa_berlaku_mulai')->nullable();

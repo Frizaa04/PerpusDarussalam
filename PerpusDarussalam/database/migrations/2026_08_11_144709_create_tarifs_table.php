@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('tarifs', function (Blueprint $table) {
             $table->id();
-            $table->enum('jenis', ['pembuatan_kartu', 'kehilangan_kartu', 'denda_keterlambatan', 'kehilangan_buku'])->unique();
+            $table->enum('jenis', ['pembuatan_kartu', 'kehilangan_kartu', 'denda_keterlambatan', 'kehilangan_buku', 'perpanjang_kartu'])->unique();
             $table->integer('nominal');
             $table->text('keterangan')->nullable();
             $table->timestamps();
@@ -24,6 +24,7 @@ return new class extends Migration
             ['jenis' => 'kehilangan_kartu', 'nominal' => 15000, 'keterangan' => 'Biaya cetak ulang kartu hilang', 'created_at' => now(), 'updated_at' => now()],
             ['jenis' => 'denda_keterlambatan', 'nominal' => 1000, 'keterangan' => 'Denda per hari keterlambatan', 'created_at' => now(), 'updated_at' => now()],
             ['jenis' => 'kehilangan_buku', 'nominal' => 0, 'keterangan' => 'Ganti rugi buku hilang (nominal disesuaikan manual per buku)', 'created_at' => now(), 'updated_at' => now()],
+            ['jenis' => 'perpanjang_kartu', 'nominal' => 5000, 'keterangan' => 'Biaya perpanjang kartu', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 

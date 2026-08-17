@@ -50,7 +50,7 @@ class TransaksiController extends Controller
         $request->validate([
             'no_identitas' => 'nullable|string|max:255',
             'nominal'      => 'required|numeric|min:0',
-            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan,kehilangan_buku',
+            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan,kehilangan_buku,perpanjang_kartu',
             'tanggal'      => 'required|date',
             'keterangan'   => 'nullable|string|max:255',
             'status_bayar' => 'required|in:belum_bayar,sudah_bayar',
@@ -101,7 +101,7 @@ class TransaksiController extends Controller
         $request->validate([
             'no_identitas' => 'nullable|string|max:255',
             'nominal'      => 'required|numeric|min:0',
-            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan,kehilangan_buku',
+            'jenis'        => 'required|in:pembuatan_kartu,kehilangan_kartu,denda_keterlambatan,kehilangan_buku,perpanjang_kartu',
             'tanggal'      => 'required|date',
             'keterangan'   => 'nullable|string|max:255',
             'status_bayar' => 'required|in:belum_bayar,sudah_bayar',

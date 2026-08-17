@@ -40,6 +40,10 @@ class BorrowingService
                 throw new \Exception('Buku tidak ditemukan');
             }
 
+            if ($bookItem->status_pinjam === 'hilang') {
+                throw new \Exception('Peminjaman gagal: Buku ini telah dilaporkan hilang.');
+            }
+
             if ($bookItem->status_pinjam === 'dipinjam') {
                 throw new \Exception('Buku sedang dipinjam');
             }
@@ -102,14 +106,19 @@ class BorrowingService
                 $tarifPerHari = Tarif::where('jenis', 'denda_keterlambatan')->value('nominal') ?? 0;
                 $nominalDenda = $hariTelat * $tarifPerHari;
 
-                Transaction::create([
-                    'user_id'      => $borrowing->user_id,
-                    'name'         => $borrowing->user->name ?? 'Non-Anggota',
-                    'jenis'        => 'denda_keterlambatan',
-                    'nominal'      => $nominalDenda,
-                    'tanggal'      => $tanggalKembali->toDateString(),
-                    'keterangan'   => "Denda keterlambatan {$hariTelat} hari (Peminjaman #{$borrowing->id})",
-                    'status_bayar' => 'belum_bayar',
+                // GUNAKAN updateOrCreate AGAR TIDAK DOBEL
+                Transaction::updateOrCreate(
+                    [
+                        'borrowing_id' => $borrowing->id, // Kunci unik relasi ke peminjaman
+                        'jenis'        => 'denda_keterlambatan',
+                    ],
+                    [
+                        'user_id'      => $borrowing->user_id,
+                        'name'         => $borrowing->user->name ?? 'Non-Anggota',
+                        'nominal'      => $nominalDenda,
+                        'tanggal'      => $tanggalKembali->toDateString(),
+                        'keterangan'   => "Denda keterlambatan {$hariTelat} hari (Peminjaman #{$borrowing->id})",
+                        'status_bayar' => 'belum_bayar',
                 ]);
             }
         });

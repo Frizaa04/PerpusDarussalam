@@ -121,9 +121,10 @@ class LaporanController extends Controller
         $kehilanganKartuCount   = $applyDateFilter(Transaction::where('jenis', 'kehilangan_kartu'))->count();
         $keterlambatanBukuCount = $applyDateFilter(Transaction::where('jenis', 'denda_keterlambatan'))->count();
         $kehilanganBukuCount    = $applyDateFilter(Transaction::where('jenis', 'kehilangan_buku'))->count();
+        $perpanjangKartuCount   = $applyDateFilter(Transaction::where('jenis', 'perpanjang_kartu'))->count();
         
         $totalSemua = $applyDateFilter(Transaction::whereIn('jenis', [
-            'pembuatan_kartu', 'kehilangan_kartu', 'denda_keterlambatan', 'kehilangan_buku'
+            'pembuatan_kartu', 'kehilangan_kartu', 'denda_keterlambatan', 'kehilangan_buku', 'perpanjang_kartu'
         ]))->sum('nominal');
 
         $dataList = null;
@@ -155,6 +156,7 @@ class LaporanController extends Controller
             'kehilanganKartuCount'   => $kehilanganKartuCount,
             'keterlambatanBukuCount' => $keterlambatanBukuCount,
             'kehilanganBukuCount'    => $kehilanganBukuCount,
+            'perpanjangKartuCount'   => $perpanjangKartuCount,
             'totalSemua'             => $totalSemua,
             'totalCategory'          => $totalCategory,
             'dataList'               => $dataList,

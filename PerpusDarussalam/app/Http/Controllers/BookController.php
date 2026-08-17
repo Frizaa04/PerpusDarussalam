@@ -16,7 +16,7 @@ class BookController extends Controller
     {
         $search = $request->query('search');
 
-        $queryBuilder = Book::with('categories');
+        $queryBuilder = Book::with('categories')->latest();
 
         if ($search) {
             $queryBuilder->where(function ($q) use ($search) {
@@ -37,7 +37,7 @@ class BookController extends Controller
         $books = $queryBuilder->paginate(10)->withQueryString();
         $allCategories = Category::all();
 
-        return view('layouts.pages.admin.katalog_buku', compact('books', 'search', 'allCategories'));
+        return view('layouts.pages.admin.katalog_buku', compact('books', 'search', 'allCategories',));
     }
 
     public function store(Request $request, BookService $bookService)
@@ -48,7 +48,7 @@ class BookController extends Controller
             'judul'             => 'required|string|max:255',
             'penulis'           => 'required|string|max:255',
             'penerbit'          => 'required|string|max:255',
-            'tahun_terbit'      => 'required|digits:4',
+            'tahun_terbit'      => 'nullable|digits:4',
             'isbn'              => 'required|string|max:255',
             'tanggal_pembelian' => 'required|date',
             'stok'              => 'required|integer|min:0',
@@ -75,7 +75,7 @@ class BookController extends Controller
             'penulis'           => 'required|string|max:255',
             'penerbit'          => 'required|string|max:255',
             'isbn'              => 'required|string|max:255',
-            'tahun_terbit'      => 'required|digits:4',
+            'tahun_terbit'      => 'nullable|digits:4',
             'tanggal_pembelian' => 'required',
             'deskripsi'         => 'nullable|string',
             'rak'               => 'nullable|string',
