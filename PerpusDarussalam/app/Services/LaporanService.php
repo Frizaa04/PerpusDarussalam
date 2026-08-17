@@ -101,7 +101,6 @@ class LaporanService
             'perempuan'    => User::where('jenis_kelamin', 'P')->count(),
             'siswa'        => User::where('status', 'siswa')->count(),
             'guru'         => User::where('status', 'guru')->count(),
-            'umum'         => User::where('status', 'umum')->count()
         ];
     }
 
@@ -146,10 +145,6 @@ class LaporanService
             'guru' => (clone $baseQuery)
                 ->whereHas('user', fn($q) =>
                     $q->where('status', 'guru')
-                )->count(),
-            'umum' => (clone $baseQuery)
-                ->whereHas('user', fn($q) =>
-                    $q->where('status', 'umum')
                 )->count(),
         ];
     }

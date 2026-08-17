@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('judul')->index(); 
             $table->string('penulis')->index(); 
             $table->string('penerbit');
-            $table->year('tahun_terbit');
+            $table->year('tahun_terbit')->nullable();
             $table->string('isbn')->index(); 
             $table->date('tanggal_pembelian');
             $table->integer('stok')->default(0);

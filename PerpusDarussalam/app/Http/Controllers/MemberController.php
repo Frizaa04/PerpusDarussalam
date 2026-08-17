@@ -11,7 +11,8 @@ class MemberController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
-        $statusFilter = $request->query('role'); // Menangkap filter status (siswa, guru, umum)
+        $statusFilter = $request->query('role'); // Menangkap filter status (siswa, guru)
+        $statusFilter = $request->query('role');
 
         $query = User::query();
 
@@ -38,9 +39,15 @@ class MemberController extends Controller
             }
         }
 
-        // Filter berdasarkan Status (Siswa, Guru, Umum)
-        if ($statusFilter && in_array($statusFilter, ['siswa', 'guru', 'umum'])) {
-            $query->where('status', $statusFilter);
+        // Filter berdasarkan Status (Siswa, Guru)
+        if ($statusFilter) {
+            if ($statusFilter === 'mts') {
+                $query->where('status', 'siswa')->where('jenjang', 'MTS');
+            } elseif ($statusFilter === 'ma') {
+                $query->where('status', 'siswa')->where('jenjang', 'MA');
+            } elseif ($statusFilter === 'guru') {
+                $query->where('status', 'guru');
+            }
         }
 
         $students = $query->latest()->paginate(10)->withQueryString();
@@ -60,7 +67,7 @@ class MemberController extends Controller
             'nomor_induk'   => 'nullable|string|max:255',
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255|unique:users,email,' . $id,
-            'status'        => 'required|in:siswa,guru,umum', 
+            'status'        => 'required|in:siswa,guru', 
             'jenis_kelamin' => 'nullable|in:L,P',
             'alamat'        => 'nullable|string|max:500',
             'jenjang'       => 'nullable|in:MA,MTS',
@@ -77,7 +84,7 @@ class MemberController extends Controller
 
         if ($status === 'siswa') {
             $nisn = $request->nomor_induk;
-        } elseif ($status === 'guru' || $status === 'umum') {
+        } elseif ($status === 'guru') {
             $nik = $request->nomor_induk;
         }
 
@@ -108,7 +115,7 @@ class MemberController extends Controller
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255|unique:users,email',
             'password'      => 'required|string|min:6',
-            'role'          => 'required|in:siswa,guru,umum',
+            'role'          => 'required|in:siswa,guru',
             'jenis_kelamin' => 'nullable|in:L,P',
             'alamat'        => 'nullable|string|max:500',
             'jenjang'       => 'nullable|in:MA,MTS',
@@ -129,7 +136,7 @@ class MemberController extends Controller
 
         if ($role === 'siswa') {
             $nisn = $request->nomor_induk;
-        } elseif ($role === 'guru' || $role === 'umum') {
+        } elseif ($role === 'guru') {
             $nik = $request->nomor_induk;
         }
 
@@ -169,7 +176,7 @@ class MemberController extends Controller
             'role'                => 'user',
             'jenis_kelamin'       => $request->jenis_kelamin,
             'alamat'              => $request->alamat,
-            'jenjang'             => $request->jenjang ?? 'MTS',
+            'jenjang'             => $request->jenjang ?? null,
             'kelas'               => $kelasFinal, 
             'masa_berlaku_mulai'  => $masaMulai->toDateString(),
             'masa_berlaku_sampai' => $masaSampai->toDateString(),
@@ -260,7 +267,7 @@ class MemberController extends Controller
                 ? \Carbon\Carbon::parse($user->masa_berlaku_sampai)->translatedFormat('d F Y') 
                 : '-';
             
-            // Tentukan juga No Induk (NISN jika siswa, NIK jika guru/umum)
+            // Tentukan juga No Induk (NISN jika siswa, NIK jika guru)
             $user->noInduk = $user->nisn ?? $user->nik ?? '-';
 
             return $user;

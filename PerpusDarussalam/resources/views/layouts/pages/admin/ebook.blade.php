@@ -41,11 +41,11 @@
                     <div class="max-w-md w-full">
                         <form action="{{ route('admin.ebook.index') }}" method="GET"
                             class="flex items-center border-2 border-[#004d40] rounded overflow-hidden bg-white">
-                            
+
                             <input type="text" name="search" value="{{ request('search') }}"
                                 placeholder="Cari Data E-Book..."
                                 class="w-full px-4 py-2 text-gray-700 outline-none font-medium placeholder-gray-400 text-sm">
-                                
+
                             <button type="submit"
                                 class="bg-[#004d40] text-white px-4 py-2 flex items-center justify-center hover:bg-[#003d30] transition">
                                 <span class="material-icons">search</span>
@@ -60,29 +60,26 @@
                     </button>
                 </div>
 
-                <!-- Form Pembungkus Penghapusan Massal -->
-                <form id="deleteForm" action="{{ route('admin.ebook.destroy-multiple') }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-
+                <div id="deleteFormContainer">
                     <!-- Tabel Daftar E-Book -->
                     <div class="bg-[#b0bec5] rounded-lg shadow-md overflow-hidden p-6">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-white text-xl font-bold tracking-wide">Tabel Daftar E-Book</h2>
 
-                            <!-- Bagian Tombol Aksi -->
                             <div class="flex items-center gap-2">
                                 <div id="selectAllContainer"
                                     class="hidden flex items-center gap-1.5 px-2.5 py-1 select-none">
-                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)"
+                                    <input type="checkbox" id="selectAllCheckbox"
+                                        onclick="toggleSelectAll(this, 'ebook-checkbox')"
                                         class="w-4 h-4 accent-red-600 cursor-pointer rounded">
                                     <label for="selectAllCheckbox"
-                                        class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
+                                        class="text-xs font-semibold text-white cursor-pointer">Pilih Semua Isi
+                                        Halaman</label>
                                 </div>
 
-                                <button type="submit" id="btnConfirmDelete"
+                                <button type="button" id="btnConfirmDelete"
                                     class="hidden bg-red-700 hover:bg-red-800 text-white font-bold px-3 py-1.5 rounded text-sm transition shadow-md">
-                                    Konfirmasi Hapus
+                                    Konfirmasi Hapus (<span id="jumlahTerpilih">0</span>)
                                 </button>
 
                                 <button type="button" id="btnToggleDelete" onclick="toggleDeleteMode()"
@@ -151,7 +148,7 @@
 
                                                 <div
                                                     class="delete-mode-action hidden flex items-center justify-center gap-2">
-                                                    <input type="checkbox" name="ids[]" value="{{ $ebook->id }}"
+                                                    <input type="checkbox" value="{{ $ebook->id }}"
                                                         class="ebook-checkbox w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
                                                     <span class="text-xs font-semibold text-red-900 italic">Centang untuk
                                                         hapus</span>
@@ -174,7 +171,7 @@
                         </div>
 
                     </div>
-                </form>
+                </div>
 
             </div>
         </main>
@@ -363,12 +360,11 @@
             </form>
         </div>
     </div>
-    
+
     <script>
         // Variable Global State
         let isDeleteModeActive = false;
 
-        // 1. Event Listener Utama (DOMContentLoaded versi jQuery)
         $(document).ready(function() {
 
             // Otomatis buka modal tambah e-book jika ada error dari server
@@ -376,28 +372,84 @@
                 openAddEbookModal();
             @endif
 
-            // Event submit form hapus massal
-            $('#deleteForm').on('submit', function(e) {
-                let checkedBoxes = $('.ebook-checkbox:checked');
-                if (checkedBoxes.length === 0) {
-                    alert('Pilih minimal satu e-book yang ingin dihapus!');
-                    e.preventDefault();
-                } else {
-                    if (!confirm('Yakin ingin menghapus e-book yang dipilih?')) {
-                        e.preventDefault();
-                    }
+            // ==========================================
+            // FITUR: INISIALISASI MEMORI HAPUS E-BOOK LINTAS HALAMAN
+            // ==========================================
+            let selectedEbookIds = JSON.parse(sessionStorage.getItem('selected_ebook_ids')) || [];
+
+            // Jika sebelumnya user sedang dalam mode hapus di page lain, pertahankan modenya
+            if (sessionStorage.getItem('ebook_delete_mode_active') === 'true') {
+                setTimeout(function() {
+                    isDeleteModeActive = false;
+                    toggleDeleteMode();
+                }, 150);
+            }
+
+            // Otomatis centang ulang e-book yang ID-nya ada di memori browser
+            $('.ebook-checkbox').each(function() {
+                if (selectedEbookIds.includes($(this).val())) {
+                    $(this).prop('checked', true);
                 }
             });
 
+            // Pantau klik checkbox e-book secara individual
+            $(document).on('change', '.ebook-checkbox', function() {
+                let id = $(this).val();
+                if ($(this).is(':checked')) {
+                    if (!selectedEbookIds.includes(id)) selectedEbookIds.push(id);
+                } else {
+                    selectedEbookIds = selectedEbookIds.filter(item => item !== id);
+                }
+                sessionStorage.setItem('selected_ebook_ids', JSON.stringify(selectedEbookIds));
+                updateConfirmDeleteButtonState();
+            });
+
+            // Event listener klik tombol Konfirmasi Hapus E-Book Lintas Halaman
+            $('#btnConfirmDelete').on('click', function(e) {
+                e.preventDefault();
+
+                let finalIds = JSON.parse(sessionStorage.getItem('selected_ebook_ids')) || [];
+
+                if (finalIds.length === 0) {
+                    alert('Silakan pilih minimal satu e-book untuk dihapus!');
+                    return;
+                }
+
+                if (confirm(
+                        `Yakin ingin menghapus ${finalIds.length} e-book yang dipilih dari berbagai halaman?`
+                        )) {
+                    $.ajax({
+                        url: "{{ route('admin.ebook.destroy-multiple') }}",
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            _method: 'DELETE',
+                            ids: finalIds
+                        },
+                        success: function(response) {
+                            sessionStorage.removeItem('selected_ebook_ids');
+                            sessionStorage.removeItem('ebook_delete_mode_active');
+                            location.reload();
+                        },
+                        error: function(xhr) {
+                            alert('Gagal menghapus data e-book lintas halaman. Status: ' + xhr
+                                .status);
+                        }
+                    });
+                }
+            });
+
+            updateConfirmDeleteButtonState();
         });
 
         // 2. Modal Functions (Tambah & Edit E-Book)
-        function openAddEbookModal() { 
-            $('#addEbookModal').removeClass('hidden'); 
+        function openAddEbookModal() {
+            $('#addEbookModal').removeClass('hidden');
         }
 
-        function closeAddEbookModal() { 
-            $('#addEbookModal').addClass('hidden'); 
+        function closeAddEbookModal() {
+            $('#addEbookModal').addClass('hidden');
         }
 
         function openEditEbookModal(id, kodeEbook, judul, categoriesId, penulis, penerbit, tahunTerbit, isbn) {
@@ -409,13 +461,12 @@
             $('#editEbookTahun').val(tahunTerbit);
             $('#editEbookIsbn').val((isbn !== 'null' && isbn !== 'undefined') ? isbn : '');
 
-            // Form action di-update sesuai Route::put('/e-book/update/{id}')
             $('#formEditEbook').attr('action', '/e-book/update/' + id);
             $('#editEbookModal').removeClass('hidden');
         }
 
-        function closeEditEbookModal() { 
-            $('#editEbookModal').addClass('hidden'); 
+        function closeEditEbookModal() {
+            $('#editEbookModal').addClass('hidden');
         }
 
         // 3. Mode Hapus Massal & Checkbox Actions
@@ -431,31 +482,65 @@
             if (isDeleteModeActive) {
                 $btnToggle.removeClass('bg-[#004d40] hover:bg-[#003d30]').addClass('bg-gray-600 hover:bg-gray-700');
                 $btnText.text('Batal');
-                $btnIcon.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />');
+                $btnIcon.html(
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />');
 
-                $btnConfirm.removeClass('hidden');
                 $selectAllContainer.removeClass('hidden');
+                sessionStorage.setItem('ebook_delete_mode_active', 'true');
 
                 $('.edit-mode-action').addClass('hidden');
                 $('.delete-mode-action').removeClass('hidden');
             } else {
                 $btnToggle.removeClass('bg-gray-600 hover:bg-gray-700').addClass('bg-[#004d40] hover:bg-[#003d30]');
                 $btnText.text('Hapus E-Book');
-                $btnIcon.html('<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />');
+                $btnIcon.html(
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />'
+                    );
 
                 $btnConfirm.addClass('hidden');
                 $selectAllContainer.addClass('hidden');
+                sessionStorage.setItem('ebook_delete_mode_active', 'false');
 
                 $('.edit-mode-action').removeClass('hidden');
                 $('.delete-mode-action').addClass('hidden');
 
+                sessionStorage.removeItem('selected_ebook_ids');
                 $('#selectAllCheckbox').prop('checked', false);
                 $('.ebook-checkbox').prop('checked', false);
             }
+            updateConfirmDeleteButtonState();
         }
 
-        function toggleSelectAll(source) {
-            $('.ebook-checkbox').prop('checked', source.checked);
+        function toggleSelectAll(master, targetClass = 'ebook-checkbox') {
+            let checkboxes = $('.' + targetClass);
+            checkboxes.prop('checked', master.checked);
+
+            let selectedEbookIds = JSON.parse(sessionStorage.getItem('selected_ebook_ids')) || [];
+
+            checkboxes.each(function() {
+                let id = $(this).val();
+                if (master.checked) {
+                    if (!selectedEbookIds.includes(id)) selectedEbookIds.push(id);
+                } else {
+                    selectedEbookIds = selectedEbookIds.filter(item => item !== id);
+                }
+            });
+
+            sessionStorage.setItem('selected_ebook_ids', JSON.stringify(selectedEbookIds));
+            updateConfirmDeleteButtonState();
+        }
+
+        function updateConfirmDeleteButtonState() {
+            let selectedEbookIds = JSON.parse(sessionStorage.getItem('selected_ebook_ids')) || [];
+            let totalCount = selectedEbookIds.length;
+
+            $('#jumlahTerpilih').text(totalCount);
+
+            if (isDeleteModeActive && totalCount > 0) {
+                $('#btnConfirmDelete').removeClass('hidden');
+            } else {
+                $('#btnConfirmDelete').addClass('hidden');
+            }
         }
     </script>
 @endsection

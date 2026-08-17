@@ -28,23 +28,23 @@
                             </button>
                         </form>
 
-                        <!-- Tombol Filter Peran (Siswa, Guru, Umum, Semua) -->
+                        <!-- Tombol Filter Peran (Mts, MA, Guru, Semua) -->
                         <div class="flex items-center gap-1 bg-white p-1 rounded border-2 border-[#004d40]">
                             <a href="{{ route('member.index', ['search' => request('search')]) }}"
                                 class="px-3 py-1 rounded text-xs font-bold transition {{ !request('role') ? 'bg-[#004d40] text-white' : 'text-[#004d40] hover:bg-emerald-50' }}">
                                 Semua
                             </a>
-                            <a href="{{ route('member.index', ['role' => 'siswa', 'search' => request('search')]) }}"
-                                class="px-3 py-1 rounded text-xs font-bold transition {{ request('role') == 'siswa' ? 'bg-[#004d40] text-white' : 'text-[#004d40] hover:bg-emerald-50' }}">
-                                Siswa
+                            <a href="{{ route('member.index', ['role' => 'mts', 'search' => request('search')]) }}"
+                                class="px-3 py-1 rounded text-xs font-bold transition {{ request('role') == 'mts' ? 'bg-[#004d40] text-white' : 'text-[#004d40] hover:bg-emerald-50' }}">
+                                MTs
+                            </a>
+                            <a href="{{ route('member.index', ['role' => 'ma', 'search' => request('search')]) }}"
+                                class="px-3 py-1 rounded text-xs font-bold transition {{ request('role') == 'ma' ? 'bg-[#004d40] text-white' : 'text-[#004d40] hover:bg-emerald-50' }}">
+                                MA
                             </a>
                             <a href="{{ route('member.index', ['role' => 'guru', 'search' => request('search')]) }}"
                                 class="px-3 py-1 rounded text-xs font-bold transition {{ request('role') == 'guru' ? 'bg-[#004d40] text-white' : 'text-[#004d40] hover:bg-emerald-50' }}">
                                 Guru
-                            </a>
-                            <a href="{{ route('member.index', ['role' => 'umum', 'search' => request('search')]) }}"
-                                class="px-3 py-1 rounded text-xs font-bold transition {{ request('role') == 'umum' ? 'bg-[#004d40] text-white' : 'text-[#004d40] hover:bg-emerald-50' }}">
-                                Umum
                             </a>
                         </div>
                         <button type="button" onclick="openAddUserModal()"
@@ -283,7 +283,7 @@
                             class="w-full bg-[#b0bec5] text-gray-800 text-xs font-medium px-2 py-1.5 rounded outline-none file:mr-2 file:py-0.5 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-600 file:text-white">
                     </div>
 
-                    <!-- Dropdown Status (Siswa/Guru/Umum) -->
+                    <!-- Dropdown Status (Siswa/Guru) -->
                     <div>
                         <label class="block text-sm font-semibold mb-1">Status / Kategori</label>
                         <select name="role" id="peranAdd" required
@@ -291,7 +291,6 @@
                             <option value="">Pilih Status...</option>
                             <option value="siswa">Siswa</option>
                             <option value="guru">Guru</option>
-                            <option value="umum">Umum</option>
                         </select>
                     </div>
 
@@ -338,8 +337,8 @@
                         <select name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="MTS">MTS</option>
-                            <option value="MA">MA</option>
+                            <option value="mts">MTS</option>
+                            <option value="ma">MA</option>
                         </select>
                     </div>
 
@@ -448,7 +447,6 @@
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="siswa">Siswa</option>
                             <option value="guru">Guru</option>
-                            <option value="umum">Umum</option>
                         </select>
                     </div>
                 </div>
@@ -460,8 +458,8 @@
                         <select id="modalJenjang" name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="MTS">MTs</option>
-                            <option value="MA">MA</option>
+                            <option value="mts">MTs</option>
+                            <option value="ma">MA</option>
                         </select>
                     </div>
                     <div>
@@ -477,8 +475,8 @@
                         <select id="modalJenisKelamin" name="jenis_kelamin"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="">-- Pilih Jenis Kelamin --</option>
-                            <option value="L">Laki-laki</option>
-                            <option value="P">Perempuan</option>
+                            <option value="l">Laki-laki</option>
+                            <option value="p">Perempuan</option>
                         </select>
                     </div>
                     <div>
@@ -579,7 +577,7 @@
             </form>
         </div>
     </div>
-    <!-- Pastikan CDN jQuery sudah dipasang di Master Layout kamu -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <script>
@@ -595,7 +593,7 @@
             if (peran === 'siswa') {
                 $label.text('NISN (Nomor Induk Siswa)');
                 $input.attr('placeholder', 'Masukkan NISN...');
-            } else if (peran === 'guru' || peran === 'umum') {
+            } else if (peran === 'guru') {
                 $label.text('NIK (Nomor Induk Kependudukan)');
                 $input.attr('placeholder', 'Masukkan NIK...');
             } else {
@@ -628,7 +626,7 @@
 
                 if (selectedRole === 'siswa') {
                     $modalInput.val(window.currentEditData.nisn || '');
-                } else if (selectedRole === 'guru' || selectedRole === 'umum') {
+                } else if (selectedRole === 'guru') {
                     $modalInput.val(window.currentEditData.nik || '');
                 } else {
                     $modalInput.val('');
@@ -735,7 +733,7 @@
 
             let $modalInput = $('#modalInputNomor');
             updateNomorField(activeRole, 'modalLabelNomor', $modalInput);
-            $modalInput.val(activeRole === 'siswa' ? window.currentEditData.nisn : (activeRole === 'guru' || activeRole === 'umum' ? window.currentEditData.nik : ''));
+            $modalInput.val(activeRole === 'siswa' ? window.currentEditData.nisn : (activeRole === 'guru' ? window.currentEditData.nik : ''));
 
             $('#modalJenisKelamin').val((jenis_kelamin || '').toLowerCase().trim());
             $('#modalJenjang').val((jenjang || '').toLowerCase().trim());

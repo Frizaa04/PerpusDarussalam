@@ -192,11 +192,6 @@
                     <h3 class="text-sm font-bold text-white/90 tracking-wide">Guru</h3>
                     <p class="text-4xl font-extrabold mt-4">{{ $guru }}</p>
                 </div>
-
-                <div class="bg-[#b0bec5] text-white p-6 rounded shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-center border border-gray-300/30">
-                    <h3 class="text-sm font-bold text-white/90 tracking-wide">Umum</h3>
-                    <p class="text-4xl font-extrabold mt-4">{{ $umum }}</p>
-                </div>
             </div>
 
         </div>

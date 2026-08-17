@@ -68,7 +68,7 @@
                                 <input type="checkbox" id="selectAllCheckboxMain"
                                         onclick="toggleSelectAll(this, 'book-checkbox')"
                                         class="w-4 h-4 accent-red-600 cursor-pointer rounded">
-                                <label for="selectAllCheckboxMain" class="text-xs font-semibold text-white cursor-pointer">Pilih Semua</label>
+                                <label for="selectAllCheckboxMain" class="text-xs font-semibold text-white cursor-pointer">Pilih Semua Isi Halaman</label>
                             </div>
 
                             <!-- Tombol Konfirmasi Hapus (Tipe diubah jadi button agar tidak submit form default) -->
@@ -205,7 +205,7 @@
 
                     <div>
                         <label class="block text-sm font-semibold mb-1">Tahun Terbit</label>
-                        <input type="number" name="tahun_terbit" placeholder="..." required
+                        <input type="number" name="tahun_terbit" placeholder="..." 
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
 
@@ -316,7 +316,7 @@
 
                     <div>
                         <label class="block text-sm font-semibold mb-1">Tahun Terbit</label>
-                        <input type="number" id="editTahunTerbit" name="tahun_terbit" placeholder="2024" required
+                        <input type="number" id="editTahunTerbit" name="tahun_terbit" placeholder="2024" 
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                     </div>
 
@@ -374,7 +374,7 @@
         <div
             class="bg-[#005a4e] text-white rounded-md shadow-2xl w-full max-w-md p-6 relative border border-emerald-400/30 max-h-[85vh] overflow-y-auto">
             <!-- Tombol Close -->
-            <button type="button" onclick="closeAddCategoryModal()"
+            <button type="button" onclick="closeAddCategoryModal()" 
                 class="absolute top-3 right-4 text-white hover:text-gray-300 text-xl font-bold transition">
                 &#10005;
             </button>
@@ -548,7 +548,7 @@
 
                 <div>
                     <label class="block font-semibold mb-1">Nomor Inventaris</label>
-                    <input type="text" id="editNomorInventaris" name="nomor_inventaris" required
+                    <input type="text" id="editNomorInventaris" name="nomor_inventaris" required readonly
                         class="w-full bg-[#b0bec5] text-gray-800 font-medium px-2.5 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                 </div>
                 <div>

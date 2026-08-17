@@ -70,12 +70,6 @@
                             Guru
                         </a>
 
-                        <!-- Tombol Umum -->
-                        <a href="{{ route('absen.index', ['status' => 'umum']) }}"
-                            class="px-3 py-1.5 rounded text-xs font-bold transition 
-                        {{ request('status') == 'umum' ? 'bg-white text-slate-800 shadow' : 'bg-amber-600 text-white hover:bg-amber-700' }}">
-                            Umum
-                        </a>
                     </div>
                 </div>
 
@@ -107,7 +101,7 @@
                                     {{ $visit->user->name ?? '-' }}
                                 </td>
 
-                                <!-- Peran User (Siswa / Guru / Umum) dengan Badge Kustom -->
+                                <!-- Peran User (Siswa / Guru) dengan Badge Kustom -->
                                 <td class="p-3 text-sm font-semibold text-white/90">
                                     @if($visit->user)
                                     <span class="px-2.5 py-1 rounded text-xs uppercase font-bold 

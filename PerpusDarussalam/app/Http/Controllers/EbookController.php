@@ -118,10 +118,13 @@ class EbookController extends Controller
 
     public function destroyMultiple(Request $request)
     {
-        $ids = $request->input('ids');
+        $ids = $request->input('ids', []);
 
-        if (!$ids) {
-            return redirect()->back()->with('error', 'Pilih minimal satu e-book yang ingin dihapus!');
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada e-book yang dipilih.'
+            ], 400);
         }
 
         $ebooks = Ebook::whereIn('id', $ids)->get();
@@ -137,6 +140,9 @@ class EbookController extends Controller
             $ebook->delete();
         }
 
-        return redirect()->back()->with('success', 'E-book yang dipilih berhasil dihapus!');
+        return response()->json([
+            'success' => true,
+            'message' => 'E-book yang dipilih berhasil dihapus lintas halaman!'
+        ], 200);
     }
 }
