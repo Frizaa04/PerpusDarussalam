@@ -70,7 +70,7 @@
                                         <!-- Badge Kategori -->
                                         <span
                                             class="absolute top-2 right-2 bg-[#004d40] text-emerald-100 text-[9px] font-bold px-2 py-0.5 rounded shadow border border-emerald-600/50">
-                                            {{ $ebook->kategori ?? 'Umum' }}
+                                            {{ $ebook->category->nama ?? 'Umum' }}
                                         </span>
                                     </div>
 

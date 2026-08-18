@@ -191,12 +191,17 @@ class TransaksiController extends Controller
         $ids = $request->input('ids');
 
         if (!$ids || !is_array($ids) || count($ids) === 0) {
-            return redirect()->route('transaction.index')->withErrors(['Pilih minimal satu data transaksi untuk dihapus.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada data transaksi yang dipilih.'
+            ], 400);
         }
 
-        // Hapus data transaksi berdasarkan array ID yang dicentang
         Transaction::whereIn('id', $ids)->delete();
 
-        return redirect()->route('transaction.index')->with('success', count($ids) . ' data transaksi berhasil dihapus!');
+        return response()->json([
+            'success' => true,
+            'message' => count($ids) . ' data transaksi berhasil dihapus!'
+        ], 200);
     }
 }

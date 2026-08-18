@@ -15,7 +15,8 @@ class UserEbookController extends Controller
         $search = $request->input('search');
 
         // Mengambil data e-book 
-        $ebooks = Ebook::when($search, function ($query, $search) {
+        $ebooks = Ebook::with('category')
+            ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('judul', 'like', "%{$search}%")
                     ->orWhere('penulis', 'like', "%{$search}%")

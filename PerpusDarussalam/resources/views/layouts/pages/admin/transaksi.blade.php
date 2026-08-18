@@ -56,10 +56,7 @@
                 </div>
 
                 <!-- Form Hapusan Massal / Bulk Delete -->
-                <form id="form-delete-bulk" action="{{ route('transaction.destroy.bulk') }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-
+                <div id="deleteFormContainer">
                     <!-- Box Tabel -->
                     <div class="bg-[#b0bec5] p-6 rounded shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-300/30">
 
@@ -68,24 +65,31 @@
                             <h2 class="text-xl font-bold text-white tracking-wide uppercase">Tabel Daftar Transaksi</h2>
 
                             <div class="flex items-center gap-3">
-                                <label id="label-check-all"
+                                <label id="selectAllContainer"
                                     class="flex items-center gap-2 text-white font-bold cursor-pointer select-none hidden ml-2">
                                     <span>Pilih Semua</span>
-                                    <input type="checkbox" id="check-all"
-                                        class="w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer">
+                                    <input type="checkbox" id="selectAllCheckboxMain" onchange="toggleSelectAll(this)"
+                                        class="w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white">
                                 </label>
 
                                 <!-- 1. Tombol Konfirmasi Hapus (Awalnya Tersembunyi, Muncul saat Mode Hapus) -->
-                                <button type="button" id="btn-submit-delete" onclick="submitDeleteForm()"
+                                <button type="button" id="btnConfirmDelete" onclick="submitDeleteForm()"
                                     class="bg-red-700 text-white font-bold px-4 py-1.5 rounded hover:bg-red-800 transition text-sm shadow hidden">
-                                    Konfirmasi Hapus
+                                    Konfirmasi Hapus (<span id="jumlahTerpilih">0</span>)
                                 </button>
 
-                                <!-- 2. Tombol Trigger Utama (Hijau "Hapus Data" -> Abu-abu/Gelap "Batal" untuk Cancel) -->
-                                <button type="button" id="btn-toggle-delete" onclick="toggleDeleteMode()"
+                                <!-- Tombol Trigger Utama Kelola Mode Hapus Transaksi -->
+                                <button type="button" id="btnToggleDelete" onclick="toggleDeleteMode()"
                                     class="bg-[#004d40] text-white font-bold px-4 py-1.5 rounded hover:bg-[#003d30] transition text-sm shadow flex items-center gap-1.5 select-none">
-                                    <span id="btn-icon" class="material-icons text-base">delete</span>
-                                    <span id="text-btn-toggle">Hapus Data</span>
+
+                                    <!-- Ikon SVG tempat sampah / close -->
+                                    <svg id="trashIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+
+                                    <span id="btnText">Hapus Transaksi</span>
                                 </button>
                             </div>
                         </div>
@@ -143,8 +147,8 @@
                                                         Edit Data
                                                     </button>
                                                     <!-- Checkbox per Baris (Tersembunyi Awal) -->
-                                                    <input type="checkbox" name="ids[]" value="{{ $transaction->id }}"
-                                                        class="item-checkbox delete-mode-action w-5 h-5 accent-[#004d40] rounded border-white/60 cursor-pointer hidden">
+                                                    <input type="checkbox" value="{{ $transaction->id }}"
+                                                        class="transaction-checkbox delete-mode-action w-5 h-5 accent-red-600 cursor-pointer rounded border-2 border-white hidden">
                                                 </div>
                                             </td>
                                         </tr>
@@ -163,7 +167,7 @@
                         </div>
 
                     </div>
-                </form>
+                </div>
 
             </div>
         </main>
@@ -229,10 +233,10 @@
                                 Kehilangan Kartu</option>
                             <option value="denda_keterlambatan"
                                 {{ old('jenis') == 'denda_keterlambatan' ? 'selected' : '' }}>Denda Keterlambatan</option>
-                            <option value="kehilangan_buku"
-                                {{ old('jenis') == 'kehilangan_buku' ? 'selected' : '' }}>Kehilangan Buku</option>
-                            <option value="perpanjang_kartu"
-                                {{ old('jenis') == 'perpanjang_kartu' ? 'selected' : '' }}>Perpanjang Kartu</option>
+                            <option value="kehilangan_buku" {{ old('jenis') == 'kehilangan_buku' ? 'selected' : '' }}>
+                                Kehilangan Buku</option>
+                            <option value="perpanjang_kartu" {{ old('jenis') == 'perpanjang_kartu' ? 'selected' : '' }}>
+                                Perpanjang Kartu</option>
                         </select>
                     </div>
 
@@ -344,172 +348,260 @@
     </div>
 
     <!-- Script Modal & Toggle Delete Mode -->
-<script>
-    let isDeleteActive = false;
+    <script>
+        let isDeleteModeActive = false;
 
-    function toggleDeleteMode() {
-        isDeleteActive = !isDeleteActive;
-
-        let $btnToggle = $('#btn-toggle-delete');
-        let $textBtn = $('#text-btn-toggle');
-        let $btnIcon = $('#btn-icon');
-        let $btnSubmit = $('#btn-submit-delete');
-        let $labelCheckAll = $('#label-check-all');
-        let $editActions = $('.edit-mode-action');
-        let $deleteActions = $('.delete-mode-action');
-
-        if (isDeleteActive) {
-            // Mode Hapus Aktif
-            $btnToggle.removeClass('bg-[#004d40] hover:bg-[#003d30]').addClass('bg-gray-700 hover:bg-gray-800');
-            $textBtn.text('Batal');
-            $btnIcon.text('close');
-
-            $btnSubmit.removeClass('hidden');
-            $labelCheckAll.removeClass('hidden');
-            $deleteActions.removeClass('hidden');
-            $editActions.addClass('hidden');
-        } else {
-            // Mode Batal/Normal
-            $btnToggle.removeClass('bg-gray-700 hover:bg-gray-800').addClass('bg-[#004d40] hover:bg-[#003d30]');
-            $textBtn.text('Hapus Data');
-            $btnIcon.text('delete');
-
-            $btnSubmit.addClass('hidden');
-            $labelCheckAll.addClass('hidden');
-
-            $deleteActions.each(function() {
-                $(this).addClass('hidden');
-                if (this.type === 'checkbox') this.checked = false;
-            });
-
-            $editActions.removeClass('hidden');
-            $('#check-all').prop('checked', false);
-        }
-    }
-
-    // 2. Fungsi Modal Tambah & Edit Transaksi
-    function openModal() {
-        $('#modal-transaction').removeClass('hidden');
-    }
-
-    function closeModal() {
-        $('#modal-transaction').addClass('hidden');
-    }
-
-    function openEditModal(id) {
-        $.ajax({
-            url: `/transaksi/${id}/edit`,
-            type: 'GET',
-            dataType: 'json',
-            success: function(res) {
-                if (res.success) {
-                    let data = res.data;
-
-                    $('#form-edit-transaction').attr('action', `/transaksi/${id}`);
-                    $('#edit-nominal').val(data.nominal || '');
-                    $('#edit-keterangan').val(data.keterangan || '');
-                    $('#edit-jenis').val(data.jenis || '');
-                    $('#edit-tanggal').val(data.tanggal || '');
-                    $('#edit-status-bayar').val(data.status_bayar || 'belum_bayar');
-
-                    $('#modal-edit-transaction').removeClass('hidden');
-                }
-            },
-            error: function(err) {
-                console.error('Error:', err);
-            }
-        });
-    }
-
-    function closeEditModal() {
-        $('#modal-edit-transaction').addClass('hidden');
-    }
-
-    // 3. Submit Hapus Massal
-    function submitDeleteForm() {
-        let $checkedBoxes = $('.item-checkbox:checked');
-
-        if ($checkedBoxes.length === 0) {
-            alert('Silakan pilih minimal satu data transaksi yang ingin dihapus.');
-            return;
+        function openModal() {
+            $('#modal-transaction').removeClass('hidden');
         }
 
-        if (confirm(`Apakah Anda yakin ingin menghapus ${$checkedBoxes.length} data transaksi yang dipilih?`)) {
-            $('#form-delete-bulk').submit();
+        function closeModal() {
+            $('#modal-transaction').addClass('hidden');
         }
-    }
 
-    // 4. Event Listener Utama (Document Ready)
-    $(document).ready(function() {
+        function openEditModal(id) {
+            $.ajax({
+                url: `/admin/transaksi/${id}/edit`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        let data = res.data;
 
-        // Check All Checkbox
-        $('#check-all').on('change', function() {
-            $('.item-checkbox').prop('checked', this.checked);
-        });
+                        $('#form-edit-transaction').attr('action', `/admin/transaksi/${id}`);
+                        $('#edit-nominal').val(data.nominal || '');
+                        $('#edit-keterangan').val(data.keterangan || '');
+                        $('#edit-jenis').val(data.jenis || '');
+                        $('#edit-tanggal').val(data.tanggal || '');
+                        $('#edit-status-bayar').val(data.status_bayar || 'belum_bayar');
 
-        // Live Search User berdasarkan No Identitas (dengan Debounce)
-        let timeout = null;
-        let $inputNoIdentitas = $('#input-no-identitas');
-        let $inputNamaUser = $('#input-nama-user');
-
-        $inputNoIdentitas.on('keydown', function(e) {
-            if (e.which === 13) {
-                e.preventDefault(); // Mencegah form tersubmit saat tekan Enter
-            }
-        });
-
-        $inputNoIdentitas.on('keyup', function() {
-            clearTimeout(timeout);
-            let identitas = $(this).val().trim();
-
-            if (identitas === '') {
-                $inputNamaUser.val('');
-                return;
-            }
-
-            timeout = setTimeout(() => {
-                $.ajax({
-                    url: `/transaksi/cari-user/${encodeURIComponent(identitas)}`,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(res) {
-                        if (res.success) {
-                            $inputNamaUser.val(res.name);
-                        } else {
-                            $inputNamaUser.val('Tidak ditemukan');
-                        }
-                    },
-                    error: function(err) {
-                        console.error('Error:', err);
+                        $('#modal-edit-transaction').removeClass('hidden');
                     }
+                },
+                error: function(err) {
+                    console.error('Error:', err);
+                }
+            });
+        }
+
+        function closeEditModal() {
+            $('#modal-edit-transaction').addClass('hidden');
+        }
+
+        // ==========================================
+        // FITUR: MODE HAPUS MASSAL LINTAS HALAMAN (sama seperti Katalog Buku)
+        // ==========================================
+        function toggleDeleteMode() {
+            isDeleteModeActive = !isDeleteModeActive;
+
+            let $btnToggle = $('#btnToggleDelete');
+            let $btnConfirm = $('#btnConfirmDelete');
+            let $selectAllContainer = $('#selectAllContainer');
+            let $btnText = $('#btnText');
+            let $trashIcon = $('#trashIcon');
+
+            if (isDeleteModeActive) {
+                $btnToggle.removeClass('bg-[#004d40] hover:bg-[#003d30]').addClass('bg-gray-700 hover:bg-gray-800');
+                $btnText.text('Batal');
+                $trashIcon.html(
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />');
+
+                $selectAllContainer.removeClass('hidden');
+                sessionStorage.setItem('transaction_delete_mode_active', 'true');
+
+                $('.edit-mode-action').addClass('hidden');
+                $('.delete-mode-action').removeClass('hidden');
+            } else {
+                $btnToggle.removeClass('bg-gray-700 hover:bg-gray-800').addClass('bg-[#004d40] hover:bg-[#003d30]');
+                $btnText.text('Hapus Transaksi');
+                $trashIcon.html(
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />'
+                    );
+
+                $btnConfirm.addClass('hidden');
+                $selectAllContainer.addClass('hidden');
+                sessionStorage.setItem('transaction_delete_mode_active', 'false');
+
+                $('.edit-mode-action').removeClass('hidden');
+                $('.delete-mode-action').addClass('hidden');
+
+                sessionStorage.removeItem('selected_transaction_ids');
+                $('#selectAllCheckboxMain').prop('checked', false);
+                $('.transaction-checkbox').prop('checked', false);
+            }
+            updateConfirmDeleteButtonState();
+        }
+
+        function toggleSelectAll(master, targetClass = 'transaction-checkbox') {
+            let checkboxes = $('.' + targetClass);
+            checkboxes.prop('checked', master.checked);
+
+            let selectedTransactionIds = JSON.parse(sessionStorage.getItem('selected_transaction_ids')) || [];
+
+            checkboxes.each(function() {
+                let id = $(this).val();
+                if (master.checked) {
+                    if (!selectedTransactionIds.includes(id)) selectedTransactionIds.push(id);
+                } else {
+                    selectedTransactionIds = selectedTransactionIds.filter(item => item !== id);
+                }
+            });
+
+            sessionStorage.setItem('selected_transaction_ids', JSON.stringify(selectedTransactionIds));
+            updateConfirmDeleteButtonState();
+        }
+
+        function updateConfirmDeleteButtonState() {
+            let selectedTransactionIds = JSON.parse(sessionStorage.getItem('selected_transaction_ids')) || [];
+            let totalCount = selectedTransactionIds.length;
+
+            $('#jumlahTerpilih').text(totalCount);
+
+            if (isDeleteModeActive && totalCount > 0) {
+                $('#btnConfirmDelete').removeClass('hidden');
+            } else {
+                $('#btnConfirmDelete').addClass('hidden');
+            }
+        }
+
+        // 4. Event Listener Utama (Document Ready)
+        $(document).ready(function() {
+
+            // ==========================================
+            // INISIALISASI MEMORI HAPUS TRANSAKSI LINTAS HALAMAN
+            // ==========================================
+            let selectedTransactionIds = JSON.parse(sessionStorage.getItem('selected_transaction_ids')) || [];
+
+            // Pertahankan mode hapus saat pindah halaman paginasi
+            if (sessionStorage.getItem('transaction_delete_mode_active') === 'true') {
+                setTimeout(function() {
+                    isDeleteModeActive = false;
+                    toggleDeleteMode();
+                }, 150);
+            }
+
+            // Otomatis centang ulang transaksi yang ID-nya ada di memori browser
+            $('.transaction-checkbox').each(function() {
+                if (selectedTransactionIds.includes($(this).val())) {
+                    $(this).prop('checked', true);
+                }
+            });
+
+            // Pantau klik checkbox transaksi secara individual
+            $(document).on('change', '.transaction-checkbox', function() {
+                let id = $(this).val();
+                let ids = JSON.parse(sessionStorage.getItem('selected_transaction_ids')) || [];
+
+                if ($(this).is(':checked')) {
+                    if (!ids.includes(id)) ids.push(id);
+                } else {
+                    ids = ids.filter(item => item !== id);
+                }
+                sessionStorage.setItem('selected_transaction_ids', JSON.stringify(ids));
+                updateConfirmDeleteButtonState();
+            });
+
+            // Event listener klik tombol Konfirmasi Hapus Transaksi Lintas Halaman
+            $('#btnConfirmDelete').on('click', function(e) {
+                e.preventDefault();
+
+                let finalIds = JSON.parse(sessionStorage.getItem('selected_transaction_ids')) || [];
+
+                if (finalIds.length === 0) {
+                    alert('Silakan pilih minimal satu transaksi untuk dihapus!');
+                    return;
+                }
+
+                if (confirm(
+                        `Yakin ingin menghapus ${finalIds.length} transaksi yang dipilih dari berbagai halaman?`
+                        )) {
+                    $.ajax({
+                        url: "{{ route('transaction.destroy.bulk') }}",
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            _method: 'DELETE',
+                            ids: finalIds
+                        },
+                        success: function(response) {
+                            sessionStorage.removeItem('selected_transaction_ids');
+                            sessionStorage.removeItem('transaction_delete_mode_active');
+                            location.reload();
+                        },
+                        error: function(xhr) {
+                            alert('Gagal menghapus data transaksi lintas halaman. Status: ' +
+                                xhr.status);
+                        }
+                    });
+                }
+            });
+
+            updateConfirmDeleteButtonState();
+
+            // Live Search User berdasarkan No Identitas (dengan Debounce)
+            let timeout = null;
+            let $inputNoIdentitas = $('#input-no-identitas');
+            let $inputNamaUser = $('#input-nama-user');
+
+            $inputNoIdentitas.on('keydown', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                }
+            });
+
+            $inputNoIdentitas.on('keyup', function() {
+                clearTimeout(timeout);
+                let identitas = $(this).val().trim();
+
+                if (identitas === '') {
+                    $inputNamaUser.val('');
+                    return;
+                }
+
+                timeout = setTimeout(() => {
+                    $.ajax({
+                        url: `/admin/transaksi/cari-user/${encodeURIComponent(identitas)}`,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(res) {
+                            if (res.success) {
+                                $inputNamaUser.val(res.name);
+                            } else {
+                                $inputNamaUser.val('Tidak ditemukan');
+                            }
+                        },
+                        error: function(err) {
+                            console.error('Error:', err);
+                        }
+                    });
+                }, 300);
+            });
+
+            // Auto-isi nominal berdasarkan jenis (Modal Tambah Transaksi)
+            $('#modal-transaction select[name="jenis"]').on('change', function() {
+                let jenis = $(this).val();
+                $.getJSON(`/admin/transaksi/tarif/${jenis}`, function(data) {
+                    if (data.success) {
+                        $('#modal-transaction input[name="nominal"]').val(data.nominal);
+                    }
+                }).fail(function(err) {
+                    console.error('Error:', err);
                 });
-            }, 300);
-        });
-
-        // Auto-isi nominal berdasarkan jenis (Modal Tambah Transaksi)
-        $('#modal-transaction select[name="jenis"]').on('change', function() {
-            let jenis = $(this).val();
-            $.getJSON(`/transaksi/tarif/${jenis}`, function(data) {
-                if (data.success) {
-                    $('#modal-transaction input[name="nominal"]').val(data.nominal);
-                }
-            }).fail(function(err) {
-                console.error('Error:', err);
             });
-        });
 
-        // Auto-isi nominal berdasarkan jenis (Modal Edit Transaksi)
-        $('#edit-jenis').on('change', function() {
-            let jenis = $(this).val();
-            $.getJSON(`/transaksi/tarif/${jenis}`, function(data) {
-                if (data.success) {
-                    $('#edit-nominal').val(data.nominal);
-                }
-            }).fail(function(err) {
-                console.error('Error:', err);
+            // Auto-isi nominal berdasarkan jenis (Modal Edit Transaksi)
+            $('#edit-jenis').on('change', function() {
+                let jenis = $(this).val();
+                $.getJSON(`/admin/transaksi/tarif/${jenis}`, function(data) {
+                    if (data.success) {
+                        $('#edit-nominal').val(data.nominal);
+                    }
+                }).fail(function(err) {
+                    console.error('Error:', err);
+                });
             });
-        });
 
-    });
-</script>
+        });
+    </script>
 @endsection

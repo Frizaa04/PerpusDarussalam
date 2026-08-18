@@ -461,7 +461,7 @@
             $('#editEbookTahun').val(tahunTerbit);
             $('#editEbookIsbn').val((isbn !== 'null' && isbn !== 'undefined') ? isbn : '');
 
-            $('#formEditEbook').attr('action', '/e-book/update/' + id);
+            $('#formEditEbook').attr('action', '/admin/e-book/update/' + id);
             $('#editEbookModal').removeClass('hidden');
         }
 
