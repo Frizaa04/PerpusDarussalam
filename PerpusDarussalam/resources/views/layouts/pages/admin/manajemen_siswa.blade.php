@@ -332,29 +332,32 @@
                     </div>
 
                     <!-- Jenjang -->
-                    <div>
+                    <div id="fieldJenjang">
                         <label class="block text-sm font-semibold mb-1">Jenjang</label>
                         <select name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="mts">MTS</option>
-                            <option value="ma">MA</option>
+                            <option value="MTs">MTS</option>
+                            <option value="MA">MA</option>
                         </select>
                     </div>
 
                     <!-- Kelas -->
-                    <div>
+                    <div id="fieldKelas">
                         <div class="flex justify-between items-center mb-1">
                             <label class="block text-sm font-semibold">Kelas</label>
+
                             <div class="space-x-1.5">
                                 <button type="button" onclick="hapusKelasAktif()" id="btnHapusKelas"
                                     class="text-xs underline text-red-300 hover:text-white hidden">
                                     Hapus
                                 </button>
+
                                 <button type="button" onclick="editKelasAktif()" id="btnEditKelas"
                                     class="text-xs underline text-yellow-200 hover:text-white hidden">
                                     Edit
                                 </button>
+
                                 <button type="button" onclick="toggleInputKelas()" id="btnToggleKelas"
                                     class="text-xs underline text-emerald-200 hover:text-white">
                                     + Kelas Baru
@@ -362,22 +365,21 @@
                             </div>
                         </div>
 
-                        <!-- Dropdown Kelas Eksisting (Ambil dari data kelas yang sudah ada, misal $allKelas) -->
                         <select name="kelas" id="selectKelas" onchange="cekPilihKelas(this)"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Kelas...</option>
+
                             @foreach ($allKelas as $kls)
-                                <option value="{{ $kls }}" data-nama="{{ $kls }}">{{ $kls }}
+                                <option value="{{ $kls }}" data-nama="{{ $kls }}">
+                                    {{ $kls }}
                                 </option>
                             @endforeach
                         </select>
 
-                        <!-- Input Text untuk Kelas Baru / Edit Kelas -->
                         <input type="text" name="kelas_baru" id="inputKelasBaru"
                             placeholder="Contoh: 10A, 12 IPA 1..."
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white hidden">
 
-                        <!-- Input hidden untuk penanda mode edit/hapus kelas -->
                         <input type="hidden" name="edit_kelas_lama" id="editKelasLama">
                         <input type="hidden" name="delete_kelas" id="deleteKelasVal">
                     </div>
@@ -612,7 +614,43 @@
 
             // Change Event: Dropdown Peran (Add)
             $('#peranAdd').on('change', function() {
-                updateNomorField($(this).val(), 'labelNomorAdd', $('#inputNomorAdd'));
+
+                let role = $(this).val().toLowerCase();
+
+                // Update NISN / NIK
+                updateNomorField(
+                    role,
+                    'labelNomorAdd',
+                    $('#inputNomorAdd')
+                );
+
+                // Jika Guru
+                if (role === 'guru') {
+
+                    // Sembunyikan Jenjang dan Kelas
+                    $('#fieldJenjang').addClass('hidden');
+                    $('#fieldKelas').addClass('hidden');
+
+                    // Kosongkan nilai Jenjang dan Kelas
+                    $('#fieldJenjang select').val('');
+                    $('#selectKelas').val('');
+                    $('#inputKelasBaru').val('');
+
+                    // Reset tombol/input kelas
+                    $('#editKelasLama').val('');
+                    $('#deleteKelasVal').val('');
+                    $('#inputKelasBaru').addClass('hidden');
+                    $('#selectKelas').removeClass('hidden');
+                    $('#btnEditKelas, #btnHapusKelas').addClass('hidden');
+                    $('#btnToggleKelas').text('+ Kelas Baru');
+
+                } else {
+
+                    // Jika Siswa atau belum memilih status,
+                    // tampilkan kembali Jenjang dan Kelas
+                    $('#fieldJenjang').removeClass('hidden');
+                    $('#fieldKelas').removeClass('hidden');
+                }
             });
 
             // Change Event: Dropdown Peran (Edit)
@@ -660,7 +698,19 @@
         });
 
         // 3. Modal Functions
-        function openAddUserModal() { $('#addUserModal').removeClass('hidden'); }
+        function openAddUserModal() {
+            $('#addUserModal').removeClass('hidden');
+
+            let role = $('#peranAdd').val().toLowerCase();
+
+            if (role === 'guru') {
+                $('#fieldJenjang').addClass('hidden');
+                $('#fieldKelas').addClass('hidden');
+            } else {
+                $('#fieldJenjang').removeClass('hidden');
+                $('#fieldKelas').removeClass('hidden');
+            }
+        }
         function closeAddUserModal() { $('#addUserModal').addClass('hidden'); }
         function openCetakModal() { $('#cetakModal').removeClass('hidden'); }
         function closeCetakModal() { $('#cetakModal').addClass('hidden'); }

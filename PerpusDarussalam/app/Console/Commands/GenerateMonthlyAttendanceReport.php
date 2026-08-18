@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Exports\MonthlyAttendanceExport;
+use App\Exports\AttendanceExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -63,7 +63,7 @@ class GenerateMonthlyAttendanceReport extends Command
 
         // Generate dan simpan Excel
         Excel::store(
-            new MonthlyAttendanceExport($startDate, $endDate),
+            new AttendanceExport($startDate, $endDate),
             $path,
             'local'
         );
