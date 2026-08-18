@@ -86,8 +86,25 @@
                         </div>
                     @endif
 
+                    {{-- TOMBOL KALENDER DINAMIS (FOTO 1) --}}
+                    <div class="relative inline-block">
+                        <input 
+                            type="date" 
+                            id="datePickerMain" 
+                            class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                            value="{{ $selectedDate->format('Y-m-d') }}"
+                            onchange="changeMainDate(this.value)"
+                        >
+                        <button type="button" class="bg-[#004d40] hover:bg-[#003d30] text-white p-2 rounded-lg flex items-center justify-center transition-colors shadow border border-[#004d40]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+
                 </div>
             </div>
+
             <h2 class="text-2xl font-bold text-[#004d40] mt-6 mb-4">
                 Laporan Manajemen Perpustakaan
             </h2>
@@ -264,7 +281,7 @@
                         </div>
 
                         <div class="mt-4">
-                            {{ $dataList->appends(['date' => $selectedDate, 'mode' => $mode, 'category' => $category, 'search' => $search])->links() }}
+                            {{ $dataList->appends(['date' => $selectedDate->format('Y-m-d'), 'mode' => $mode, 'category' => $category, 'search' => $search])->links() }}
                         </div>
                     </div>
                 @endif
@@ -273,4 +290,21 @@
         </div>
     </main>
 </div>
+
+{{-- Script JavaScript untuk mengubah tanggal via kalender --}}
+<script>
+    function changeMainDate(selectedDate) {
+        if (!selectedDate) return;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('date', selectedDate);
+        
+        // Pertahankan parameter mode & category jika ada
+        if (!urlParams.has('mode')) {
+            urlParams.set('mode', '{{ $mode }}');
+        }
+        
+        window.location.href = window.location.pathname + '?' + urlParams.toString();
+    }
+</script>
 @endsection

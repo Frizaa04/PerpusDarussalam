@@ -60,7 +60,7 @@ class BorrowingService
                 'user_id' => $user->id,
                 'book_item_id' => $bookItem->id,
                 'tanggal_pinjam' => $tanggalPinjam,
-                'tanggal_jatuh_tempo' => $tanggalPinjam->copy()->addDays(7),
+                'tanggal_jatuh_tempo' => $tanggalPinjam->copy()->addDays(3),
                 'status' => 'dipinjam',
             ]);
 
