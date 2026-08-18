@@ -711,7 +711,7 @@
 
         // Set URL tombol cetak massal
         let $btnPrintAll = $('#btnPrintAllBarcode');
-        $btnPrintAll.attr('href', `/book/${bookId}/print-all-barcodes`).removeClass('hidden');
+        $btnPrintAll.attr('href', `/admin/book/${bookId}/print-all-barcodes`).removeClass('hidden');
 
         $('#kelolaModal').removeClass('hidden');
 
@@ -720,7 +720,7 @@
 
         // Fetch Data Eksemplar via jQuery AJAX
         $.ajax({
-            url: `/book/${bookId}/items`,
+            url: `/admin/book/${bookId}/items`,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -737,7 +737,7 @@
                 $.each(data, function(index, item) {
                     let badgeColor = item.status_pinjam === 'tersedia' ? 'bg-emerald-600' : 'bg-amber-600';
                     let kondisiFormatted = item.kondisi.replace('_', ' ');
-                    let printBarcodeUrl = `/book/item/${item.id}/print-barcode`;
+                    let printBarcodeUrl = `/admin/book/item/${item.id}/print-barcode`;
 
                     let rowHtml = `
                     <tr class="hover:bg-white/10 transition-colors">
@@ -756,7 +756,7 @@
                                 class="bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded text-[10px] font-bold shadow">
                                 Edit Bagian Ini
                             </button>
-                            <form action="/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
+                            <form action="/admin/book/item/${item.id}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus eksemplar ini?')">
                                 <input type="hidden" name="_token" value="${csrfToken}">
                                 <input type="hidden" name="_method" value="DELETE">
                                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow">

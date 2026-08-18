@@ -282,7 +282,7 @@
 
                     if (nomor.length > 0) {
                         $.ajax({
-                            url: `/api/check-member/${nomor}`,
+                            url: `/admin/api/check-member/${nomor}`,
                             type: 'GET',
                             dataType: 'json',
                             success: function(data) {
@@ -321,7 +321,7 @@
 
                     if (nomorInv.length > 0) {
                         $.ajax({
-                            url: `/api/check-book/${nomorInv}`,
+                            url: `/admin/api/check-book/${nomorInv}`,
                             type: 'GET',
                             dataType: 'json',
                             success: function(data) {

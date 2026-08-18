@@ -71,7 +71,7 @@
                         </li>
                         <li class="flex justify-between border-b border-[#004d40]/10 py-1">
                             <span>Jumat</span>
-                            <span class="font-bold">08.00 - 15.30 WITA</span>
+                            <span class="font-bold">08.00 - 15.00 WITA</span>
                         </li>
                         <li class="flex justify-between text-red-800 font-bold py-1">
                             <span>Sabtu, Minggu & Hari Libur</span>

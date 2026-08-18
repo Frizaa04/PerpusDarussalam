@@ -337,7 +337,7 @@
                         <select name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 text-sm font-medium px-3 py-1.5 rounded outline-none focus:ring-2 focus:ring-white">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="MTs">MTS</option>
+                            <option value="MTS">MTS</option>
                             <option value="MA">MA</option>
                         </select>
                     </div>
@@ -460,8 +460,8 @@
                         <select id="modalJenjang" name="jenjang"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="">Pilih Jenjang...</option>
-                            <option value="mts">MTs</option>
-                            <option value="ma">MA</option>
+                            <option value="MTS">MTS</option>
+                            <option value="MA">MA</option>
                         </select>
                     </div>
                     <div>
@@ -477,8 +477,8 @@
                         <select id="modalJenisKelamin" name="jenis_kelamin"
                             class="w-full bg-[#b0bec5] text-gray-800 font-medium px-3 py-1.5 rounded outline-none text-sm">
                             <option value="">-- Pilih Jenis Kelamin --</option>
-                            <option value="l">Laki-laki</option>
-                            <option value="p">Perempuan</option>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
                         </select>
                     </div>
                     <div>
@@ -775,7 +775,7 @@
             $('#modalName').val((name && name !== 'null') ? name : '');
             $('#modalEmail').val((email && email !== 'null') ? email : '');
             $('#modalAlamat').val((alamat && alamat !== 'null') ? alamat : '');
-            $('#editForm').attr('action', '/manajemen-siswa/update/' + id);
+            $('#editForm').attr('action', '/admin/manajemen-siswa/update/' + id);
 
             // Auto Match Dropdown (Role, Gender, Jenjang)
             let activeRole = (role || '').toLowerCase().trim();
@@ -785,8 +785,8 @@
             updateNomorField(activeRole, 'modalLabelNomor', $modalInput);
             $modalInput.val(activeRole === 'siswa' ? window.currentEditData.nisn : (activeRole === 'guru' ? window.currentEditData.nik : ''));
 
-            $('#modalJenisKelamin').val((jenis_kelamin || '').toLowerCase().trim());
-            $('#modalJenjang').val((jenjang || '').toLowerCase().trim());
+            $('#modalJenisKelamin').val((jenis_kelamin || '').toUpperCase().trim());
+            $('#modalJenjang').val((jenjang || '').toUpperCase().trim());
             $('#modalKelas').val((kelas && kelas !== 'null') ? kelas : '');
 
             $('#editModal').removeClass('hidden');
@@ -800,7 +800,7 @@
             let formData = new FormData($('#editForm')[0]);
 
             $.ajax({
-                url: '/manajemen-siswa/update/' + id,
+                url: '/admin/manajemen-siswa/update/' + id,
                 type: 'POST',
                 data: formData,
                 processData: false,
