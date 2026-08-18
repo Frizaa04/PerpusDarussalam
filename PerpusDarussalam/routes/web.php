@@ -20,9 +20,6 @@ use App\Http\Controllers\UserEbookController;
 use App\Http\Controllers\AboutUserController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\PushNotificationController; 
-use App\Exports\MonthlyAttendanceExport;
-use Carbon\Carbon;
-use Maatwebsite\Excel\Facades\Excel;
 
 // Halaman Awal (Public) - Langsung Mengarah ke Home User
 Route::get('/', function () {
@@ -41,27 +38,27 @@ Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.l
 Route::middleware(['auth:web'])->group(function () {
     
     // 1. Beranda User (Ganti closure function menjadi memanggil UserController)
-    Route::get('/home', [UserController::class, 'index'])->name('user.home');
+    Route::get('/user/home', [UserController::class, 'index'])->name('user.home');
 
     // 2. Area Anggota User
-    Route::get('/area-anggota', [AreaAnggotaUserController::class, 'index'])->name('user.area_anggota');
+    Route::get('/user/area-anggota', [AreaAnggotaUserController::class, 'index'])->name('user.area_anggota');
 
     // 3. Update Password User (Area Anggota)
-    Route::put('/area-anggota/update-password', [AreaAnggotaUserController::class, 'updatePassword'])->name('password.update.custom');
+    Route::put('/user/area-anggota/update-password', [AreaAnggotaUserController::class, 'updatePassword'])->name('password.update.custom');
 
     // 3. E-Book User
     Route::get('/user/e-book', [UserEbookController::class, 'index'])->name('user.ebook.index');
     Route::get('/user/e-book/read/{id}', [UserEbookController::class, 'read'])->name('user.ebook.read');
 
     // Route menuju halaman detail buku / e-book user
-    Route::get('/book/view/{id}', [UserController::class, 'showBookDetail'])->name('user.book.show');
+    Route::get('/user/book/view/{id}', [UserController::class, 'showBookDetail'])->name('user.book.show');
 
     // 4. Route Tentang Kami
-    Route::get('/tentang-kami', [AboutUserController::class, 'index'])->name('user.about');
+    Route::get('/user/tentang-kami', [AboutUserController::class, 'index'])->name('user.about');
 
     // 5. Simpan Push Notification Token User
-    Route::post('/push-notification/subscribe', [PushNotificationController::class, 'store'])->name('push.subscribe');
-    Route::get('/push-notification/test', [PushNotificationController::class, 'testNotification'])->name('push.test');
+    Route::post('/user/push-notification/subscribe', [PushNotificationController::class, 'store'])->name('push.subscribe');
+    Route::get('/user/push-notification/test', [PushNotificationController::class, 'testNotification'])->name('push.test');
 
     // 6. Logout User
     Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
@@ -73,112 +70,102 @@ Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name(
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
-// Absen / Kunjungan (Public)
-Route::get('/absen', [AbsenController::class, 'index'])->name('absen.index');
-Route::post('/absen', [AbsenController::class, 'store'])->name('absen.store');
-
 // ROUTE DASHBOARD ADMIN 
 Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
 
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::post('/admin/announcement', [AdminAnnouncementController::class, 'store'])->name('admin.announcement.store');
     Route::patch('/admin/announcement/{id}/activate', [AdminAnnouncementController::class, 'activate'])->name('admin.announcement.activate');
     Route::delete('/admin/announcement/{id}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
 
-    Route::post('/banner', [BannerController::class, 'store'])->name('admin.banner.store');
-    Route::patch('/banner/{id}/activate', [BannerController::class, 'activate'])->name('admin.banner.activate');
-    Route::patch('/banner/{id}/deactivate', [BannerController::class, 'deactivate'])->name('admin.banner.deactivate');
-    Route::delete('/banner/{id}', [BannerController::class, 'destroy'])->name('admin.banner.destroy');
+    Route::post('/admin/banner', [BannerController::class, 'store'])->name('admin.banner.store');
+    Route::patch('/admin/banner/{id}/activate', [BannerController::class, 'activate'])->name('admin.banner.activate');
+    Route::patch('/admin/banner/{id}/deactivate', [BannerController::class, 'deactivate'])->name('admin.banner.deactivate');
+    Route::delete('/admin/banner/{id}', [BannerController::class, 'destroy'])->name('admin.banner.destroy');
 
     // Manajemen Siswa / User
-    Route::get('/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
-    Route::post('/manajemen-siswa/store', [MemberController::class, 'store'])->name('member.store');
-    Route::put('/manajemen-siswa/update/{id}', [MemberController::class, 'update'])->name('member.update');
-    Route::delete('/manajemen-siswa/destroy-multiple', [MemberController::class, 'destroyMultiple'])->name('member.destroyMultiple');
-    Route::delete('/manajemen-siswa/destroy-expired', [MemberController::class, 'destroyExpired'])->name('member.destroyExpired');
-    Route::post('/manajemen-siswa/cetak-kartu-batch', [MemberController::class, 'printCards'])->name('member.printCards');
-    Route::put('/manajemen-siswa/perpanjang/{id}', [MemberController::class, 'perpanjang'])->name('member.perpanjang');
-    Route::delete('/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
+    Route::get('/admin/manajemen-siswa', [MemberController::class, 'index'])->name('member.index');
+    Route::post('/admin/manajemen-siswa/store', [MemberController::class, 'store'])->name('member.store');
+    Route::put('/admin/manajemen-siswa/update/{id}', [MemberController::class, 'update'])->name('member.update');
+    Route::delete('/admin/manajemen-siswa/destroy-multiple', [MemberController::class, 'destroyMultiple'])->name('member.destroyMultiple');
+    Route::delete('/admin/manajemen-siswa/destroy-expired', [MemberController::class, 'destroyExpired'])->name('member.destroyExpired');
+    Route::post('/admin/manajemen-siswa/cetak-kartu-batch', [MemberController::class, 'printCards'])->name('member.printCards');
+    Route::put('/admin/manajemen-siswa/perpanjang/{id}', [MemberController::class, 'perpanjang'])->name('member.perpanjang');
+    Route::delete('/admin/manajemen-siswa/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
-        // Katalog Buku
-    Route::get('/katalog-buku', [BookController::class, 'index'])->name('book.index');
-    Route::post('/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
-    Route::put('/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
-    Route::post('/katalog-buku/kategori/store', [BookController::class, 'storeCategory'])->name('book.category.store');
-    Route::delete('/katalog-buku/kategori/{id}', [BookController::class, 'destroyCategory'])->name('book.category.destroy');
-    Route::post('/katalog-buku/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
+    // Katalog Buku
+    Route::get('/admin/katalog-buku', [BookController::class, 'index'])->name('book.index');
+    Route::post('/admin/katalog-buku/store', [BookController::class, 'store'])->name('book.store');
+    Route::put('/admin/katalog-buku/update', [BookController::class, 'update'])->name('book.update');
+    Route::post('/admin/katalog-buku/kategori/store', [BookController::class, 'storeCategory'])->name('book.category.store');
+    Route::delete('/admin/katalog-buku/kategori/{id}', [BookController::class, 'destroyCategory'])->name('book.category.destroy');
+    Route::post('/admin/katalog-buku/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
 
     // Edit perbuku
-    Route::get('/book/{id}/items', [BookItemController::class, 'getItems']);
-    Route::post('/book/item/store', [BookItemController::class, 'store'])->name('book.item.store');
-    Route::put('/book/item/{id}', [BookItemController::class, 'update'])->name('book.item.update');
-    Route::delete('/book/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
-    Route::delete('/book/item/{id}', [BookItemController::class, 'destroy'])->name('book.item.destroy');
-    Route::get('/book/{id}/print-all-barcodes', [BookItemController::class, 'printAllBarcodes'])->name('book.print-all-barcodes');
-    Route::get('/book/item/{id}/print-barcode', [BookItemController::class, 'printBarcode'])->name('book.item.print-barcode');
-    Route::get('/book/item/print-selected', [BookItemController::class, 'printSelectedBarcodes'])->name('book.item.print.selected.barcodes');
+    Route::get('/admin/book/{id}/items', [BookItemController::class, 'getItems']);
+    Route::post('/admin/book/item/store', [BookItemController::class, 'store'])->name('book.item.store');
+    Route::put('/admin/book/item/{id}', [BookItemController::class, 'update'])->name('book.item.update');
+    Route::delete('/admin/book/destroy-multiple', [BookController::class, 'destroyMultiple'])->name('book.destroyMultiple');
+    Route::delete('/admin/book/item/{id}', [BookItemController::class, 'destroy'])->name('book.item.destroy');
+    Route::get('/admin/book/{id}/print-all-barcodes', [BookItemController::class, 'printAllBarcodes'])->name('book.print-all-barcodes');
+    Route::get('/admin/book/item/{id}/print-barcode', [BookItemController::class, 'printBarcode'])->name('book.item.print-barcode');
+    Route::get('/admin/book/item/print-selected', [BookItemController::class, 'printSelectedBarcodes'])->name('book.item.print.selected.barcodes');
 
     // Sirkulasi
-    Route::get('/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');
-    Route::post('/sirkulasi', [CirculationController::class, 'store'])->name('circulation.store');
-    Route::post('/sirkulasi/return/{id}', [CirculationController::class, 'returnBook'])->name('circulation.return');
-    Route::post('/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
-    Route::post('/sirkulasi/{id}/hilang', [CirculationController::class, 'loseBook'])->name('circulation.lose');
+    Route::get('/admin/sirkulasi', [CirculationController::class, 'index'])->name('circulation.index');
+    Route::post('/admin/sirkulasi', [CirculationController::class, 'store'])->name('circulation.store');
+    Route::post('/admin/sirkulasi/return/{id}', [CirculationController::class, 'returnBook'])->name('circulation.return');
+    Route::post('/admin/circulation/cancel/{id}', [CirculationController::class, 'cancelBorrow'])->name('circulation.cancel');
+    Route::post('/admin/sirkulasi/{id}/hilang', [CirculationController::class, 'loseBook'])->name('circulation.lose');
 
     // API Cek Anggota Otomatis
-    Route::get('/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisn']);
-    Route::get('/api/check-book/{nomor}', [CirculationController::class, 'getBookByInventory']);
+    Route::get('/admin/api/check-member/{nomor}', [CirculationController::class, 'getUserByNikNisn']);
+    Route::get('/admin/api/check-book/{nomor}', [CirculationController::class, 'getBookByInventory']);
 
     // Halaman Transaksi Keuangan
-    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaction.index');
-    Route::post('/transaksi/store', [TransaksiController::class, 'store'])->name('transaction.store');
-    Route::get('/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaction.edit');
-    Route::put('/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaction.update');
-    Route::delete('/transaksi/bulk-delete', [TransaksiController::class, 'bulkDestroy'])->name('transaction.destroy.bulk');
-    Route::get('/transaksi/cari-user/{identitas}', [TransaksiController::class, 'cariUser'])->name('transaction.cariUser');
-    Route::get('/transaksi/tarif/{jenis}', [TransaksiController::class, 'getTarif'])->name('transaction.tarif');
+    Route::get('/admin/transaksi', [TransaksiController::class, 'index'])->name('transaction.index');
+    Route::post('/admin/transaksi/store', [TransaksiController::class, 'store'])->name('transaction.store');
+    Route::get('/admin/transaksi/{id}/edit', [TransaksiController::class, 'edit'])->name('transaction.edit');
+    Route::put('/admin/transaksi/{id}', [TransaksiController::class, 'update'])->name('transaction.update');
+    Route::delete('/admin/transaksi/bulk-delete', [TransaksiController::class, 'bulkDestroy'])->name('transaction.destroy.bulk');
+    Route::get('/admin/transaksi/cari-user/{identitas}', [TransaksiController::class, 'cariUser'])->name('transaction.cariUser');
+    Route::get('/admin/transaksi/tarif/{jenis}', [TransaksiController::class, 'getTarif'])->name('transaction.tarif');
 
     // E-Book
-    Route::get('/e-book', [EbookController::class, 'index'])->name('admin.ebook.index');
-    Route::post('/e-book/store', [EbookController::class, 'store'])->name('admin.ebook.store');
-    Route::put('/e-book/update/{id}', [EbookController::class, 'update'])->name('admin.ebook.update');
-    Route::delete('/e-book/delete/{id}', [EbookController::class, 'destroy'])->name('admin.ebook.destroy');
-    Route::post('/e-book/bulk-delete', [EbookController::class, 'bulkDestroy'])->name('admin.ebook.destroy.bulk');
-    Route::delete('/e-book/destroy-multiple', [EbookController::class, 'destroyMultiple'])->name('admin.ebook.destroy-multiple');
+    Route::get('/admin/e-book', [EbookController::class, 'index'])->name('admin.ebook.index');
+    Route::post('/admin/e-book/store', [EbookController::class, 'store'])->name('admin.ebook.store');
+    Route::put('/admin/e-book/update/{id}', [EbookController::class, 'update'])->name('admin.ebook.update');
+    Route::delete('/admin/e-book/delete/{id}', [EbookController::class, 'destroy'])->name('admin.ebook.destroy');
+    Route::post('/admin/e-book/bulk-delete', [EbookController::class, 'bulkDestroy'])->name('admin.ebook.destroy.bulk');
+    Route::delete('/admin/e-book/destroy-multiple', [EbookController::class, 'destroyMultiple'])->name('admin.ebook.destroy-multiple');
+
+    // Absen / Kunjungan (Public)
+    Route::get('/admin/absen', [AbsenController::class, 'index'])->name('absen.index');
+    Route::post('/admin/absen', [AbsenController::class, 'store'])->name('absen.store');
 
     // Laporan Utama & Detail Laporan
-    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
-    Route::get('/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
-    Route::get('/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
-    Route::get('/test-export-bulanan', function () {
-        $startDate = Carbon::create(2026, 7, 1)->startOfMonth();
-        $endDate   = Carbon::create(2026, 7, 1)->endOfMonth();
-        return Excel::download(
-            new MonthlyAttendanceExport($startDate, $endDate),
-            'Laporan_Absensi_Juli_2026.xlsx'
-        );
-    });
-    Route::get('/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
-    
-    // Laporan Keuangan
+    Route::get('/admin/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/admin/laporan/koleksi', [LaporanController::class, 'koleksi'])->name('laporan.koleksi');
+    Route::get('/admin/laporan/anggota', [LaporanController::class, 'anggota'])->name('laporan.anggota');
+    Route::get('/admin/laporan/pengunjung', [LaporanController::class, 'pengunjung'])->name('laporan.pengunjung');
+    Route::get('/admin/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
 
     // Route Export Excel
-    Route::get('/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
-    Route::get('/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
-    Route::get('/laporan/anggota/export', [LaporanController::class, 'exportAnggotaExcel'])->name('laporan.anggota.export');
-    Route::get('/laporan/peminjaman/export', [LaporanController::class, 'exportPeminjamanExcel'])->name('laporan.peminjaman.export');
-    Route::get('/laporan/absensi/export', [LaporanController::class, 'exportAttendanceExcel'])->name('laporan.absensi.export');
-    Route::get('/laporan/transaksi/export', [LaporanController::class, 'exportKeuanganExcel'])->name('laporan.transaksi.export');
+    Route::get('/admin/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
+    Route::get('/admin/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
+    Route::get('/admin/laporan/anggota/export', [LaporanController::class, 'exportAnggotaExcel'])->name('laporan.anggota.export');
+    Route::get('/admin/laporan/peminjaman/export', [LaporanController::class, 'exportPeminjamanExcel'])->name('laporan.peminjaman.export');
+    Route::get('/admin/laporan/absensi/export', [LaporanController::class, 'exportAttendanceExcel'])->name('laporan.absensi.export');
+    Route::get('/admin/laporan/transaksi/export', [LaporanController::class, 'exportKeuanganExcel'])->name('laporan.transaksi.export');
     
     // Route Import Excel
-    Route::post('/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
-    Route::post('/laporan/koleksi/import', [LaporanController::class, 'importKoleksi'])->name('laporan.koleksi.import');
+    Route::post('/admin/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
+    Route::post('/admin/laporan/koleksi/import', [LaporanController::class, 'importKoleksi'])->name('laporan.koleksi.import');
 
     // Route Notifikasi
-    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
-    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.readAll');
-    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::get('/admin/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::post('/admin/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::post('/admin/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.readAll');
+    Route::post('/admin/notifications/mark-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 
 });

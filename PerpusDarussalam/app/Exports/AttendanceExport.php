@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\visits;
+use App\Models\Visits;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -18,37 +18,58 @@ class AttendanceExport implements FromArray, WithStyles, ShouldAutoSize
     protected $endDate;
     protected $jumlahData = 0;
 
-    // Terima rentang tanggal dari Controller
     public function __construct($startDate, $endDate)
     {
-        $this->startDate = Carbon::parse($startDate);
-        $this->endDate = Carbon::parse($endDate);
+        $this->startDate = Carbon::parse($startDate)->startOfDay();
+        $this->endDate   = Carbon::parse($endDate)->endOfDay();
     }
-    
+
     public function array(): array
     {
         $data = [];
 
-        $data[] = ['No', 'Waktu Kunjungan', 'No Identitas / ID', 'Nama Pengunjung', 'Kategori / Role'];
+        // Header
+        $data[] = [
+            'No',
+            'Waktu Kunjungan',
+            'No Identitas / ID',
+            'Nama Pengunjung',
+            'Kategori / Role'
+        ];
 
-        // whereBetween untuk mengambil data sesuai rentang (Harian/Mingguan/Bulanan)
-        $visits = visits::with('user')
+        // Ambil data berdasarkan rentang tanggal
+        $visits = Visits::with('user')
             ->whereBetween('visited_at', [
-                $this->startDate->format('Y-m-d 00:00:00'), 
-                $this->endDate->format('Y-m-d 23:59:59')
+                $this->startDate,
+                $this->endDate
             ])
+            ->orderBy('visited_at', 'asc')
             ->get();
-            
+
         $this->jumlahData = $visits->count();
+
         $no = 1;
 
         foreach ($visits as $visit) {
+            $user = $visit->user;
+
             $data[] = [
                 $no++,
-                $visit->visited_at ? Carbon::parse($visit->visited_at)->format('Y-m-d H:i:s') : '-',
-                $visit->user->nis ?? $visit->user->nik ?? $visit->user->id ?? '-', 
-                $visit->user->name ?? '-',
-                $visit->user->role ?? $visit->user->kategori ?? '-', 
+
+                $visit->visited_at
+                    ? Carbon::parse($visit->visited_at)->format('Y-m-d H:i:s')
+                    : '-',
+
+                $user?->nis
+                    ?? $user?->nik
+                    ?? $user?->id
+                    ?? '-',
+
+                $user?->name ?? '-',
+
+                $user?->role
+                    ?? $user?->kategori
+                    ?? '-',
             ];
         }
 
@@ -58,23 +79,44 @@ class AttendanceExport implements FromArray, WithStyles, ShouldAutoSize
     public function styles(Worksheet $sheet)
     {
         $styleHeaderHijau = [
-            'font' => ['bold' => true, 'color' => ['argb' => Color::COLOR_WHITE]],
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'argb' => Color::COLOR_WHITE
+                ],
+            ],
+
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['argb' => '004D40'], 
+                'startColor' => [
+                    'argb' => '004D40'
+                ],
             ],
+
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => '000000'],
+                    'color' => [
+                        'argb' => '000000'
+                    ],
                 ],
             ],
         ];
 
-        $sheet->getStyle('A1:E1')->applyFromArray($styleHeaderHijau);
+        // Style header
+        $sheet->getStyle('A1:E1')
+            ->applyFromArray($styleHeaderHijau);
 
+        // Border data
         if ($this->jumlahData > 0) {
-            $sheet->getStyle('A2:E' . (1 + $this->jumlahData))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle(
+                'A2:E' . ($this->jumlahData + 1)
+            )
+                ->getBorders()
+                ->getAllBorders()
+                ->setBorderStyle(
+                    Border::BORDER_THIN
+                );
         }
 
         return [];

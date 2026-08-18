@@ -3,10 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Book;
-use App\Models\User;
-use App\Models\visits;
-use App\Models\Borrowing;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use App\Exports\KoleksiExport;
@@ -243,11 +239,37 @@ class LaporanController extends Controller
 
     public function exportAttendanceExcel(Request $request)
     {
-        $mode = $request->get('mode', 'harian');
-        $date = $request->date ? Carbon::parse($request->date) : today();
-        $startDate = ($mode === 'mingguan') ? $date->copy()->startOfWeek() : $date;
-        $endDate = ($mode === 'mingguan') ? $date->copy()->endOfWeek() : $date;
-        return Excel::download(new AttendanceExport($startDate, $endDate), 'Laporan_Absensi.xlsx');
+        $params = $this->getCommonParams($request);
+        $startDate = $params['startDate'];
+        $endDate   = $params['endDate'];
+        $mode      = $params['mode'];
+        $selectedDate = $params['selectedDate'];
+
+        switch ($mode) {
+            case 'mingguan':
+                $namaFile = 'Laporan_Absensi_Mingguan_' .
+                    $selectedDate->format('Y-m-d') .
+                    '.xlsx';
+                break;
+
+            case 'bulanan':
+                $namaFile = 'Laporan_Absensi_Bulanan_' .
+                    $selectedDate->format('Y-m') .
+                    '.xlsx';
+                break;
+
+            case 'harian':
+            default:
+                $namaFile = 'Laporan_Absensi_Harian_' .
+                    $selectedDate->format('Y-m-d') .
+                    '.xlsx';
+                break;
+        }
+
+        return Excel::download(
+            new AttendanceExport($startDate, $endDate),
+            $namaFile
+        );
     }
 
     public function exportKeuanganExcel(Request $request)
