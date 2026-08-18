@@ -205,7 +205,27 @@ class LaporanController extends Controller
         try {
             $import = app(KoleksiImport::class);  
             Excel::import($import, $request->file('file_excel'));
-            return redirect()->back()->with('success', "Berhasil meng-import " . $import->importedCount . " data koleksi buku baru!");
+
+            $imported = $import->importedCount ?? 0;
+            $duplicates = $import->duplicates ?? [];
+            $duplicatesCount = count($duplicates);
+
+            // Jika semua data duplikat (0 data baru berhasil di-import)
+            if ($imported === 0 && $duplicatesCount > 0) {
+                $listJudul = implode(', ', $duplicates);
+                return redirect()->back()->with('warning', "Semua data ({$duplicatesCount} data) diabaikan karena sudah ada di sistem: [ {$listJudul} ]");
+            }
+
+            // Susun pesan untuk sukses
+            $message = "Berhasil meng-import {$imported} data koleksi buku baru!";
+
+            // Jika ada beberapa data yang duplikat, tampilkan rincian judulnya
+            if ($duplicatesCount > 0) {
+                $listJudul = implode(', ', $duplicates);
+                $message .= " ({$duplicatesCount} data diabaikan karena duplikat: {$listJudul})";
+            }
+
+            return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal meng-import: ' . $e->getMessage());
         }
@@ -225,7 +245,20 @@ class LaporanController extends Controller
         try {
             $import = new AnggotaImport();
             Excel::import($import, $request->file('file_excel'));
-            return redirect()->back()->with('success', "Berhasil meng-import " . $import->importedCount . " data anggota baru!");
+
+            $imported = $import->importedCount ?? 0;
+            $duplicatesCount = count($import->duplicates ?? []);
+
+            if ($imported === 0 && $duplicatesCount > 0) {
+                return redirect()->back()->with('warning', "Semua data ({$duplicatesCount} data) diabaikan karena sudah ada di sistem (duplikat).");
+            }
+
+            $message = "Berhasil meng-import {$imported} data anggota baru!";
+            if ($duplicatesCount > 0) {
+                $message .= " ({$duplicatesCount} data diabaikan karena duplikat)";
+            }
+
+            return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal meng-import: ' . $e->getMessage());
         }
@@ -274,13 +307,16 @@ class LaporanController extends Controller
 
     public function exportKeuanganExcel(Request $request)
     {
-        $tanggalInput = $request->query('date', today()->format('Y-m-d'));
-        $mode = $request->query('mode', 'harian');
-        $carbonDate = Carbon::parse($tanggalInput);
+        // Menggunakan helper getCommonParams yang sudah mencakup logika harian, mingguan, dan bulanan
+        $params = $this->getCommonParams($request);
+        
+        $startDate = $params['startDate'];
+        $endDate   = $params['endDate'];
+        $mode      = $params['mode'];
 
-        $startDate = ($mode === 'mingguan') ? $carbonDate->copy()->startOfWeek()->format('Y-m-d') : $tanggalInput;
-        $endDate = ($mode === 'mingguan') ? $carbonDate->copy()->endOfWeek()->format('Y-m-d') : $tanggalInput;
+        // Penamaan file dinamis berdasarkan mode
+        $fileName = 'Laporan_Keuangan_' . ucfirst($mode) . '_' . $startDate . '_sd_' . $endDate . '.xlsx';
 
-        return Excel::download(new TransactionExport($startDate, $endDate), 'laporan-transaksi.xlsx');
+        return Excel::download(new TransactionExport($startDate, $endDate), $fileName);
     }
 }

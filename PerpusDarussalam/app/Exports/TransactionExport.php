@@ -20,9 +20,12 @@ class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
 
     public function __construct($startDate, $endDate = null)
     {
-        // Jika hanya dikirim satu tanggal
-        $this->startDate = $startDate ? Carbon::parse($startDate) : today();
-        $this->endDate = $endDate ? Carbon::parse($endDate) : $this->startDate;
+        // Pastikan startDate berada di 00:00:00
+        $this->startDate = $startDate ? Carbon::parse($startDate)->startOfDay() : today()->startOfDay();
+
+        // Jika endDate kosong, gunakan copy dari startDate agar objek Carbon terpisah
+        // Set endDate ke akhir hari (23:59:59)
+        $this->endDate = $endDate ? Carbon::parse($endDate)->endOfDay() : $this->startDate->copy()->endOfDay();
     }
     
     public function array(): array
@@ -30,17 +33,17 @@ class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
         $data = [];
         $data[] = ['No', 'Nama', 'Jenis Transaksi', 'Nominal', 'Tanggal', 'Keterangan'];
 
-        // Gunakan whereBetween untuk mengambil data dalam rentang tanggal
+        // Menggunakan rentang tanggal yang sudah diparse presisi
         $transactions = Transaction::with('user')
             ->whereBetween('tanggal', [
-                $this->startDate->format('Y-m-d 00:00:00'), 
-                $this->endDate->format('Y-m-d 23:59:59')
+                $this->startDate->format('Y-m-d H:i:s'), 
+                $this->endDate->format('Y-m-d H:i:s')
             ])
             ->get();
             
         $this->jumlahData = $transactions->count();
         $no = 1;
-        $totalNominal = 0; // Variabel untuk menampung jumlah total
+        $totalNominal = 0;
 
         $jenisLabels = [
             'pembuatan_kartu'     => 'Pembuatan Kartu',
@@ -64,12 +67,8 @@ class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
             ];
         }
 
-        // Jika ada data, tambahkan baris kosong lalu baris Total di bawahnya
         if ($this->jumlahData > 0) {
-            // Baris kosong
             $data[] = ['', '', '', '', '', ''];
-            
-            // Baris Total langsung menampilkan angka hasil hitung 
             $data[] = ['', '', 'TOTAL KESELURUHAN', $totalNominal, '', ''];
         }
 
@@ -92,18 +91,14 @@ class TransactionExport implements FromArray, WithStyles, ShouldAutoSize
             ],
         ];
 
-        // Terapkan warna ke Header 
         $sheet->getStyle('A1:F1')->applyFromArray($styleHeaderHijau);
 
-        // Border tipis untuk seluruh isi data
         if ($this->jumlahData > 0) {
             $lastRowData = 1 + $this->jumlahData;
             $totalRowIndex = $lastRowData + 2;
 
-            // Border untuk data
             $sheet->getStyle('A2:F' . $lastRowData)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-            // Styling baris Total 
             $sheet->getStyle("A{$totalRowIndex}:F{$totalRowIndex}")->applyFromArray([
                 'font' => ['bold' => true],
                 'borders' => [
