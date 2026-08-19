@@ -151,7 +151,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::get('/admin/laporan/peminjaman', [LaporanController::class, 'peminjaman'])->name('laporan.peminjaman');
 
     // Route Export Excel
-    Route::get('/admin/laporan/koleksi/export', [LaporanController::class, 'exportExcel'])->name('laporan.koleksi.export');
+    Route::get('/admin/laporan/koleksi/export', [LaporanController::class, 'exportKoleksiExcel'])->name('laporan.koleksi.export');
     Route::get('/admin/laporan/pengunjung/export', [LaporanController::class, 'exportPengunjungExcel'])->name('laporan.pengunjung.export');
     Route::get('/admin/laporan/anggota/export', [LaporanController::class, 'exportAnggotaExcel'])->name('laporan.anggota.export');
     Route::get('/admin/laporan/peminjaman/export', [LaporanController::class, 'exportPeminjamanExcel'])->name('laporan.peminjaman.export');
