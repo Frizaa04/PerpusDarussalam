@@ -24,48 +24,46 @@
                         <div class="inline-flex bg-[#004d40] p-1 rounded-lg border border-[#004d40] shadow-sm">
                             <a href="{{ route('laporan.koleksi', [
                                 'date' => $selectedDate->format('Y-m-d'),
-                                'mode' => 'harian'
+                                'mode' => 'bulanan'
                             ]) }}"
-                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'harian' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
-                                Harian
-                            </a>
-
-                            <a href="{{ route('laporan.koleksi', [
-                                'date' => $selectedDate->format('Y-m-d'),
-                                'mode' => 'mingguan'
-                                ]) }}"
-                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'mingguan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
-                                Per Minggu
-                            </a>
-
-                            <a href="{{ route('laporan.koleksi', [
-                                'date' => $selectedDate->format('Y-m-d'),
-                                'mode' => 'bulanan',
-                            ]) }}"
-                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'bulanan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors
+                                {{ $mode === 'bulanan'
+                                    ? 'bg-amber-400 text-[#004d40]'
+                                    : 'text-white hover:bg-white/10' }}">
                                 Bulanan
+                            </a>
+
+                            <a href="{{ route('laporan.koleksi', [
+                                'date' => $selectedDate->format('Y-m-d'),
+                                'mode' => 'tahunan'
+                            ]) }}"
+                            class="px-3 py-1.5 text-xs font-bold rounded transition-colors
+                                {{ $mode === 'tahunan'
+                                    ? 'bg-amber-400 text-[#004d40]'
+                                    : 'text-white hover:bg-white/10' }}">
+                                Tahunan
                             </a>
                         </div>
 
                     <!-- Label Bulan & Tahun -->
-                    <div class="bg-[#004d40] text-amber-300 px-3.5 py-2 rounded text-sm font-bold shadow-sm">
-                        {{ $monthYearLabel }}
-                    </div>
+                    @if($mode === 'bulanan')
 
-                    <!-- Tanggal Harian / Rentang Minggu -->
-                    @if($mode === 'harian')
-                        <div class="inline-flex bg-[#004d40] rounded border border-[#004d40] overflow-hidden shadow-sm">
-                            @foreach($dates as $d)
-                                <a href="{{ route('laporan.koleksi', ['date' => $d['full_date'], 'mode' => 'harian']) }}" 
-                                   class="px-3 py-2 text-sm font-bold border-r border-white/30 last:border-r-0 transition-colors duration-150 {{ $d['is_active'] ? 'bg-[#003d30] text-amber-300' : 'text-white hover:bg-white/10' }}">
-                                    {{ $d['day'] }}
-                                </a>
-                            @endforeach
-                        </div>
-                    @else
                         <div class="bg-[#003d30] border border-amber-400/50 text-amber-300 px-4 py-2 rounded text-sm font-bold shadow-sm">
-                            Rentang: {{ \Carbon\Carbon::parse($startOfWeekDate)->format('d M') }} - {{ \Carbon\Carbon::parse($endOfWeekDate)->format('d M Y') }}
+                            Rentang:
+                            {{ $selectedDate->copy()->startOfMonth()->format('d M Y') }}
+                            -
+                            {{ $selectedDate->copy()->endOfMonth()->format('d M Y') }}
                         </div>
+
+                    @elseif($mode === 'tahunan')
+
+                        <div class="bg-[#003d30] border border-amber-400/50 text-amber-300 px-4 py-2 rounded text-sm font-bold shadow-sm">
+                            Rentang:
+                            {{ $selectedDate->copy()->startOfYear()->format('d M Y') }}
+                            -
+                            {{ $selectedDate->copy()->endOfYear()->format('d M Y') }}
+                        </div>
+
                     @endif
 
                     <!-- Date Picker Kalender Popup -->
@@ -98,7 +96,8 @@
                         <span>Import Excel</span>
                     </button>
 
-                    <a href="{{ route('laporan.koleksi.export', ['date' => $selectedDate->format('Y-m-d')]) }}" class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Unduh Laporan Excel">
+                    <a href="{{ route('laporan.koleksi.export', ['date' => $selectedDate->format('Y-m-d'),'mode' => $mode]) }}"
+                        class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold" title="Unduh Laporan Excel">
                         <span class="material-icons text-xl">file_download</span>
                         <span>Unduh Excel</span>
                     </a>

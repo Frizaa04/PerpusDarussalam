@@ -14,35 +14,57 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class BorrowingExport implements FromArray, WithStyles, ShouldAutoSize
 {
-    protected $selectedDate;
+    protected $startDate;
+    protected $endDate;
     protected $jumlahPeminjaman = 0;
 
-    public function __construct($date)
+    public function __construct($startDate, $endDate)
     {
-        $this->selectedDate = $date ? Carbon::parse($date) : today();
+        $this->startDate = Carbon::parse($startDate)->startOfDay();
+        $this->endDate   = Carbon::parse($endDate)->endOfDay();
     }
-    
+
     public function array(): array
     {
         $data = [];
 
-        // Header Tabel Peminjaman
-        $data[] = ['ID Peminjaman', 'Nama Peminjam', 'Judul Buku', 'Status', 'Tanggal Pinjam'];
+        $data[] = [
+            'ID Peminjaman',
+            'Nama Peminjam',
+            'Judul Buku',
+            'Status',
+            'Tanggal Pinjam'
+        ];
 
-        // Ambil data peminjaman DAN FILTER BERDASARKAN TANGGAL yang dipilih
-        $borrowings = Borrowing::with(['user', 'bookItem.book'])
-            ->whereDate('created_at', $this->selectedDate->format('Y-m-d')) // <-- TAMBAHKAN FILTER TANGGAL INI
+        $borrowings = Borrowing::with([
+                'user',
+                'bookItem.book'
+            ])
+            ->whereBetween('tanggal_pinjam', [
+                $this->startDate,
+                $this->endDate
+            ])
+            ->orderBy('tanggal_pinjam', 'asc')
             ->get();
-            
+
         $this->jumlahPeminjaman = $borrowings->count();
 
         foreach ($borrowings as $borrowing) {
             $data[] = [
                 $borrowing->id,
-                $borrowing->user->name ?? '-',
-                $borrowing->bookItem->book->judul ?? $borrowing->bookItem->book->title ?? '-',
-                $borrowing->status,
-                $borrowing->created_at->format('Y-m-d H:i:s'),
+
+                $borrowing->user?->name ?? '-',
+
+                $borrowing->bookItem?->book?->judul
+                    ?? $borrowing->bookItem?->book?->title
+                    ?? '-',
+
+                $borrowing->status ?? '-',
+
+                $borrowing->tanggal_pinjam
+                    ? Carbon::parse($borrowing->tanggal_pinjam)
+                        ->format('Y-m-d H:i:s')
+                    : '-',
             ];
         }
 
@@ -52,25 +74,42 @@ class BorrowingExport implements FromArray, WithStyles, ShouldAutoSize
     public function styles(Worksheet $sheet)
     {
         $styleHeaderHijau = [
-            'font' => ['bold' => true, 'color' => ['argb' => Color::COLOR_WHITE]],
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'argb' => Color::COLOR_WHITE
+                ],
+            ],
+
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['argb' => '00B050'], 
+                'startColor' => [
+                    'argb' => '00B050'
+                ],
             ],
+
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => '000000'],
+                    'color' => [
+                        'argb' => '000000'
+                    ],
                 ],
             ],
         ];
 
-        // Terapkan warna hijau ke Header Peminjaman (Baris 1)
-        $sheet->getStyle('A1:E1')->applyFromArray($styleHeaderHijau);
+        $sheet->getStyle('A1:E1')
+            ->applyFromArray($styleHeaderHijau);
 
-        // Tambahkan border hitam tipis untuk seluruh isi data
         if ($this->jumlahPeminjaman > 0) {
-            $sheet->getStyle('A2:E' . (1 + $this->jumlahPeminjaman))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle(
+                'A2:E' . ($this->jumlahPeminjaman + 1)
+            )
+                ->getBorders()
+                ->getAllBorders()
+                ->setBorderStyle(
+                    Border::BORDER_THIN
+                );
         }
 
         return [];

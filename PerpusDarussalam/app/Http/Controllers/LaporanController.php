@@ -193,10 +193,37 @@ class LaporanController extends Controller
 
     // --- Fungsi Export & Import ---
 
-    public function exportExcel(Request $request)
+    public function exportKoleksiExcel(Request $request)
     {
-        $tanggal = $request->query('date', today()->format('Y-m-d'));
-        return Excel::download(new KoleksiExport($tanggal), 'Laporan_Koleksi_' . $tanggal . '.xlsx');
+        $params = $this->getCommonParams($request);
+
+        $mode = $params['mode'];
+        $selectedDate = $params['selectedDate'];
+
+        if ($mode === 'bulanan') {
+
+            $namaFile = 'Laporan_Koleksi_Bulanan_' .
+                $selectedDate->format('Y-m') .
+                '.xlsx';
+
+        } elseif ($mode === 'tahunan') {
+
+            $namaFile = 'Laporan_Koleksi_Tahunan_' .
+                $selectedDate->format('Y') .
+                '.xlsx';
+
+        } else {
+
+            // Default ke bulanan
+            $namaFile = 'Laporan_Koleksi_Bulanan_' .
+                $selectedDate->format('Y-m') .
+                '.xlsx';
+        }
+
+        return Excel::download(
+            new KoleksiExport($selectedDate, $mode),
+            $namaFile
+        );
     }
 
     public function importKoleksi(Request $request)
@@ -266,8 +293,40 @@ class LaporanController extends Controller
 
     public function exportPeminjamanExcel(Request $request)
     {
-        $tanggal = $request->query('date', today()->format('Y-m-d'));
-        return Excel::download(new BorrowingExport($tanggal), 'Laporan_Peminjaman_' . $tanggal . '.xlsx');
+        $params = $this->getCommonParams($request);
+
+        $startDate = $params['startDate'];
+        $endDate   = $params['endDate'];
+
+        $mode = $params['mode'];
+        $selectedDate = $params['selectedDate'];
+
+        switch ($mode) {
+
+            case 'mingguan':
+                $namaFile = 'Laporan_Peminjaman_Mingguan_' .
+                    $selectedDate->format('Y-m-d') .
+                    '.xlsx';
+                break;
+
+            case 'bulanan':
+                $namaFile = 'Laporan_Peminjaman_Bulanan_' .
+                    $selectedDate->format('Y-m') .
+                    '.xlsx';
+                break;
+
+            case 'harian':
+            default:
+                $namaFile = 'Laporan_Peminjaman_Harian_' .
+                    $selectedDate->format('Y-m-d') .
+                    '.xlsx';
+                break;
+        }
+
+        return Excel::download(
+            new BorrowingExport($startDate, $endDate),
+            $namaFile
+        );
     }
 
     public function exportAttendanceExcel(Request $request)

@@ -19,19 +19,23 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 class KoleksiExport implements WithMultipleSheets
 {
     protected $selectedDate;
+    protected $mode;
 
-    public function __construct($date)
+    public function __construct($date, $mode = 'bulanan')
     {
-        $this->selectedDate = $date ? Carbon::parse($date) : today();
+        $this->selectedDate = $date
+            ? Carbon::parse($date)
+            : today();
+
+        $this->mode = $mode;
     }
 
-    // Membagi data menjadi 3 sheet 
     public function sheets(): array
     {
         return [
             'Daftar_Buku' => new DaftarBukuSheet(),
             'Buku_Item'   => new BukuItemSheet(),
-            'Data_Ebook'  => new EbookSheet(), 
+            'Data_Ebook'  => new EbookSheet(),
         ];
     }
 }

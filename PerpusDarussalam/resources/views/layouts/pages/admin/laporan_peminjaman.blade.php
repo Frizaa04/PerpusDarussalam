@@ -98,7 +98,7 @@
                             Kembali
                         </a>
 
-                        <a href="{{ route('laporan.peminjaman.export', ['date' => $selectedDate->format('Y-m-d')]) }}"
+                        <a href="{{ route('laporan.peminjaman.export', ['date' => $selectedDate->format('Y-m-d'),'mode' => $mode]) }}"
                             class="bg-[#004d40] text-white px-4 py-2.5 rounded hover:bg-[#003d30] transition shadow flex items-center gap-2 text-sm font-bold"
                             title="Unduh Laporan Excel">
                             <span class="material-icons text-xl">file_download</span>
