@@ -786,7 +786,7 @@
         $('#editKondisiItem').val(kondisi);
         $('#editStatusPinjamItem').val(statusPinjam);
 
-        $('#formEditItem').attr('action', `/book/item/${itemId}`);
+        $('#formEditItem').attr('action', `/admin/book/item/${itemId}`);
         $('#editItemModal').removeClass('hidden');
     }
 

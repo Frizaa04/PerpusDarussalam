@@ -33,7 +33,7 @@
                             'category' => $category
                         ]) }}"
                         class="px-3 py-1.5 text-xs font-bold rounded transition-colors {{ $mode === 'mingguan' ? 'bg-amber-400 text-[#004d40]' : 'text-white hover:bg-white/10' }}">
-                            Per Minggu
+                            Mingguan
                         </a>
 
                         <a href="{{ route('laporan.index', [

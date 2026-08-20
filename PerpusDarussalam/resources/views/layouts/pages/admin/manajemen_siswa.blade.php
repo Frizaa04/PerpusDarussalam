@@ -824,7 +824,7 @@
             if (!confirm(`Perpanjang masa berlaku kartu untuk ${name} hingga 30 Juni tahun depan?`)) return;
 
             $.ajax({
-                url: `/manajemen-siswa/perpanjang/${id}`,
+                url: `/admin/manajemen-siswa/perpanjang/${id}`,
                 type: 'PUT',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
