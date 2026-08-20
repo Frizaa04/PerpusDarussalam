@@ -159,7 +159,6 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(
     Route::get('/admin/laporan/transaksi/export', [LaporanController::class, 'exportKeuanganExcel'])->name('laporan.transaksi.export');
     
     // Route Import Excel
-    Route::post('/admin/laporan/anggota/import', [LaporanController::class, 'importAnggota'])->name('laporan.anggota.import');
     Route::post('/admin/laporan/koleksi/import', [LaporanController::class, 'importKoleksi'])->name('laporan.koleksi.import');
 
     // Route Notifikasi

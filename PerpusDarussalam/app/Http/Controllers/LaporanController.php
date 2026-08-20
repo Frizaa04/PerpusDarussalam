@@ -260,35 +260,10 @@ class LaporanController extends Controller
 
     public function exportAnggotaExcel(Request $request)
     {
-        $params = $this->getCommonParams($request);
-        $startDate = ($params['mode'] === 'mingguan') ? $params['startOfWeekDate'] : $params['selectedDate']->format('Y-m-d');
-        $endDate = ($params['mode'] === 'mingguan') ? $params['endOfWeekDate'] : $startDate;
-        return Excel::download(new AnggotaExport($startDate, $endDate), 'Laporan_Anggota_' . $startDate . '.xlsx');
-    }
-
-    public function importAnggota(Request $request)
-    {
-        $request->validate(['file_excel' => 'required|mimes:xlsx,xls,csv|max:2048']);
-        try {
-            $import = new AnggotaImport();
-            Excel::import($import, $request->file('file_excel'));
-
-            $imported = $import->importedCount ?? 0;
-            $duplicatesCount = count($import->duplicates ?? []);
-
-            if ($imported === 0 && $duplicatesCount > 0) {
-                return redirect()->back()->with('warning', "Semua data ({$duplicatesCount} data) diabaikan karena sudah ada di sistem (duplikat).");
-            }
-
-            $message = "Berhasil meng-import {$imported} data anggota baru!";
-            if ($duplicatesCount > 0) {
-                $message .= " ({$duplicatesCount} data diabaikan karena duplikat)";
-            }
-
-            return redirect()->back()->with('success', $message);
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal meng-import: ' . $e->getMessage());
-        }
+        return Excel::download(
+            new AnggotaExport(),
+            'Laporan_Anggota.xlsx'
+        );
     }
 
     public function exportPeminjamanExcel(Request $request)
