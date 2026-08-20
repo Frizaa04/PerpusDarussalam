@@ -317,7 +317,7 @@
 
     // Fungsi tunggal AJAX untuk memperbarui status satuan
     function markAsReadAjax(id) {
-        fetch(`/notifikasi/${id}/read`, {
+        fetch(`/admin/notifikasi/${id}/read`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',

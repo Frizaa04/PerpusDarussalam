@@ -40,15 +40,15 @@
                     <ul class="space-y-3 text-sm font-medium">
                         <li class="flex items-start gap-3">
                             <span class="font-bold w-20 shrink-0">Alamat</span>
-                            <span>: Jl. Kh. Ahmad Dahlan No.1, Kompleks Madrasah Darussalam</span>
+                            <span>: Jl. Harapan Baru, Kec. Loa Janan ilir, Kota Samarinda, Kalimantan Timur</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <span class="font-bold w-20 shrink-0">Telepon / WA</span>
-                            <span>: +62 812-3456-7890</span>
+                            <span>: +62 813-1555-9300</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <span class="font-bold w-20 shrink-0">Email</span>
-                            <span>: perpus@darussalam.sch.id</span>
+                            <span>: perpusMDIBS@gmail.com</span>
                         </li>
                     </ul>
                 </div>
