@@ -18,21 +18,11 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class AnggotaExport implements WithMultipleSheets
 {
-    protected $startDate;
-    protected $endDate;
-
-    // Terima parameter tanggal dari Controller
-    public function __construct($startDate, $endDate)
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-    }
-
     public function sheets(): array
     {
         return [
-            'Data_Siswa'   => new AnggotaSiswaSheet($this->startDate, $this->endDate),
-            'Data_Guru'    => new AnggotaGuruSheet($this->startDate, $this->endDate),
+            'Data_Siswa' => new AnggotaSiswaSheet(),
+            'Data_Guru'  => new AnggotaGuruSheet(),
         ];
     }
 }
@@ -42,23 +32,12 @@ class AnggotaExport implements WithMultipleSheets
  */
 class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
-    protected $startDate;
-    protected $endDate;
-
-    public function __construct($startDate, $endDate)
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-    }
-
     public function collection()
     {
         return User::where('status', 'siswa')
-            ->whereBetween('created_at', [
-                Carbon::parse($this->startDate)->format('Y-m-d 00:00:00'), 
-                Carbon::parse($this->endDate)->format('Y-m-d 23:59:59')
-            ])
-            ->get(); 
+            ->where('role', '!=', 'admin')
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     public function headings(): array
@@ -114,23 +93,12 @@ class AnggotaSiswaSheet implements FromCollection, WithHeadings, WithMapping, Wi
  */
 class AnggotaGuruSheet implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithTitle
 {
-    protected $startDate;
-    protected $endDate;
-
-    public function __construct($startDate, $endDate)
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-    }
-
     public function collection()
     {
         return User::where('status', 'guru')
-            ->whereBetween('created_at', [
-                Carbon::parse($this->startDate)->format('Y-m-d 00:00:00'), 
-                Carbon::parse($this->endDate)->format('Y-m-d 23:59:59')
-            ])
-            ->get(); 
+            ->where('role', '!=', 'admin')
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     public function headings(): array
