@@ -139,9 +139,9 @@
                                                         class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                         Edit Data
                                                     </button>
-                                                    <button type="button"
-                                                        onclick="window.open('{{ asset('storage/' . $ebook->file_pdf) }}', '_blank')"
-                                                        class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm">
+                                                    <button type="button" 
+                                                            onclick="window.open('{{ asset('storage/' . $ebook->file_pdf) }}#toolbar=0', '_blank')" 
+                                                            class="bg-[#004d40] text-white px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#003d30] transition shadow-sm">
                                                         Baca PDF
                                                     </button>
                                                 </div>

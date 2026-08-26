@@ -62,7 +62,7 @@
                         </svg>
                         {{-- Cukup ubah perpus@darussalam.sch.id jika alamat email asli sudah ada --}}
                         <a href="mailto:perpus@darussalam.sch.id" class="hover:text-white hover:underline transition">
-                            perpus@darussalam.sch.id
+                            perpusMDIBS@gmail.com
                         </a>
                     </li>
 
