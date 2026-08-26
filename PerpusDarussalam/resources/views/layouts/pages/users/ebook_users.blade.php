@@ -88,10 +88,11 @@
 
                                 <!-- Tombol Aksi (Baca E-Book) di dalam Card -->
                                 <div class="mt-3 pt-2 border-t border-emerald-800/80">
-                                    <a href="{{ route('user.ebook.read', $ebook->id) }}" target="_blank"
-                                        class="w-full block text-center bg-[#004d40] hover:bg-[#00695c] text-white text-[10px] font-bold py-1.5 rounded transition shadow border border-emerald-600/40">
+                                    <button type="button" 
+                                            onclick="window.open('{{ asset('storage/' . $ebook->file_pdf) }}#toolbar=0', '_blank')"
+                                            class="w-full block text-center bg-[#004d40] hover:bg-[#00695c] text-white text-[10px] font-bold py-1.5 rounded transition shadow border border-emerald-600/40">
                                         Baca E-Book
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         @endforeach
