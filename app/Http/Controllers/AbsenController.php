@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Visits;
+use App\Models\visits;
 use App\Models\User;
 use Carbon\Carbon;
 

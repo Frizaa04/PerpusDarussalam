@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Book;
 use App\Models\User;
-use App\Models\Visits;
+use App\Models\visits;
 use App\Models\Ebook;
 use App\Models\Borrowing;
 use Carbon\Carbon;
