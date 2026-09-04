@@ -241,10 +241,6 @@
                     @method('DELETE')
                 </form>
 
-                <div class="mt-4">
-                    {{ $students->links('vendor.pagination.custom') }}
-                </div>
-            </div>
     </div>
     </main>
     </div>
